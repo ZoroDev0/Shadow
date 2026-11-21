@@ -209,12 +209,15 @@ const I18N = {
   prot_native_tip:  { en: 'Some phone brands stop background services to save battery. If alerts stop, allow ScamShield to run in the background in battery settings.', hi: 'कुछ फ़ोन ब्रांड बैटरी बचाने के लिए बैकग्राउंड सेवाएँ रोक देते हैं। अलर्ट बंद हो जाएँ तो बैटरी सेटिंग में ScamShield को बैकग्राउंड में चलने दें।' },
   prot_native_ok:   { en: 'Notification access is on', hi: 'नोटिफिकेशन एक्सेस चालू है' },
   prot_native_off:  { en: 'Notification access is off', hi: 'नोटिफिकेशन एक्सेस बंद है' },
+  prot_native_silent: { en: 'Notification permission is missing — alerts will stay silent.', hi: 'नोटिफिकेशन अनुमति नहीं है — अलर्ट मूक रहेंगे।' },
+  prot_native_app_btn: { en: 'Open app settings', hi: 'ऐप सेटिंग खोलें' },
   prot_native_restricted: { en: 'If Android says the setting is restricted, open App info → three-dot menu → Allow restricted settings, then try again.', hi: 'अगर Android कहे कि सेटिंग प्रतिबंधित है, तो App info → तीन-डॉट मेन्यू → Allow restricted settings खोलें, फिर दोबारा कोशिश करें।' },
   prot_native_debug: { en: 'Debug build: notifications posted by adb (com.android.shell) are scanned too.', hi: 'डिबग बिल्ड: adb (com.android.shell) के नोटिफिकेशन भी स्कैन होते हैं।' },
+  prot_native_last_scan: { en: 'Last scan: {app} · {verdict} ({time})', hi: 'अंतिम जाँच: {app} · {verdict} ({time})' },
   hist_notif:       { en: 'Notification · {app}', hi: 'नोटिफिकेशन · {app}' },
   sim_tag:          { en: 'Simulation', hi: 'सिमुलेशन' },
   lab_t:           { en: 'Test lab', hi: 'टेस्ट लैब' },
-  lab_d:           { en: 'Run 86 project-written cases on this device. This is not independent accuracy.', hi: 'इस डिवाइस पर 86 प्रोजेक्ट-लिखित मामलों की जाँच चलाएँ। यह स्वतंत्र सटीकता नहीं है।' },
+  lab_d:           { en: 'Run 87 project-written cases on this device. This is not independent accuracy.', hi: 'इस डिवाइस पर 87 प्रोजेक्ट-लिखित मामलों की जाँच चलाएँ। यह स्वतंत्र सटीकता नहीं है।' },
   lab_run:         { en: 'Run tests', hi: 'टेस्ट चलाएँ' },
   lab_total:       { en: 'Cases', hi: 'मामले' },
   lab_pass:        { en: 'Passed', hi: 'पास' },
@@ -1028,6 +1031,11 @@ async function refreshNative() {
   if (!isNativeAndroid()) return;
   nativeState = await isListenerEnabled();
   nativeScans = await getRecent();
+  if (nativeState.enabled && nativeState.sdk >= 33 && !nativeState.postNotifications) {
+    void requestPostNotifications().then(granted => {
+      if (granted) void refreshNative();
+    });
+  }
   renderProtect();
   renderHistory();
 }
@@ -1039,13 +1047,32 @@ function renderProtect() {
     const on = isNative ? nativeState.enabled : !!state.toggles[c.k];
     let extra = '';
     if (isNative) {
+      let notifWarn = '';
+      if (on && nativeState.sdk >= 33 && !nativeState.postNotifications) {
+        notifWarn = '<p class="pc-hint">' + esc(t('prot_native_silent')) + '</p>' +
+          '<button class="btn btn-outline pc-btn" type="button" data-native="appsettings">' +
+          esc(t('prot_native_app_btn')) + '</button>';
+      }
+      let lastScanLine = '';
+      if (nativeState.debug && nativeScans && nativeScans.length > 0) {
+        const last = nativeScans[0];
+        const timeStr = new Date(last.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const vText = t('v_' + last.verdict) || last.verdict;
+        const scanTxt = t('prot_native_last_scan')
+          .replace('{app}', last.appLabel || last.packageName)
+          .replace('{verdict}', vText)
+          .replace('{time}', timeStr);
+        lastScanLine = '<p class="pc-hint">' + esc(scanTxt) + '</p>';
+      }
       extra = '<p class="pc-desc">' + esc(t('prot_native_need')) + '</p>' +
         '<p class="pc-status' + (on ? ' on' : '') + '"><span class="dot"></span>' +
         esc(on ? t('prot_native_ok') : t('prot_native_off')) + '</p>' +
         '<button class="btn btn-outline pc-btn" type="button" data-native="settings">' +
         esc(t('prot_native_btn')) + '</button>' +
         (on ? '' : '<p class="pc-hint">' + esc(t('prot_native_restricted')) + '</p>') +
+        notifWarn +
         (nativeState.debug ? '<p class="pc-hint">' + esc(t('prot_native_debug')) + '</p>' : '') +
+        lastScanLine +
         '<p class="pc-hint">' + esc(t('prot_native_tip')) + '</p>';
     }
     return '<div class="prot-card card">' +
@@ -1259,8 +1286,13 @@ function wireEvents() {
       if (!nativeState.enabled) {
         /* Access is the system's grant, not ours: send the user to it. */
         c.checked = false;
-        void openListenerSettings().then(() => { if (nativeState.sdk >= 33) void requestPostNotifications(); });
+        void openListenerSettings().then(() => {
+          if (nativeState.sdk >= 33 && !nativeState.postNotifications) void requestPostNotifications();
+        });
         return;
+      }
+      if (c.checked && nativeState.sdk >= 33 && !nativeState.postNotifications) {
+        void requestPostNotifications();
       }
       void setScanning(c.checked).then(() => refreshNative());
       return;
