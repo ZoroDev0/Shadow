@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-ts="n">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Paste any suspicious SMS, WhatsApp message or link and get a plain-language verdict in seconds.">
+  <meta name="theme-color" id="metaTheme" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>ScamShield — Is that message a scam?</title>
+  <script>
+  try {
+    var __s = JSON.parse(localStorage.getItem("scamshield.v1") || "{}");
+    var __th = __s.theme || "auto";
+    var __d = __th === "dark" || (__th !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.dataset.theme = __d ? "dark" : "light";
+    document.documentElement.dataset.ts = __s.ts || "n";
+    var __m = document.querySelector("meta[name=theme-color]");
+    if (__m) __m.content = __d ? "#000000" : "#ffffff";
+  } catch (e) {}
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
