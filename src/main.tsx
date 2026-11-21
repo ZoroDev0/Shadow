@@ -17,3 +17,11 @@ function App() {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <App />
 );
+
+/* App-shell only: public/sw.js caches the HTML, manifest and hashed assets.
+   It never caches POST bodies or /analyze responses. Production builds only. */
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
