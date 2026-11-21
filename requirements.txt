@@ -1,0 +1,32 @@
+# SHADOW backend
+fastapi
+uvicorn[standard]
+pydantic
+
+# Machine learning
+numpy
+pandas
+scikit-learn
+xgboost
+shap
+
+# Webpage analysis
+beautifulsoup4
+lxml
+requests
+tldextract
+
+# Database
+sqlalchemy
+
+# Testing
+pytest
+playwright
+httpx
+
+# Experiment tracking
+mlflow
+
+# Utilities
+python-dotenv
+joblib
