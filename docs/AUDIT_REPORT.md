@@ -368,14 +368,14 @@ This does **NOT** verify browser behavior. DevTools Network-tab verification is 
 
 - No obvious secret strings were found in source/docs.
 - No personal absolute paths were found.
-- Largest tracked files: `index_9.html` 208K, `backend/golden.json` 204K, `src/legacy.ts` 148K.
+- Largest tracked files (Phase 6 measurement): `models/shadow_unified_classifier.txt` 548K, three `ml-research/notebooks/*` files ~300K each, `backend/golden.json` 234K, `index_9.html` 205K. A 2.3 MB `Shadow-main.zip` exists in commit `4496227` but is not reachable from `HEAD`.
 - `.gitignore` excludes dependencies, build, virtualenv, cache, env, model/dataset and archive formats.
 - MIT licence exists only in current ScamShield repo.
 - Tag: `v1.0-hackathon`.
 - README accurately states rule-based/no ML/no SMS/no OCR, but stale/unsupported claims remain:
   - The earlier audit incorrectly said 48/63. Command-count verification shows 66 project-written self-tests (55 original plus 11 audit-gap regressions) and 81 golden parity entries (66 plus 15 extra cases). The `48` in `scoreCompare.test.ts` is the number of cases embedded in the legacy `index_9.html`, not the suite size.
   - README/backend use project-written pass counts only; they must not be read as independent accuracy.
-  - `docs/EXTENSION_HANDOFF.md` states wildcard CORS even though code uses explicit origin configuration.
+  - ~~`docs/EXTENSION_HANDOFF.md` states wildcard CORS even though code uses explicit origin configuration.~~ Fixed in Phase 6: the handoff now documents explicit `ALLOWED_ORIGINS` plus the localhost/`chrome-extension` regex, with `allow_credentials=False`.
 
 ## H. Risks and recommendations
 

@@ -1,6 +1,6 @@
-# Unseen evaluator: 40 independent messages
+# Development evaluator: 40 project-written messages
 
-These messages were written for this hardening pass and were not included in the original 48-case suite.
+These messages were written for this hardening pass and were not included in the original 55-case suite. They are development data, not independent evidence.
 They are not evidence of production accuracy and should not be described as an external benchmark.
 
 | ID | Expected | TS verdict / score | Python verdict / score | Text |

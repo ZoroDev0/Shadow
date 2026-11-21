@@ -35,8 +35,15 @@ base URL in the configuration.
 
 ## CORS
 
-The backend allows `GET`, `POST` and `OPTIONS` requests from browser origins with
-`Access-Control-Allow-Origin: *`.
+The backend does **not** use a wildcard. It allows `GET`, `POST` and `OPTIONS` from:
+
+- the explicit origins listed in the `ALLOWED_ORIGINS` environment variable
+  (comma-separated; defaults to `http://localhost:5173`), and
+- the regex `https?://(localhost|127\.0\.0\.1)(:\d+)?|chrome-extension://.*`
+  (local development and browser extensions).
+
+`allow_credentials=False`, so cookies are never accepted cross-origin. To use a
+deployed backend from the extension, add that exact origin to `ALLOWED_ORIGINS`.
 
 ## Request contract
 
