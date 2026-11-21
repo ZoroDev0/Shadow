@@ -58,7 +58,7 @@ Do not commit `android/local.properties`, `android/.gradle/`, `android/**/build/
 `assets/public/`, `assets/engine/` or any `*.apk`, `*.aab`, `*.jks`, `*.keystore`.
 All of those are in `.gitignore`.
 
-Measured on this machine: debug APK **7.6 MB** (13.5 MB uncompressed), of which
+Measured on this machine: debug APK **7.4 MB** (13.5 MB uncompressed), of which
 QuickJS `.so` files are 854 KB (arm64-v8a), 538 KB (armeabi-v7a), 878 KB (x86)
 and 928 KB (x86_64). A release build would split per ABI and shrink further.
 
@@ -73,7 +73,7 @@ same JavaScript the web app runs, so there is exactly one detection brain.
 QuickJS has no ICU, so `EngineBridge` normalises text with
 `java.text.Normalizer` (exact NFKC) before calling in, and the bundle's
 `normalize()` call becomes a no-op. `src/native/androidEngineGolden.test.ts`
-proves this path against all **101** golden entries inside real QuickJS with
+proves this path against all **102** golden entries inside real QuickJS with
 normalisation removed — same verdict and same score on every entry.
 
 ## Grant notification access
@@ -139,7 +139,7 @@ cd android && ./gradlew connectedDebugAndroidTest
 
 `EngineGoldenTest` (instrumented) runs the same `backend/golden.json` — copied
 into the androidTest assets at build time, never duplicated in git — through the
-on-device QuickJS bridge and asserts verdict **and** score on all 101 entries.
+on-device QuickJS bridge and asserts verdict **and** score on all 102 entries.
 
 ## Limits (read before a demo)
 
@@ -159,3 +159,105 @@ on-device QuickJS bridge and asserts verdict **and** score on all 101 entries.
   privacy policy and a sensitive-permission declaration. The hackathon build is
   a sideloaded debug APK.
 - Uninstalling the app removes the stored history; nothing is synced anywhere.
+
+## Troubleshooting (phone test)
+
+### Access granted but no alert appears
+
+Work through this list in order:
+
+1. **POST_NOTIFICATIONS permission (Android 13+).** Without it the app can read
+   notifications but cannot post its own alert. The Protect card shows a warning
+   banner ("Notification permission is missing — alerts will stay silent") and a
+   button to open app settings. Grant *Notifications* there, or tap the banner in
+   the app.  
+   Confirm via: *Settings → Apps → ScamShield → Notifications* — all toggles on.
+
+2. **Battery optimisation / background restrictions.**  
+   - *Settings → Battery → Battery optimization → ScamShield* — set to
+     **Unrestricted** (or "Don't optimise").  
+   - Some OEM skins (MIUI, One UI, ColorOS) have an extra "Background activity"
+     or "Auto-launch" toggle — enable it for ScamShield.
+
+3. **App allowlist / auto-start (OEM skins).**  
+   MIUI: *Security → Manage apps → ScamShield → Autostart* → enable.  
+   One UI: *Settings → Device Care → Battery → App power management* → add
+   ScamShield to the "Always sleeping apps" exclusion list.
+
+4. **Scanning paused.**  The Protect card has a *Pause scanning* toggle. Make
+   sure it shows *Scanning active*.
+
+5. **60-second de-dupe window.**  The listener suppresses a second identical
+   notification from the same app within 60 seconds. Test with a different
+   message body.
+
+6. **Debug-only `com.android.shell` messages.**  `adb shell am broadcast …`
+   sends notifications attributed to `com.android.shell`, which the listener
+   skips to avoid false positives from test commands. Use a real SMS or WhatsApp
+   message for end-to-end tests.
+
+---
+
+### Confirm the listener is bound
+
+```bash
+adb shell dumpsys notification | grep -i scamshield
+```
+
+You should see a line like:
+```
+  com.scamshield.app/com.scamshield.app.ScamShieldListenerService (granted)
+```
+
+If it is absent or shows `(not granted)`:  
+*Settings → Notifications → Notification access → ScamShield* → enable, then
+kill and reopen the app.
+
+---
+
+### View scan log lines in logcat
+
+The listener emits one `DEBUG` line per scanned notification **in debug builds
+only** (release builds are silent). The line contains only the package name,
+verdict and score — no message text.
+
+```bash
+adb logcat -s ScamShieldListener
+```
+
+Example output:
+```
+D ScamShieldListener: scanned pkg=com.whatsapp verdict=scam score=78
+D ScamShieldListener: scanned pkg=com.sbi.lotusintouch verdict=safe score=5
+```
+
+If nothing appears but the listener is bound, the notification may be from a
+package not in the scanned-app list (WhatsApp, Paytm, PhonePe, GPay, SBI
+YONO, BHIM).
+
+---
+
+### Run instrumented golden tests on a connected device
+
+```bash
+cd android
+./gradlew connectedDebugAndroidTest
+```
+
+This installs a test APK that evaluates all 102 golden entries inside real
+QuickJS on the device and asserts verdict + score. Requires a device or
+emulator connected via `adb devices`.
+
+---
+
+### Message text is never logged
+
+Confirmed by grep — no `Log.*` call in the Kotlin source writes any message
+body or notification text:
+
+```bash
+grep -r "Log\." android/app/src/main/java/ | grep -v "//.*Log\."
+```
+
+The only log line is in `ScamShieldListenerService.kt` and emits
+`pkg=… verdict=… score=…` only.
