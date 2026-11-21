@@ -859,10 +859,18 @@ function openDemo() {
   $('#demoBubble').textContent = DEMO_SMS;
   buildDemoTry();
   demoGo(0);
+  $('#demoOv')._returnFocus = document.activeElement;
   $('#demoOv').classList.add('show');
   setTimeout(() => $('#demoClose').focus(), 260);
 }
-function hideDemo() { $('#demoOv').classList.remove('show'); }
+function hideDemo() {
+  $('#demoOv').classList.remove('show');
+  const rf = $('#demoOv')._returnFocus;
+  if (rf && typeof rf.focus === 'function') {
+    try { rf.focus(); } catch (e) {}
+    $('#demoOv')._returnFocus = null;
+  }
+}
 
 /* ---- Test lab — measured accuracy for judges ------------------------- */
 function runLab() {
@@ -874,24 +882,29 @@ function runLab() {
   out.innerHTML = '<div class="load-status" style="padding:12px 0"><span class="spin"></span><span>' + esc(t('lab_run')) + '…</span></div>';
   /* let the spinner paint, then run the synchronous suite */
   setTimeout(() => {
-    const r = runSelfTests();
-    let html = '<div class="lab-stats">' +
-      '<div class="lab-stat"><div class="num">' + r.total + '</div><div class="lb">' + esc(t('lab_total')) + '</div></div>' +
-      '<div class="lab-stat"><div class="num">' + r.passed + '</div><div class="lb">' + esc(t('lab_pass')) + '</div></div>' +
-      '<div class="lab-stat"><div class="num">' + r.accuracy + '%</div><div class="lb">' + esc(t('lab_acc')) + '</div></div>' +
-      '</div>';
-    if (r.failures && r.failures.length) {
-      html += '<h4 class="lab-fail-head">' + esc(t('lab_fail')) + '</h4>';
-      html += r.failures.map(f =>
-        '<div class="lab-row"><span class="vb suspicious">FAIL</span>' +
-        '<span><strong>' + esc(f.label) + '</strong>' +
-        esc(f.expected + ' → ' + f.got + (typeof f.score === 'number' ? ' · ' + f.score + '/100' : '')) +
-        '</span></div>').join('');
-    } else {
-      html += '<div class="lab-ok"><span data-icon="checkCircle"></span><span>' + esc(t('lab_none')) + '</span></div>';
+    try {
+      const r = runSelfTests();
+      let html = '<div class="lab-stats">' +
+        '<div class="lab-stat"><div class="num">' + r.total + '</div><div class="lb">' + esc(t('lab_total')) + '</div></div>' +
+        '<div class="lab-stat"><div class="num">' + r.passed + '</div><div class="lb">' + esc(t('lab_pass')) + '</div></div>' +
+        '<div class="lab-stat"><div class="num">' + r.accuracy + '%</div><div class="lb">' + esc(t('lab_acc')) + '</div></div>' +
+        '</div>';
+      if (r.failures && r.failures.length) {
+        html += '<h4 class="lab-fail-head">' + esc(t('lab_fail')) + '</h4>';
+        html += r.failures.map(f =>
+          '<div class="lab-row"><span class="vb suspicious">FAIL</span>' +
+          '<span><strong>' + esc(f.label) + '</strong>' +
+          esc(f.expected + ' → ' + f.got + (typeof f.score === 'number' ? ' · ' + f.score + '/100' : '')) +
+          '</span></div>').join('');
+      } else {
+        html += '<div class="lab-ok"><span data-icon="checkCircle"></span><span>' + esc(t('lab_none')) + '</span></div>';
+      }
+      out.innerHTML = html;
+      injectIcons(out);
+    } catch (err) {
+      console.error('[Shadow] test lab failed', err);
+      out.innerHTML = '<div class="lab-row"><span class="vb suspicious">FAIL</span><span>' + esc(t('err_generic')) + '</span></div>';
     }
-    out.innerHTML = html;
-    injectIcons(out);
   }, 60);
 }
 
@@ -983,11 +996,10 @@ function openSheet(el) {
   el.classList.add('open');
   $('#scrim').classList.add('show');
   if (!wasOpen) {
+    el._returnFocus = document.activeElement;
     sheetStack.push(el);
-    if (!mqDesk.matches) {
-      const f = el.querySelector('button');
-      if (f) setTimeout(() => f.focus(), 330);
-    }
+    const f = el.querySelector('button, input, textarea, [tabindex="0"]');
+    if (f) setTimeout(() => f.focus(), 330);
   }
 }
 function closeSheet(el) {
@@ -997,6 +1009,11 @@ function closeSheet(el) {
   if (el.id === 'sheetResult' && state.resultLoc === 'sheet') { state.resultLoc = null; stopSpeak(); }
   /* Onboarding counts as seen however it is closed — show only once. */
   if (el.id === 'sheetOnb' && !state.onboarded) { state.onboarded = true; saveState(); }
+  const rf = el._returnFocus;
+  if (rf && typeof rf.focus === 'function') {
+    try { rf.focus(); } catch (e) {}
+    el._returnFocus = null;
+  }
 }
 function enableSheetDrag() {
   $$('.sheet').forEach(sheet => {
@@ -1049,8 +1066,19 @@ function showDeskToast() {
   toastTimer = setTimeout(hideDeskToast, 5500);
 }
 function hideDeskToast() { clearTimeout(toastTimer); $('#deskToast').classList.remove('show'); }
-function showScamOv() { $('#scamOv').classList.add('show'); $('#ovBack').focus(); }
-function hideScamOv() { $('#scamOv').classList.remove('show'); }
+function showScamOv() {
+  $('#scamOv')._returnFocus = document.activeElement;
+  $('#scamOv').classList.add('show');
+  $('#ovBack').focus();
+}
+function hideScamOv() {
+  $('#scamOv').classList.remove('show');
+  const rf = $('#scamOv')._returnFocus;
+  if (rf && typeof rf.focus === 'function') {
+    try { rf.focus(); } catch (e) {}
+    $('#scamOv')._returnFocus = null;
+  }
+}
 
 /* ---- Navigation -------------------------------------------------------- */
 function switchScreen(name) {
@@ -1253,6 +1281,26 @@ function wireEvents() {
 
   /* Keyboard shortcuts */
   document.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      const topSheet = sheetStack[sheetStack.length - 1];
+      const modal = topSheet || ($('#demoOv').classList.contains('show') ? $('#demoOv') : $('#scamOv').classList.contains('show') ? $('#scamOv') : $('#dlgClear').classList.contains('show') ? $('#dlgClear') : null);
+      if (modal) {
+        const focusables = Array.from(modal.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+          .filter(el => (el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0));
+        if (focusables.length) {
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+      return;
+    }
     if (e.key === 'Escape') {
       if ($('#scamOv').classList.contains('show')) { hideScamOv(); return; }
       if ($('#demoOv').classList.contains('show')) { hideDemo(); return; }
