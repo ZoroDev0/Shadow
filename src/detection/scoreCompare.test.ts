@@ -16,6 +16,9 @@ const KNOWN_DIFFERENCES = [
   // Phase 7 general-rule additions: delivery hand-over, release fee, loan fee,
   // joining deposit, webcam blackmail, parcel contraband, cheap-TLD benefit link.
   "R12", "R13", "R14", "R15", "R16", "R17", "R18", "R19",
+  // R20: official Amazon.com / amazon.co.uk storefronts recognised as genuine;
+  // the frozen reference engine still labels them Amazon.in lookalikes.
+  "R20",
   "S19", "S27", "X10",
 ];
 

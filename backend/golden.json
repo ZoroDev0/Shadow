@@ -4216,6 +4216,139 @@
     }
   },
   {
+    "id": "R20",
+    "label": "Global Amazon storefronts are official, not Amazon.in lookalikes",
+    "expect": "safe",
+    "text": "Your Amazon order has shipped. Track it at https://www.amazon.com/orders or amazon.co.uk/orders",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link points to the real official website amazon.com.",
+          "text_hi": "लिंक असली आधिकारिक वेबसाइट amazon.com पर जाता है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "This is a routine delivery update about your own order.",
+          "text_hi": "यह आपके ही ऑर्डर की आम डिलीवरी सूचना है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://www.amazon.com/orders",
+          "verdict": "safe",
+          "reason": {
+            "en": "The link points to the real official website amazon.com.",
+            "hi": "लिंक असली आधिकारिक वेबसाइट amazon.com पर जाता है।",
+            "text_en": "The link points to the real official website amazon.com.",
+            "text_hi": "लिंक असली आधिकारिक वेबसाइट amazon.com पर जाता है।"
+          },
+          "lookalike_of": null
+        },
+        {
+          "url": "amazon.co",
+          "verdict": "scam",
+          "reason": {
+            "en": "The link “amazon.co” is a fake copy of the real website “amazon.in”.",
+            "hi": "लिंक “amazon.co” असली वेबसाइट “amazon.in” की नकल है।",
+            "text_en": "The link “amazon.co” is a fake copy of the real website “amazon.in”.",
+            "text_hi": "लिंक “amazon.co” असली वेबसाइट “amazon.in” की नकल है।"
+          },
+          "lookalike_of": "amazon.in"
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share Shadow with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": [
+        "amazon.co"
+      ]
+    }
+  },
+  {
+    "id": "R21",
+    "label": "Widening the official list still rejects an Amazon lookalike domain",
+    "expect": "scam",
+    "text": "Amazon order on hold. Verify your payment at amazon-billing.com/pay",
+    "result": {
+      "verdict": "scam",
+      "score": 70,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link “amazon-billing.com” is a fake copy of the real website “amazon.in”.",
+          "text_hi": "लिंक “amazon-billing.com” असली वेबसाइट “amazon.in” की नकल है।",
+          "rank": 0
+        },
+        {
+          "icon": "key",
+          "text_en": "It pushes you to “update/verify your details, payment or bill” through it — never do that from a message.",
+          "text_hi": "यह आपको उसी संदेश से “जानकारी/भुगतान अपडेट या सत्यापित” करने पर मजबूर करता है — संदेश से ऐसा कभी न करें।",
+          "rank": 1
+        },
+        {
+          "icon": "bank",
+          "text_en": "It references “AMAZON” — scammers often imitate well-known companies.",
+          "text_hi": "इसमें “AMAZON” का नाम है — ठग अक्सर मशहूर कंपनियों का नाटक करते हैं।",
+          "rank": 8
+        }
+      ],
+      "links": [
+        {
+          "url": "amazon-billing.com/pay",
+          "verdict": "scam",
+          "reason": {
+            "en": "The link “amazon-billing.com” is a fake copy of the real website “amazon.in”.",
+            "hi": "लिंक “amazon-billing.com” असली वेबसाइट “amazon.in” की नकल है।",
+            "text_en": "The link “amazon-billing.com” is a fake copy of the real website “amazon.in”.",
+            "text_hi": "लिंक “amazon-billing.com” असली वेबसाइट “amazon.in” की नकल है।"
+          },
+          "lookalike_of": "amazon.in"
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "amazon-billing.com",
+        "Verify your payment"
+      ]
+    }
+  },
+  {
     "id": "X1",
     "label": "extra",
     "expect": "suspicious",

@@ -156,7 +156,11 @@ export const CASES:SelfTestCase[] = [
     { id: 'R18', label: 'Parcel-contraband threat with a settlement demand', expect: 'scam',
       text: 'Your parcel contains narcotics. Case registered. Pay Rs 25,000 settlement or police will come to your address.' },
     { id: 'R19', label: 'Delivery context does not excuse an OTP sent to a phone number', expect: 'scam',
-      text: 'Delhivery parcel is held. Share the OTP on call 9876500011 to release the shipment.' }
+      text: 'Delhivery parcel is held. Share the OTP on call 9876500011 to release the shipment.' },
+    { id: 'R20', label: 'Global Amazon storefronts are official, not Amazon.in lookalikes', expect: 'safe',
+      text: 'Your Amazon order has shipped. Track it at https://www.amazon.com/orders or amazon.co.uk/orders' },
+    { id: 'R21', label: 'Widening the official list still rejects an Amazon lookalike domain', expect: 'scam',
+      text: 'Amazon order on hold. Verify your payment at amazon-billing.com/pay' }
   ];
 export function runSelfTests(){const rows:any[]=[];const failures:any[]=[];let passed=0;for(const c of CASES){let got:any="error",sc=-1,err="";try{const r=detectLocal(c.text);got=r.verdict;sc=r.score}catch(e:any){err=e?.message||String(e)}const ok=got===c.expect;if(ok)passed++;else failures.push({case:c.id,label:c.label,expected:c.expect,got,score:sc,error:err});rows.push({case:c.id,expect:c.expect,got,score:sc,result:ok?"PASS":"FAIL",note:ok?"":(err||c.label)})}const total=CASES.length;const accuracy=Math.round(passed/total*1000)/10;const summary={total,passed,accuracy,failures};if(typeof console!=="undefined"){try{console.table(rows)}catch{}console.log(`[Shadow] self-tests: ${passed}/${total} passed (${accuracy}%)`)}return summary}
 if(typeof window!=="undefined")(window as any).runSelfTests=runSelfTests;else(globalThis as any).runSelfTests=runSelfTests;
