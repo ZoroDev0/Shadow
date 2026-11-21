@@ -379,6 +379,8 @@ mark.hl{background:var(--hl-bg);color:var(--hl-fg);border-radius:5px;
 .pc-status .dot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--text);flex:none}
 .pc-status.on .dot{background:var(--text)}
 .prot-card .switch{margin-top:6px}
+.pc-btn{margin-top:12px}
+.pc-hint{color:var(--text-muted);font-size:.78rem;line-height:1.5;margin-top:8px}
 .sim-card{padding:18px;margin-top:22px}
 .sim-card h2{font:700 1.1rem var(--font-display);letter-spacing:-.01em}
 .sim-card .scr-sub{margin:4px 0 0}

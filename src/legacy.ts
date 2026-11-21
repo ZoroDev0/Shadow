@@ -1,5 +1,10 @@
 import { analyze as analyzeShared } from './detection/analyze';
 import { urlHost } from './detection/engine';
+import {
+  clearRecent, getRecent, isListenerEnabled, isNativeAndroid, onNotificationScanned,
+  openAppSettings, openListenerSettings, requestPostNotifications, setScanning
+} from './native/scamShield';
+import type { RecentScan } from './native/scamShield';
 
 "use strict";
 /* ══════════════════════════════════════════════════════════════════
@@ -110,7 +115,7 @@ const I18N = {
   prot_ext:        { en: 'Browser Extension (Chrome)', hi: 'ब्राउज़र एक्सटेंशन (Chrome)' },
   prot_ext_d:      { en: 'Checks every page you open and blocks lookalike bank sites before they load.', hi: 'खुलने वाले हर पेज की जाँच करके नकली बैंक साइटें वहीं रोक देता है।' },
   prot_and:        { en: 'Android notification scanner', hi: 'Android नोटिफिकेशन स्कैनर' },
-  prot_and_d:      { en: 'Reads incoming SMS and alerts you instantly if a message looks like a scam.', hi: 'आने वाले SMS पढ़कर घोटाले जैसा लगने पर तुरंत चेतावनी देता है।' },
+  prot_and_d:      { en: 'Android app: reads notifications from the messaging apps you allow — never your SMS inbox.', hi: 'Android ऐप: आपकी अनुमति वाले मैसेजिंग ऐप्स के नोटिफिकेशन पढ़ता है — SMS इनबॉक्स कभी नहीं।' },
   prot_dsk:        { en: 'Windows / Mac clipboard watcher', hi: 'Windows / Mac क्लिपबोर्ड वॉचर' },
   prot_dsk_d:      { en: 'Watches the text you copy and warns you before you paste it somewhere risky.', hi: 'आप जो टेक्स्ट copy करते हैं उसे देखकर खतरे पर चेतावनी देता है।' },
   on:              { en: 'Active · demo', hi: 'सक्रिय · डेमो' },
@@ -197,8 +202,19 @@ const I18N = {
   share_open:      { en: 'Opening WhatsApp — warning copied for you', hi: 'WhatsApp खुल रहा है — चेतावनी कॉपी हो गई' },
   share_done:      { en: 'Shared', hi: 'साझा हो गया' },
   /* — Test lab — */
+  /* — Android notification scanner (real on the phone, simulation on web) — */
+  prot_native_d:   { en: 'Android only: reads notifications from the messaging apps you allow — never your SMS inbox.', hi: 'केवल Android पर: आपकी अनुमति वाले मैसेजिंग ऐप्स के नोटिफिकेशन पढ़ता है — SMS इनबॉक्स कभी नहीं।' },
+  prot_native_need: { en: 'Notification access is needed to see new messages from the apps you choose. ScamShield never reads your SMS inbox, contacts, clipboard or screen, and no message leaves the phone.', hi: 'आपके चुने ऐप्स के नए संदेश देखने के लिए नोटिफिकेशन एक्सेस चाहिए। ScamShield आपका SMS इनबॉक्स, संपर्क, क्लिपबोर्ड या स्क्रीन नहीं पढ़ता, और कोई संदेश फ़ोन से बाहर नहीं जाता।' },
+  prot_native_btn:  { en: 'Open notification access settings', hi: 'नोटिफिकेशन एक्सेस सेटिंग खोलें' },
+  prot_native_tip:  { en: 'Some phone brands stop background services to save battery. If alerts stop, allow ScamShield to run in the background in battery settings.', hi: 'कुछ फ़ोन ब्रांड बैटरी बचाने के लिए बैकग्राउंड सेवाएँ रोक देते हैं। अलर्ट बंद हो जाएँ तो बैटरी सेटिंग में ScamShield को बैकग्राउंड में चलने दें।' },
+  prot_native_ok:   { en: 'Notification access is on', hi: 'नोटिफिकेशन एक्सेस चालू है' },
+  prot_native_off:  { en: 'Notification access is off', hi: 'नोटिफिकेशन एक्सेस बंद है' },
+  prot_native_restricted: { en: 'If Android says the setting is restricted, open App info → three-dot menu → Allow restricted settings, then try again.', hi: 'अगर Android कहे कि सेटिंग प्रतिबंधित है, तो App info → तीन-डॉट मेन्यू → Allow restricted settings खोलें, फिर दोबारा कोशिश करें।' },
+  prot_native_debug: { en: 'Debug build: notifications posted by adb (com.android.shell) are scanned too.', hi: 'डिबग बिल्ड: adb (com.android.shell) के नोटिफिकेशन भी स्कैन होते हैं।' },
+  hist_notif:       { en: 'Notification · {app}', hi: 'नोटिफिकेशन · {app}' },
+  sim_tag:          { en: 'Simulation', hi: 'सिमुलेशन' },
   lab_t:           { en: 'Test lab', hi: 'टेस्ट लैब' },
-  lab_d:           { en: 'Run 55 project-written cases on this device. This is not independent accuracy.', hi: 'इस डिवाइस पर 55 प्रोजेक्ट-लिखित मामलों की जाँच चलाएँ। यह स्वतंत्र सटीकता नहीं है।' },
+  lab_d:           { en: 'Run 86 project-written cases on this device. This is not independent accuracy.', hi: 'इस डिवाइस पर 86 प्रोजेक्ट-लिखित मामलों की जाँच चलाएँ। यह स्वतंत्र सटीकता नहीं है।' },
   lab_run:         { en: 'Run tests', hi: 'टेस्ट चलाएँ' },
   lab_total:       { en: 'Cases', hi: 'मामले' },
   lab_pass:        { en: 'Passed', hi: 'पास' },
@@ -930,7 +946,7 @@ function relTime(ts) {
   return new Date(ts).toLocaleDateString(state.lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short' });
 }
 function renderHistory() {
-  const h = state.history;
+  const h = historyWithNative();
   const scams = h.filter(x => x.verdict === 'scam').length;
   const safes = h.filter(x => x.verdict === 'safe').length;
   $('#histStats').innerHTML =
@@ -941,10 +957,12 @@ function renderHistory() {
   const list = h.filter(x => state.histFilter === 'all' || x.verdict === state.histFilter);
   $('#histList').innerHTML = list.map(x => {
     const vlbl = { scam: t('v_scam'), suspicious: t('v_susp'), safe: t('v_safe') }[x.verdict] || '';
+    const src = x.source
+      ? '<span class="htime">' + esc(t('hist_notif').replace('{app}', x.source)) + ' · ' + esc(relTime(x.ts)) + ' · ' + x.score + '/100</span>'
+      : '<span class="htime">' + esc(relTime(x.ts)) + ' · ' + x.score + '/100</span>';
     return '<div class="hrow" role="button" tabindex="0" data-id="' + esc(x.id) + '" aria-label="' + esc(vlbl) + ': ' + esc(x.text.slice(0, 60)) + '">' +
       '<span class="vb ' + x.verdict + '">' + esc(vlbl) + '</span>' +
-      '<span class="hmid"><span class="snip">' + esc(x.text.slice(0, 110)) + '</span>' +
-      '<span class="htime">' + esc(relTime(x.ts)) + ' · ' + x.score + '/100</span></span>' +
+      '<span class="hmid"><span class="snip">' + esc(x.text.slice(0, 110)) + '</span>' + src + '</span>' +
       '<button class="iconbtn hdel" type="button" data-del="' + esc(x.id) + '" aria-label="' + esc(t('del_label')) + '"><span data-icon="trash"></span></button>' +
       '</div>';
   }).join('');
@@ -952,6 +970,11 @@ function renderHistory() {
   injectIcons($('#histList'));
 }
 function deleteHistory(id) {
+  if (id.indexOf('n-') === 0) {
+    nativeScans = nativeScans.filter(s => 'n-' + s.at + '-' + s.packageName !== id);
+    renderHistory();
+    return;
+  }
   const doRemove = () => {
     state.history = state.history.filter(x => x.id !== id);
     saveState(); renderHistory(); snack(t('removed'));
@@ -961,7 +984,7 @@ function deleteHistory(id) {
   else doRemove();
 }
 function openHistoryItem(id) {
-  const e = state.history.find(x => x.id === id);
+  const e = historyWithNative().find(x => x.id === id);
   if (!e) return;
   switchScreen('check');
   $('#msgInput').value = e.text;
@@ -975,13 +998,63 @@ const PROTECT_CARDS = [
   { k: 'and', icon: 'phoneDev', name: 'prot_and', desc: 'prot_and_d' },
   { k: 'dsk', icon: 'monitor',  name: 'prot_dsk', desc: 'prot_dsk_d' }
 ];
+/* ── Native Android notification scanner ───────────────────────────────
+   On the phone this card is real: the switch reflects the system's
+   notification-access grant and scanning can be paused. On the web the
+   platform reports unsupported and the card stays the labelled simulation. */
+let nativeState = { supported: false, enabled: false, scanning: false, postNotifications: false, debug: false, sdk: 0 };
+let nativeScans: RecentScan[] = [];
+
+function nativeScanEntry(s: RecentScan) {
+  const reason = { en: 'Found in a notification from ' + s.appLabel + '. The message body is not stored on this device.',
+                   hi: s.appLabel + ' के नोटिफिकेशन में मिला। संदेश का पूरा टेक्स्ट इस डिवाइस पर नहीं रखा जाता।' };
+  return {
+    id: 'n-' + s.at + '-' + s.packageName,
+    text: s.snippet,
+    ts: s.at,
+    score: s.score,
+    verdict: s.verdict,
+    source: s.appLabel,
+    result: { verdict: s.verdict, score: s.score, links: [],
+      reasons: [{ key: 'native', icon: 'info', text_en: reason.en, text_hi: reason.hi }] }
+  };
+}
+
+function historyWithNative() {
+  return state.history.concat(nativeScans.map(nativeScanEntry));
+}
+
+async function refreshNative() {
+  if (!isNativeAndroid()) return;
+  nativeState = await isListenerEnabled();
+  nativeScans = await getRecent();
+  renderProtect();
+  renderHistory();
+}
+
 function renderProtect() {
+  if (isNativeAndroid()) nativeState.supported = true;
   $('#protList').innerHTML = PROTECT_CARDS.map(c => {
-    const on = !!state.toggles[c.k];
+    const isNative = c.k === 'and' && nativeState.supported;
+    const on = isNative ? nativeState.enabled : !!state.toggles[c.k];
+    let extra = '';
+    if (isNative) {
+      extra = '<p class="pc-desc">' + esc(t('prot_native_need')) + '</p>' +
+        '<p class="pc-status' + (on ? ' on' : '') + '"><span class="dot"></span>' +
+        esc(on ? t('prot_native_ok') : t('prot_native_off')) + '</p>' +
+        '<button class="btn btn-outline pc-btn" type="button" data-native="settings">' +
+        esc(t('prot_native_btn')) + '</button>' +
+        (on ? '' : '<p class="pc-hint">' + esc(t('prot_native_restricted')) + '</p>') +
+        (nativeState.debug ? '<p class="pc-hint">' + esc(t('prot_native_debug')) + '</p>' : '') +
+        '<p class="pc-hint">' + esc(t('prot_native_tip')) + '</p>';
+    }
     return '<div class="prot-card card">' +
       '<div class="pc-ic" data-icon="' + c.icon + '"></div>' +
-      '<div class="pc-main"><h3>' + esc(t(c.name)) + '</h3><p class="pc-desc">' + esc(t(c.desc)) + '</p>' +
-      '<p class="pc-status' + (on ? ' on' : '') + '"><span class="dot"></span>' + esc(on ? t('on') : t('off')) + '</p></div>' +
+      '<div class="pc-main"><h3>' + esc(t(c.name)) + '</h3>' +
+      (isNative ? '' : '<p class="pc-desc">' + esc(t(c.desc)) + '</p>' +
+        '<p class="pc-status' + (on ? ' on' : '') + '"><span class="dot"></span>' + esc(on ? t('on') : t('off')) +
+        (c.k === 'and' || c.k === 'dsk' ? ' · ' + esc(t('sim_tag')) : '') + '</p>') +
+      extra + '</div>' +
       '<label class="switch"><input type="checkbox" data-prot="' + c.k + '"' + (on ? ' checked' : '') +
       ' aria-label="' + esc(t(c.name)) + '"><span class="trk"></span><span class="thb"></span></label>' +
       '</div>';
@@ -1170,6 +1243,8 @@ function wireEvents() {
   $('#dlgCancel').addEventListener('click', () => $('#dlgClear').classList.remove('show'));
   $('#dlgOk').addEventListener('click', () => {
     state.history = [];
+    nativeScans = [];
+    if (isNativeAndroid()) void clearRecent();
     saveState();
     renderHistory();
     $('#dlgClear').classList.remove('show');
@@ -1180,9 +1255,25 @@ function wireEvents() {
   $('#protList').addEventListener('change', e => {
     const c = e.target.closest('[data-prot]');
     if (!c) return;
+    if (c.dataset.prot === 'and' && nativeState.supported) {
+      if (!nativeState.enabled) {
+        /* Access is the system's grant, not ours: send the user to it. */
+        c.checked = false;
+        void openListenerSettings().then(() => { if (nativeState.sdk >= 33) void requestPostNotifications(); });
+        return;
+      }
+      void setScanning(c.checked).then(() => refreshNative());
+      return;
+    }
     state.toggles[c.dataset.prot] = c.checked;
     saveState();
     renderProtect();
+  });
+  $('#protList').addEventListener('click', e => {
+    const btn = e.target.closest('[data-native="settings"]');
+    if (btn) void openListenerSettings();
+    const app = e.target.closest('[data-native="appsettings"]');
+    if (app) void openAppSettings();
   });
   $('#simSms').addEventListener('click', showSmsBanner);
   $('#simCopy').addEventListener('click', showDeskToast);
@@ -1360,5 +1451,17 @@ export function initLegacy() {
   }
   /* First launch only — 3-card onboarding, shown once. */
   if (!state.onboarded) setTimeout(() => openSheet($('#sheetOnb')), 450);
+
+  /* Android: real listener state, live scans, and a re-check after settings. */
+  if (isNativeAndroid()) {
+    void refreshNative();
+    void onNotificationScanned(scan => {
+      nativeScans = [scan].concat(nativeScans).slice(0, 25);
+      renderHistory();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') void refreshNative();
+    });
+  }
 }
 

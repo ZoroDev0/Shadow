@@ -169,6 +169,16 @@ const en = {
   "onb_s3_t": "Stay safe",
   "onb_s3_d": "Never share OTP or PIN. Report scams at cybercrime.gov.in or 1930.",
   "onb_go": "Get started",
-  "onb_skip": "Skip"
+  "onb_skip": "Skip",
+  "prot_native_d": "Android only: reads notifications from the messaging apps you allow — never your SMS inbox.",
+  "prot_native_need": "Notification access is needed to see new messages from the apps you choose. ScamShield never reads your SMS inbox, contacts, clipboard or screen, and no message leaves the phone.",
+  "prot_native_btn": "Open notification access settings",
+  "prot_native_tip": "Some phone brands stop background services to save battery. If alerts stop, allow ScamShield to run in the background in battery settings.",
+  "prot_native_ok": "Notification access is on",
+  "prot_native_off": "Notification access is off",
+  "prot_native_restricted": "If Android says the setting is restricted, open App info → three-dot menu → Allow restricted settings, then try again.",
+  "prot_native_debug": "Debug build: notifications posted by adb (com.android.shell) are scanned too.",
+  "hist_notif": "Notification · {app}",
+  "sim_tag": "Simulation",
 } as const;
 export default en;
