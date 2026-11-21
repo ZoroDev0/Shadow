@@ -1,0 +1,47 @@
+# Environment & Virtualenvs
+.venv/
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Dataset files & Archives (Explicitly Excluded)
+data/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.parquet
+*.npy
+*.npz
+*.h5
+*.arff
+*.xlsx
+*.xls
+*.csv
+
+# Exceptions for small metadata CSVs in docs
+!docs/research/*.csv
+!ml-research/reports/*.csv
+
+# System, IDE & Jupyter
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
+*.log
+
+# Caches
+.cache/
+matplotlib/
