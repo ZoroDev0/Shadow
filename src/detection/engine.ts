@@ -585,7 +585,7 @@ export function detectLocal(rawText) {
     score += la.pts;
     links.push({
       url: la.url, verdict: la.verdict,
-      reason: { en: la.reason.en, hi: la.reason.hi, text_en: la.reason.en, text_hi: la.reason.hi },
+      reason: la.reason ? { en: la.reason.en, hi: la.reason.hi, text_en: la.reason.en, text_hi: la.reason.hi } : null,
       lookalike_of: la.lookalike_of
     });
     if (la.verdict !== 'safe') {

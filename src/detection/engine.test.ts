@@ -31,4 +31,13 @@ describe("Shadow project-written detector suite", () => {
       if (got !== verdict) throw new Error(`${text} => expected ${verdict}, got ${got}`);
     }
   });
+
+  it("handles URLs without dots and adversarial strings without crashing", () => {
+    expect(() => detectLocal("visit http://localhost now")).not.toThrow();
+    const r = detectLocal("visit http://localhost now");
+    expect(r.verdict).toBeDefined();
+    expect(r.links[0]?.url).toBe("http://localhost");
+    expect(r.links[0]?.reason).toBeNull();
+    expect(() => detectLocal("a".repeat(4000))).not.toThrow();
+  });
 });
