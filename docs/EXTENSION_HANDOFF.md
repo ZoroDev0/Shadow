@@ -1,8 +1,63 @@
-# ScamShield browser extension handoff
+# ScamShield browser extension — handoff
 
-The backend is a Manifest V3 extension-compatible HTTP API.
+Status: **in the repo** (`extension/`), Manifest V3, unpacked build.
+Detection is imported from `src/detection` — there is no second engine.
 
-## Run locally
+## What exists now
+
+| Part | File | Behaviour |
+| --- | --- | --- |
+| Service worker | `extension/src/background.ts` | Context menus, main-frame navigation guard, badge, session “Proceed anyway”. |
+| Popup | `extension/src/popup.ts` | Paste/type → verdict, score, reasons, link diff, advice. EN/HI toggle persisted. Also renders the last context-menu result (`?view=result`). |
+| Options | `extension/src/options.ts` | Language, protection on/off, allowlist, optional API base URL. |
+| Interstitial | `extension/src/blocked.ts` | Fake-vs-real domain diff, reasons, “Go back” (default) and “Proceed anyway”. |
+| URL policy | `extension/src/policy.ts` | Pure functions: `block` / `badge` / `ignore` + reasons. |
+| Engine bridge | `extension/src/detect.ts` | `checkText` (local, or server with local fallback), `checkUrl` (always local). |
+| Tests | `extension/tests/*.test.ts` | Mocked chrome API; navigation, allowlist, manifest, false-positive guard. |
+
+Build and load steps, permissions and data flow: [`extension/README.md`](../extension/README.md).
+
+## Detection contract
+
+Local checks call the shared engine directly:
+
+```ts
+import { detectLocal } from "../../src/detection/engine";
+```
+
+A bare address uses `analyzeUrl()` (same module), which returns the **link**
+verdict so a lookalike domain is never reported as merely “be careful”. The
+message score is not reused for navigation decisions.
+
+## Optional backend API
+
+Still supported, unchanged in shape, but **off unless the user sets a base URL**
+in the options page. The extension then requests the optional host permission
+for that exact origin, and sends:
+
+```json
+POST {API_BASE}/analyze
+{"text": "..."}
+```
+
+Response contract:
+
+```json
+{
+  "verdict": "safe | suspicious | scam",
+  "score": 0,
+  "reasons": [{"icon": "link", "text_en": "...", "text_hi": "..."}],
+  "links": [{"url": "...", "verdict": "safe", "reason": {"en": "...", "hi": "..."}, "lookalike_of": null}],
+  "advice": [{"text_en": "...", "text_hi": "..."}],
+  "highlights": []
+}
+```
+
+Timeout 8 s (`API_TIMEOUT_MS` in `extension/src/detect.ts`). Non-200, a bad
+shape, a thrown error or an abort all fall back to the on-device detector, and
+the popup says “checked on this device”. Navigation checks never call the API.
+
+## Run the backend locally
 
 ```bash
 cd backend
@@ -12,78 +67,25 @@ pip install -r requirements.txt
 ML_ENABLED=false uvicorn app:app --reload --port 8000
 ```
 
-Set `SHADOW_MODEL_PATH` only if a licensed 20-feature URL model is available.
+`GET /health` is available for a reachability check. CORS already allows
+`chrome-extension://*` origins plus explicit `ALLOWED_ORIGINS`.
 
-## Base URL
+## Rules of the road
 
-Use a placeholder and configure it in the extension:
+- Do not copy engine code into `extension/`. Import it.
+- Keep permissions at `contextMenus`, `storage`, `webNavigation` plus the
+  optional runtime host permission. `extension/tests/manifest.test.ts` fails if
+  that set grows or if `<all_urls>` appears.
+- Any change to `src/detection/rules.json` affects the web app, the backend and
+  the extension at once. Run `npm test` and backend `pytest` together.
+- False positives are the expensive failure. Add newly allowed legitimate sites
+  to `extension/tests/legitSites.test.ts`; only widen a rule in
+  `selfTests.ts` + `backend/golden.json` when a real bug is proven.
 
-```text
-const API_BASE = "http://127.0.0.1:8000";
-```
+## Not done / not claimed
 
-For production, replace this placeholder with the deployed public HTTPS base URL:
-
-```text
-const API_BASE = "https://YOUR-BACKEND.example.com";
-```
-
-No public deployed backend URL is available in this environment yet.
-
-For a deployed backend, use the HTTPS backend origin. Do not append `/analyze` to the
-base URL in the configuration.
-
-## CORS
-
-The backend does **not** use a wildcard. It allows `GET`, `POST` and `OPTIONS` from:
-
-- the explicit origins listed in the `ALLOWED_ORIGINS` environment variable
-  (comma-separated; defaults to `http://localhost:5173`), and
-- the regex `https?://(localhost|127\.0\.0\.1)(:\d+)?|chrome-extension://.*`
-  (local development and browser extensions).
-
-`allow_credentials=False`, so cookies are never accepted cross-origin. To use a
-deployed backend from the extension, add that exact origin to `ALLOWED_ORIGINS`.
-
-## Request contract
-
-`POST /analyze`
-
-```json
-{"text":"Your SBI account is blocked. KYC update now: http://sbi-kyc-update.xyz"}
-```
-
-Example Manifest V3 service worker call:
-
-```js
-const response = await fetch(`${API_BASE}/analyze`, {
-  method: "POST",
-  headers: {"Content-Type": "application/json"},
-  body: JSON.stringify({text: messageText}),
-  signal: AbortSignal.timeout(8000),
-});
-
-if (!response.ok) throw new Error(`HTTP ${response.status}`);
-const result = await response.json();
-```
-
-## Response contract
-
-```json
-{
-  "verdict": "safe",
-  "score": 0,
-  "reasons": [{"icon":"link","text_en":"...","text_hi":"..."}],
-  "links": [{"url":"https://example.com","verdict":"safe","reason":{"en":"...","hi":"..."},"lookalike_of":null}],
-  "advice": [{"text_en":"...","text_hi":"..."}],
-  "highlights": []
-}
-```
-
-`verdict` is exactly `safe`, `suspicious`, or `scam`. `score` is 0–100.
-
-## Health check
-
-```js
-const health = await fetch(`${API_BASE}/health`);
-```
+- Not published to any store; no signing, no auto-update.
+- No content scripts: page content is never read.
+- No Firefox or Safari build (no `manifest.firefox.json`; the port is unwritten).
+- The web app's Protect-screen switches remain demo simulations; installing
+  this extension is a separate manual step.

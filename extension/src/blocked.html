@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScamShield — scam link blocked</title>
+  <link rel="stylesheet" href="ext.css">
+</head>
+<body class="blocked-body">
+  <main class="blocked-card" id="card">
+    <div class="blocked-head">
+      <span class="mark" id="mark" aria-hidden="true"></span>
+      <strong data-i18n="ext_name">ScamShield</strong>
+    </div>
+
+    <h2 data-i18n="ext_blocked_title"></h2>
+    <p class="muted" data-i18n="ext_blocked_sub"></p>
+    <p class="host-big" id="host"></p>
+
+    <div id="result" aria-live="polite"></div>
+
+    <div class="blocked-actions">
+      <button class="btn btn-filled btn-lg btn-block" id="btnBack" type="button" autofocus
+        data-i18n="ext_go_back"></button>
+      <button class="btn btn-outline btn-block" id="btnProceed" type="button"
+        data-i18n="ext_proceed"></button>
+    </div>
+    <p class="session-note" data-i18n="ext_session_note"></p>
+  </main>
+
+  <script type="module" src="blocked.js"></script>
+</body>
+</html>

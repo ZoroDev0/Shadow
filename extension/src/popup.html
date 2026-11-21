@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScamShield</title>
+  <link rel="stylesheet" href="ext.css">
+</head>
+<body class="popup">
+  <header class="top">
+    <span class="mark" id="mark" aria-hidden="true"></span>
+    <h1 data-i18n="ext_name">ScamShield</h1>
+    <span class="spacer"></span>
+    <div class="seg" id="segLang" role="group" aria-label="Language" data-i18n-aria="ext_lang_aria">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="hi" aria-pressed="false">हिं</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="muted" data-i18n="ext_tagline"></p>
+
+    <form class="card" id="form" novalidate>
+      <label class="field" for="text">
+        <span data-i18n="ext_label"></span>
+      </label>
+      <textarea id="text" name="text" maxlength="4000" rows="5" spellcheck="false"
+        data-i18n-placeholder="ext_placeholder"></textarea>
+      <div class="row">
+        <button class="btn btn-filled btn-lg" id="btnCheck" type="submit" data-i18n="btn_check"></button>
+      </div>
+    </form>
+
+    <p class="err" id="err" role="alert" hidden></p>
+    <div id="result" aria-live="polite"></div>
+  </main>
+
+  <footer class="foot">
+    <span class="muted" data-i18n="ext_footer"></span>
+    <button class="btn btn-text" id="btnOptions" type="button" data-i18n="ext_options"></button>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

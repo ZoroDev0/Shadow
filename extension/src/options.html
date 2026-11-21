@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScamShield settings</title>
+  <link rel="stylesheet" href="ext.css">
+</head>
+<body class="page">
+  <header class="top">
+    <span class="mark" id="mark" aria-hidden="true"></span>
+    <h1 data-i18n="ext_name">ScamShield</h1>
+  </header>
+
+  <main class="wrap">
+    <p class="muted" data-i18n="ext_tagline"></p>
+
+    <section class="card" style="margin-top:16px">
+      <div class="set-row">
+        <div class="set-main">
+          <h3 data-i18n="ext_enabled"></h3>
+          <p class="muted" data-i18n="ext_enabled_d"></p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="enabled" aria-label="Protection on" data-i18n-aria="ext_enabled">
+          <span class="trk"></span><span class="thb"></span>
+        </label>
+      </div>
+
+      <div class="set-row">
+        <div class="set-main"><h3 data-i18n="ext_lang"></h3></div>
+        <div class="seg" id="segLang" role="group" aria-label="Language" data-i18n-aria="ext_lang_aria">
+          <button type="button" data-lang="en" aria-pressed="true">English</button>
+          <button type="button" data-lang="hi" aria-pressed="false">हिन्दी</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3 data-i18n="ext_allow_title"></h3>
+      <p class="muted" data-i18n="ext_allow_desc"></p>
+      <form id="allowForm" class="row" novalidate>
+        <label class="field" for="allowInput" style="flex:1;min-width:200px">
+          <span data-i18n="ext_allow_add"></span>
+          <input type="text" id="allowInput" autocomplete="off" spellcheck="false"
+            data-i18n-placeholder="ext_allow_placeholder">
+        </label>
+        <button class="btn btn-outline" type="submit" data-i18n="ext_add"></button>
+      </form>
+      <p class="err" id="allowErr" role="alert" hidden></p>
+      <ul class="allow-list" id="allowList"></ul>
+      <p class="empty" id="allowEmpty" hidden data-i18n="ext_allow_empty"></p>
+    </section>
+
+    <section class="card">
+      <h3 data-i18n="ext_api_title"></h3>
+      <p class="muted" data-i18n="ext_api_desc"></p>
+      <label class="field" for="apiBase" style="margin-top:12px">
+        <span data-i18n="ext_api_placeholder"></span>
+        <input type="url" id="apiBase" inputmode="url" autocomplete="off" spellcheck="false"
+          placeholder="https://your-server.example.com">
+      </label>
+      <div class="row">
+        <button class="btn btn-filled" id="btnApiSave" type="button" data-i18n="ext_api_save"></button>
+        <button class="btn btn-outline" id="btnApiClear" type="button" data-i18n="ext_api_clear"></button>
+      </div>
+      <p class="err" id="apiErr" role="alert" hidden></p>
+    </section>
+
+    <p class="status"><span class="dot" aria-hidden="true"></span><span id="permNote" data-i18n="ext_perm_note"></span></p>
+    <p class="muted" id="toast" role="status" aria-live="polite"></p>
+  </main>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

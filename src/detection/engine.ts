@@ -1079,5 +1079,40 @@ export async function analyze(input) {
 
 
 
+
+/* ── 10 · A URL on its own (browser extension interstitial) ───────────
+   Same tables, same reasons, same advice — but the verdict is the LINK
+   verdict, so a lookalike bank domain is never reported as merely
+   "be careful" just because it arrived without surrounding message text. */
+export function analyzeUrl(rawUrl) {
+  const url = String(rawUrl || '').slice(0, 2000);
+  const link = analyzeLink(url);
+  const base = detectLocal(url);
+  if (!link.host || link.host.indexOf('.') === -1) return base;
+  const verdict = link.verdict;
+  const score = verdict === 'scam' ? Math.max(70, Math.min(100, link.pts + 40))
+    : verdict === 'suspicious' ? Math.max(30, Math.min(65, link.pts + 8))
+      : base.score;
+  const reasons = [];
+  if (link.reason) reasons.push({ icon: 'link', text_en: link.reason.en, text_hi: link.reason.hi });
+  for (const r of base.reasons) {
+    if (reasons.length >= 4) break;
+    if (reasons.some(function (x) { return x.text_en === r.text_en; })) continue;
+    reasons.push(r);
+  }
+  return {
+    verdict: verdict,
+    score: score,
+    reasons: reasons,
+    links: [{
+      url: link.url, verdict: link.verdict,
+      reason: { en: link.reason.en, hi: link.reason.hi, text_en: link.reason.en, text_hi: link.reason.hi },
+      lookalike_of: link.lookalike_of
+    }],
+    advice: ADVICE[verdict],
+    highlights: verdict === 'safe' ? [] : [link.host]
+  };
+}
+
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 

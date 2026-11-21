@@ -20,6 +20,7 @@ Shadow is an end-to-end platform designed to protect users against modern web-ba
 The platform provides:
 1. **Shadow Web Application**: Single-page, on-device scam detector for SMS, WhatsApp messages and URLs with an explainable rule engine and bilingual (English/Hindi) UI.
 2. **Central Backend Detection Engine**: FastAPI service with a Python parity mirror of the rule engine, validated against the TypeScript implementation.
+3. **ScamShield Browser Extension (Chrome/Edge/Brave)**: Manifest V3 build of the same engine — checks pasted text, right-clicked text or links, and warns before a lookalike bank or government page opens. Available as an unpacked build; not published to any extension store.
 
 ---
 
@@ -55,6 +56,17 @@ npm run build
 Set `VITE_API_BASE` to a backend origin to POST `{ "text": "..." }` to `${VITE_API_BASE}/analyze`.
 When unset or on API failure, Shadow uses its on-device local detector with an 8-second timeout.
 
+### Browser extension (unpacked build)
+
+The extension imports `src/detection` directly — the engine is not copied. Build it and load `extension/dist`:
+
+```bash
+npm run build:ext
+# chrome://extensions → Developer mode → Load unpacked → extension/dist
+```
+
+See [`extension/README.md`](extension/README.md) for permissions, data flow and limits.
+
 ---
 
 ## 3. Backend Detection Service
@@ -87,6 +99,7 @@ ML_ENABLED=false uvicorn app:app --host 0.0.0.0 --port 8000
 .
 ├── backend/            # FastAPI central detection engine, parity tests & golden datasets
 ├── docs/               # System documentation, runbooks, QA procedures & evaluation reports
+├── extension/          # ScamShield MV3 browser extension (source + build output)
 ├── index.html          # Vite entrypoint
 ├── index_9.html        # Frozen standalone reference page (not built; read by the parity test)
 ├── public/             # Static web assets
@@ -101,7 +114,7 @@ ML_ENABLED=false uvicorn app:app --host 0.0.0.0 --port 8000
 
 - **Static Parsing Only:** External HTML pages are parsed statically with `BeautifulSoup` without executing untrusted JavaScript.
 - **No Live Navigation:** Avoid live automated navigation to malicious URLs during testing.
-- **Simulation Notice:** Device protection switches in the demo UI are simulated; screenshot upload serves as preview UI.
+- **Simulation Notice:** Device protection switches in the demo UI are simulated, and screenshot upload is preview UI only. The browser extension's navigation warning is real once you load the unpacked build; installing it is a manual step and it is not distributed through a store.
 
 ---
 
