@@ -59,6 +59,12 @@ class ScamShieldListenerService : NotificationListenerService() {
 
         worker.execute {
             val verdict = engine.detect(text) ?: return@execute
+            if (BuildConfig.DEBUG) {
+                android.util.Log.d(
+                    TAG,
+                    "scanned pkg=${payload.packageName} verdict=${verdict.verdict} score=${verdict.score}"
+                )
+            }
             if (verdict.verdict != "scam" && verdict.verdict != "suspicious") return@execute
 
             val record = ScanRecord(
@@ -107,6 +113,7 @@ class ScamShieldListenerService : NotificationListenerService() {
     }
 
     companion object {
+        private const val TAG = "ScamShieldListener"
         private const val PREFS = "scamshield.settings"
         private const val KEY_SCANNING = "scanning_enabled"
 
