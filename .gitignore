@@ -62,3 +62,20 @@ models/
 backend/models/
 artifacts/
 docs/research/
+
+# Android / Capacitor native build output (never commit keys or binaries)
+android/.gradle/
+android/local.properties
+android/build/
+android/app/build/
+android/app/release/
+android/.cxx/
+android/capacitor-cordova-android-plugins/build/
+android/app/src/main/assets/public/
+android/app/src/main/assets/engine/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+*.apk
+*.aab
+*.jks
+*.keystore
