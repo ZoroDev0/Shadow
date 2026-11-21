@@ -140,7 +140,23 @@ export const CASES:SelfTestCase[] = [
     { id: 'R10', label: 'Official SBI password reset guidance', expect: 'safe',
       text: 'Your SBI password expired. Reset via sbi.co.in. Do not share OTP.' },
     { id: 'R11', label: 'Negation is not allowed to suppress a real OTP ask', expect: 'scam',
-      text: 'Never share your OTP. Now send me the OTP 4821 immediately.' }
+      text: 'Never share your OTP. Now send me the OTP 4821 immediately.' },
+    { id: 'R12', label: 'Genuine delivery hand-over: OTP given in person at the doorstep', expect: 'safe',
+      text: 'Delhivery: your shipment 4421 will be delivered today between 10am-1pm. Share the OTP at the doorstep only with the delivery agent.' },
+    { id: 'R13', label: 'FASTag recharge demand on a .online lookalike domain', expect: 'scam',
+      text: 'FASTag: your tag is blacklisted for low balance. Recharge Rs 250 at fastag-kyc.online/pay or your vehicle will be stopped at the toll.' },
+    { id: 'R14', label: 'Benefit instalment held back until a verification fee is paid', expect: 'scam',
+      text: 'PM-Kisan: your installment is on hold. Pay Rs 199 verification fee at pmkisan-benefit.top to release Rs 6000.' },
+    { id: 'R15', label: 'Approved loan with a processing fee pushed to WhatsApp', expect: 'scam',
+      text: 'Aapka loan approve ho gaya bina documents ke. Processing fee Rs 1,499 turant bhejo WhatsApp 9090909090.' },
+    { id: 'R16', label: 'Work-from-home task with a joining deposit', expect: 'scam',
+      text: 'Work from home: earn Rs 3000 daily by reviewing hotels. Pay Rs 500 joining deposit. Telegram t.me/hotelwork' },
+    { id: 'R17', label: 'Webcam-recording blackmail with a crypto demand', expect: 'scam',
+      text: 'I have your webcam recording. Transfer Rs 15,000 in bitcoin or I upload it to your office group.' },
+    { id: 'R18', label: 'Parcel-contraband threat with a settlement demand', expect: 'scam',
+      text: 'Your parcel contains narcotics. Case registered. Pay Rs 25,000 settlement or police will come to your address.' },
+    { id: 'R19', label: 'Delivery context does not excuse an OTP sent to a phone number', expect: 'scam',
+      text: 'Delhivery parcel is held. Share the OTP on call 9876500011 to release the shipment.' }
   ];
 export function runSelfTests(){const rows:any[]=[];const failures:any[]=[];let passed=0;for(const c of CASES){let got:any="error",sc=-1,err="";try{const r=detectLocal(c.text);got=r.verdict;sc=r.score}catch(e:any){err=e?.message||String(e)}const ok=got===c.expect;if(ok)passed++;else failures.push({case:c.id,label:c.label,expected:c.expect,got,score:sc,error:err});rows.push({case:c.id,expect:c.expect,got,score:sc,result:ok?"PASS":"FAIL",note:ok?"":(err||c.label)})}const total=CASES.length;const accuracy=Math.round(passed/total*1000)/10;const summary={total,passed,accuracy,failures};if(typeof console!=="undefined"){try{console.table(rows)}catch{}console.log(`[ScamShield] self-tests: ${passed}/${total} passed (${accuracy}%)`)}return summary}
 if(typeof window!=="undefined")(window as any).runSelfTests=runSelfTests;else(globalThis as any).runSelfTests=runSelfTests;

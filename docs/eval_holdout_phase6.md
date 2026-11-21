@@ -1,6 +1,6 @@
 # Phase 6 honest re-test
 
-Both engines were run through the frozen 66-case self-test suite (not repeated
+Both engines were run through the then-current 66-case self-test suite (not repeated
 here), the 40-message stored development set, and a 30-message holdout written
 for this phase. **None of this is independent evidence.** Every message was
 written by the same agent that read `rules.json`, so these are rule-coverage
@@ -64,6 +64,10 @@ regression cases, which the suite now covers.
 | G20 | safe | safe / 3 | safe / 3 | OK |
 ## 2. Holdout — 30 new messages (run once)
 
+> **Phase 7 note:** these 30 messages have since been used as a development set
+> when writing the Phase 7 rules, so they are no longer a holdout. See
+> `docs/eval_holdout_phase7.md` for the current one-shot set.
+
 Source: `docs/eval_holdout_phase6_messages.json`. Written after the rules were
 frozen, executed once, and **not tuned on afterwards**. Expected labels are the
 author's own; a disagreement is a genuine data point, not a bug report.
@@ -126,6 +130,6 @@ run — that would turn the holdout into development data.
 ## 3. TS vs Python
 
 Zero differences in verdict or score across the 40 development messages and the
-30 holdout messages, plus 81/81 golden parity and the shared normalisation
+30 holdout messages, plus 89/89 golden parity and the shared normalisation
 fixture contract (`src/detection/normalizeFixtures.json`, asserted by both
 `src/detection/normalize.test.ts` and `backend/test_parity.py`).

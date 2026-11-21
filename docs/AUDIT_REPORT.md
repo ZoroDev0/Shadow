@@ -7,7 +7,7 @@ Audit date: 2026-11-21
 1. Overall PRD completion: **68%**.
 2. Demo-readiness: **82%**; the core paste/check/result flow, examples, bilingual UI, history, and Test Lab are working and build/test-verified.
 3. Production-readiness: **35%**; no deployment, PWA, real SMS/notification integration, extension, security operations, or independent evaluation.
-4. Biggest strength: a real, explainable, on-device rule engine plus a Python parity mirror and 66 project-written self-test cases.
+4. Biggest strength: a real, explainable, on-device rule engine plus a Python parity mirror and 74 project-written self-test cases.
 5. Biggest gap: it does not read real SMS, notifications, screens, phone links, or clipboard continuously.
 6. Biggest false-security risk: Protect is explicitly UI simulation; the app does not activate device protections.
 7. Screenshot upload is real file selection plus preview UI only; there is no OCR or text analysis.
@@ -32,7 +32,7 @@ Audit date: 2026-11-21
 | Hinglish and Devanagari patterns | **Partial** | `rules.json`, `engine.ts`, `backend/app.py` | Present but weak for spaced/Unicode/obfuscated wording; fresh 30-case probe found misses. |
 | URL lookalike/homoglyph/punycode/shortener/bad TLD | **Done** | `src/detection/engine.ts:290-380`; `src/detection/rules.json` | Static link analysis is implemented and 60 India URL eval is 30/30 phishing + 30/30 official with 0/0. |
 | Negation handling for genuine OTPs | **Done** | `NEG_SHARE_RE`, `credNegated`, delivery/no-action; `G01-G14` suite | Negation is regex-local and can be bypassed or misfire. |
-| Genuine bank OTP/delivery/bill reminders stay SAFE | **Done** | 66 project-written suite; engine test passed | The claim is only on project-written cases. |
+| Genuine bank OTP/delivery/bill reminders stay SAFE | **Done** | 74 project-written suite; engine test passed | The claim is only on project-written cases. |
 | `analyze(input)` contract | **Done** | `src/detection/analyze.ts`; `src/detection/engine.ts:894-927`; `backend/app.py:832-833` | TS contract validation exists; backend Pydantic result shape test passed. |
 | `VITE_API_BASE` empty = on-device | **Done** | `src/detection/engine.ts:896-927`; `src/legacy.ts:1244-1276` | Static network call evidence says no fetch if API base is empty. DevTools Network check is NOT VERIFIED. |
 | API configured = POST `/analyze`, 8-second timeout, fallback | **Done** | `src/detection/engine.ts:897-927`; live `curl` backend test | Timeout/response validation/fallback code exists; fallback behavior under real Wi-Fi loss is NOT VERIFIED. |
@@ -46,7 +46,7 @@ Audit date: 2026-11-21
 | 3 Protect simulations | **Done / Simulated** | `src/legacy.ts:showSmsBanner`, `showDeskToast`, `showScamOv` | Simulation is explicitly labelled in UI and docs. |
 | Onboarding | **Done** | `src/legacy.ts:initLegacy`, localStorage onboarding state | Browser first-launch behavior NOT VERIFIED. |
 | Demo story | **Done** | `src/legacy.ts:openDemo/demoGo` | UI implementation exists; real presentation is NOT VERIFIED. |
-| Test Lab | **Done** | `src/legacy.ts:runLab`, `src/detection/selfTests.ts` | 66 project-written cases: 43 scam, 7 suspicious, 16 safe. Browser rendering NOT VERIFIED. |
+| Test Lab | **Done** | `src/legacy.ts:runLab`, `src/detection/selfTests.ts` | 74 project-written cases: 50 scam, 7 suspicious, 17 safe. Browser rendering NOT VERIFIED. |
 | Screenshot upload / OCR | **Simulated / UI-only** | `src/legacy.ts:1793-1802`: `createObjectURL`, preview, `soon()` | No OCR/library/network image analysis. |
 | 48px targets / text-size settings | **Partial** | `src/styles/legacy.css`, `applyTextSize()` | CSS inspection suggests controls, but WCAG and 48px audit NOT VERIFIED by browser. |
 | WCAG AA | **Not verified** | `docs/MANUAL_QA.md` lists human-only checks | Static color/label evidence only. Automated browser/a11y tools were not run. |
@@ -140,7 +140,7 @@ Technical paths and estimates:
 | Settings | English/Hindi, light/dark/auto, text size, reduce motion | **Real UI**, browser visual QA NOT VERIFIED |
 | Demo story | 3-step Priya story and CTA | **Real UI**, not real incident evidence |
 | Onboarding | First-run 3-card sheet | **Real UI**, first-launch behavior NOT VERIFIED |
-| Test Lab | Runs project-written cases locally | **Real static suite**, 66 cases in code |
+| Test Lab | Runs project-written cases locally | **Real static suite**, 74 cases in code |
 | Backend | `/health`, `/analyze`, local rules, bounded ML gate | **Real local backend** |
 
 Prioritised additions:
@@ -171,7 +171,7 @@ Link points are negative for official domains and positive for IPs, punycode, br
 
 Weaknesses:
 
-- A 66/66 project suite is not independent accuracy.
+- A fully passing project-written suite is not independent accuracy.
 - Spaces, Unicode digits, English letter spacing, emoji separators and novel paraphrases are weak.
 - Negation is sentence-local and can suppress a real ask if a warning word appears.
 - Official-domain allowlisting is useful but can be embedded in a real-looking subdomain and is checked carefully.
@@ -229,9 +229,9 @@ Probe commands:
 
 | Suite | Size / coverage | Authorship / overfit risk |
 |---|---|---|
-| TypeScript self-tests | 66: 43 scam, 7 suspicious, 16 safe | Written for this repo: 55 original cases plus 11 audit-gap regressions `R01`-`R11` in `src/detection/selfTests.ts` (`U01`-`U07` are 7 general-regression cases). High overfit risk. |
-| Vitest engine suite | The 66-case suite plus 15 named extra cases | Project-written and no external samples. |
-| Golden parity set | 81 entries: 66 self-tests plus 15 extra cases | `backend/golden.json` is a TS/Python parity artifact, not independent truth. |
+| TypeScript self-tests | 74: 50 scam, 7 suspicious, 17 safe | Written for this repo: 55 original cases, 11 audit-gap regressions `R01`-`R11`, and 8 Phase 7 holdout regressions `R12`-`R19` in `src/detection/selfTests.ts` (`U01`-`U07` are 7 general-regression cases). High overfit risk. |
+| Vitest engine suite | The 74-case suite plus 15 named extra cases | Project-written and no external samples. |
+| Golden parity set | 89 entries: 74 self-tests plus 15 extra cases | `backend/golden.json` is a TS/Python parity artifact, not independent truth. |
 | `scoreCompare.test.ts` | 48 cases embedded in the legacy `index_9.html` engine plus 15 extra cases | Compares the old standalone HTML engine against the modular TS engine; currently no verdict or score differences. No external truth. |
 | India URL eval | 60 written URL strings: 30 lookalikes and 30 official | Rules-only, project-authored, no live DNS or real site check; 100% on this set is expected. |
 | Unseen eval | 40 messages: 20 scam-like and 20 genuine | Authored in the hardening pass, explicitly not independent. Existing report says no misses/FP/differences. |
@@ -373,7 +373,7 @@ This does **NOT** verify browser behavior. DevTools Network-tab verification is 
 - MIT licence exists only in current ScamShield repo.
 - Tag: `v1.0-hackathon`.
 - README accurately states rule-based/no ML/no SMS/no OCR, but stale/unsupported claims remain:
-  - The earlier audit incorrectly said 48/63. Command-count verification shows 66 project-written self-tests (55 original plus 11 audit-gap regressions) and 81 golden parity entries (66 plus 15 extra cases). The `48` in `scoreCompare.test.ts` is the number of cases embedded in the legacy `index_9.html`, not the suite size.
+  - The earlier audit incorrectly said 48/63. Command-count verification shows 74 project-written self-tests (55 original plus 11 audit-gap regressions plus 8 Phase 7 regressions) and 89 golden parity entries (74 plus 15 extra cases). The `48` in `scoreCompare.test.ts` is the number of cases embedded in the legacy `index_9.html`, not the suite size.
   - README/backend use project-written pass counts only; they must not be read as independent accuracy.
   - ~~`docs/EXTENSION_HANDOFF.md` states wildcard CORS even though code uses explicit origin configuration.~~ Fixed in Phase 6: the handoff now documents explicit `ALLOWED_ORIGINS` plus the localhost/`chrome-extension` regex, with `allow_credentials=False`.
 
@@ -386,7 +386,7 @@ This does **NOT** verify browser behavior. DevTools Network-tab verification is 
 | Live public backend unavailable | Run local; set `VITE_API_BASE` blank and demo on-device. |
 | Browser first run/onboarding hides screen | Pre-open app, clear localStorage before recording, keep backup screen recording. |
 | Hindi/English UI clipped on projector or phone | Use Extra Large text and desktop width; browser visual QA. |
-| Judge assumes 66/66 means independent | Say "66 project-written cases", never "66/66 independent". |
+| Judge assumes a full pass means independent | Say "project-written cases", never "independent accuracy". |
 | Judge assumes real SMS protection | Demo Protect and say "simulation" every time. |
 | False positive on genuine urgent message | Use HDFC OTP/Amazon/Swiggy examples and explain rule limitations. |
 | Obfuscated scam bypasses engine | Do not claim perfect detection; show only known realistic cases. |
@@ -398,7 +398,7 @@ This does **NOT** verify browser behavior. DevTools Network-tab verification is 
 
 **Must do — 6-10 h**
 
-1. ~~Reconcile stale 48/55 and 63/70 references~~ Done: docs now state 66 project-written cases and 81 golden entries.
+1. ~~Reconcile stale 48/55 and 63/70 references~~ Done: docs now state 74 project-written cases and 89 golden entries.
 2. Add exact independent 60-message evaluation kit result or remove any independent-accuracy implication. 8 h.
 3. Fix obfuscated spaced brand/OTP, QR collect and Unicode digit normalization. 4-8 h.
 4. Do real browser smoke check for first run, paste, examples, history, Protect labels and Network. 1-2 h.

@@ -81,6 +81,12 @@
           "rank": 0
         },
         {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
+        {
           "icon": "key",
           "text_en": "It pushes a “KYC/Aadhaar update” — banks never run KYC updates through message links.",
           "text_hi": "यह “KYC/आधार अपडेट” की बात करता है — बैंक कभी संदेश-लिंक से KYC अपडेट नहीं करवाते।",
@@ -774,6 +780,12 @@
           "rank": 0
         },
         {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
+        {
           "icon": "key",
           "text_en": "It pushes a “KYC/Aadhaar update” — banks never run KYC updates through message links.",
           "text_hi": "यह “KYC/आधार अपडेट” की बात करता है — बैंक कभी संदेश-लिंक से KYC अपडेट नहीं करवाते।",
@@ -1016,6 +1028,12 @@
           "rank": 0
         },
         {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
+        {
           "icon": "key",
           "text_en": "It pushes a “KYC/Aadhaar update” — banks never run KYC updates through message links.",
           "text_hi": "यह “KYC/आधार अपडेट” की बात करता है — बैंक कभी संदेश-लिंक से KYC अपडेट नहीं करवाते।",
@@ -1156,6 +1174,12 @@
           "rank": 0
         },
         {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
+        {
           "icon": "bank",
           "text_en": "It speaks in the name of a bank or government body (“SBI”) — scammers hide behind big names.",
           "text_hi": "यह किसी बैंक या सरकारी विभाग (“SBI”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
@@ -1213,12 +1237,18 @@
     "text": "Dear ICICI customer, your KYC is pending. Complete KYC at 1c1cibank-kyc-update.com now",
     "result": {
       "verdict": "scam",
-      "score": 98,
+      "score": 100,
       "reasons": [
         {
           "icon": "link",
           "text_en": "“1c1cibank-kyc-update.com” uses look-alike letters to imitate the real website “icicibank.com”.",
           "text_hi": "“1c1cibank-kyc-update.com” एक जैसे दिखने वाले अक्षरों से असली वेबसाइट “icicibank.com” की नकल है।",
+          "rank": 0
+        },
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
           "rank": 0
         },
         {
@@ -1343,6 +1373,12 @@
       "verdict": "scam",
       "score": 100,
       "reasons": [
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
         {
           "icon": "link",
           "text_en": "A traffic e-challan that avoids the official government portal — real challans are only paid at echallan.parivahan.gov.in.",
@@ -1661,12 +1697,18 @@
     "text": "Congratulations! Your loan of Rs 2 lakh is approved. No documents needed. Pay Rs 1500 processing fee on 9876501234 today!",
     "result": {
       "verdict": "scam",
-      "score": 70,
+      "score": 74,
       "reasons": [
         {
           "icon": "siren",
           "text_en": "It promises instant approval with no documents, then pushes an APK or demands a processing fee. Real lenders do not collect fees this way.",
           "text_hi": "यह बिना दस्तावेज़ तुरंत लोन मंज़ूर होने का वादा करके APK या प्रोसेसिंग फीस माँगता है। असली लोनदाता ऐसे शुल्क नहीं लेते।",
+          "rank": 0
+        },
+        {
+          "icon": "phone",
+          "text_en": "A “approved” loan that first asks for a processing or advance fee through a private number is an advance-fee loan scam. Real lenders deduct fees from the disbursal.",
+          "text_hi": "“मंज़ूर” लोन पहले निजी नंबर पर प्रोसेसिंग या एडवांस फीस मांगता है — यह एडवांस-फीस लोन घोटाला है। असली लोनदाता फीस वितरण में से काटते हैं।",
           "rank": 0
         }
       ],
@@ -3735,6 +3777,445 @@
     }
   },
   {
+    "id": "R12",
+    "label": "Genuine delivery hand-over: OTP given in person at the doorstep",
+    "expect": "safe",
+    "text": "Delhivery: your shipment 4421 will be delivered today between 10am-1pm. Share the OTP at the doorstep only with the delivery agent.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "checkCircle",
+          "text_en": "This is a routine delivery update about your own order.",
+          "text_hi": "यह आपके ही ऑर्डर की आम डिलीवरी सूचना है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "No threatening or panic-creating language.",
+          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "Nothing here pressures you to act quickly.",
+          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share ScamShield with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए ScamShield उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": []
+    }
+  },
+  {
+    "id": "R13",
+    "label": "FASTag recharge demand on a .online lookalike domain",
+    "expect": "scam",
+    "text": "FASTag: your tag is blacklisted for low balance. Recharge Rs 250 at fastag-kyc.online/pay or your vehicle will be stopped at the toll.",
+    "result": {
+      "verdict": "scam",
+      "score": 70,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
+        {
+          "icon": "link",
+          "text_en": "The link ends in “.online” — a cheap domain type that scammers often use.",
+          "text_hi": "लिंक का अंत “.online” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।",
+          "rank": 4
+        }
+      ],
+      "links": [
+        {
+          "url": "fastag-kyc.online/pay",
+          "verdict": "suspicious",
+          "reason": {
+            "en": "The link ends in “.online” — a cheap domain type that scammers often use.",
+            "hi": "लिंक का अंत “.online” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।",
+            "text_en": "The link ends in “.online” — a cheap domain type that scammers often use.",
+            "text_hi": "लिंक का अंत “.online” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "fastag-kyc.online"
+      ]
+    }
+  },
+  {
+    "id": "R14",
+    "label": "Benefit instalment held back until a verification fee is paid",
+    "expect": "scam",
+    "text": "PM-Kisan: your installment is on hold. Pay Rs 199 verification fee at pmkisan-benefit.top to release Rs 6000.",
+    "result": {
+      "verdict": "scam",
+      "score": 98,
+      "reasons": [
+        {
+          "icon": "key",
+          "text_en": "Money or a benefit is being held back until you pay a “verification”, “processing” or “release” fee. Nothing legitimate releases your own money that way.",
+          "text_hi": "आपका पैसा या लाभ “वेरिफिकेशन”, “प्रोसेसिंग” या “रिलीज़” फीस देने तक रोका जा रहा है। कोई भी असली संस्था आपका पैसा इस तरह नहीं रोकती।",
+          "rank": 0
+        },
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
+        {
+          "icon": "link",
+          "text_en": "The link ends in “.top” — a cheap domain type that scammers often use.",
+          "text_hi": "लिंक का अंत “.top” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।",
+          "rank": 4
+        }
+      ],
+      "links": [
+        {
+          "url": "pmkisan-benefit.top",
+          "verdict": "suspicious",
+          "reason": {
+            "en": "The link ends in “.top” — a cheap domain type that scammers often use.",
+            "hi": "लिंक का अंत “.top” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।",
+            "text_en": "The link ends in “.top” — a cheap domain type that scammers often use.",
+            "text_hi": "लिंक का अंत “.top” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "pmkisan-benefit.top"
+      ]
+    }
+  },
+  {
+    "id": "R15",
+    "label": "Approved loan with a processing fee pushed to WhatsApp",
+    "expect": "scam",
+    "text": "Aapka loan approve ho gaya bina documents ke. Processing fee Rs 1,499 turant bhejo WhatsApp 9090909090.",
+    "result": {
+      "verdict": "scam",
+      "score": 84,
+      "reasons": [
+        {
+          "icon": "phone",
+          "text_en": "A “approved” loan that first asks for a processing or advance fee through a private number is an advance-fee loan scam. Real lenders deduct fees from the disbursal.",
+          "text_hi": "“मंज़ूर” लोन पहले निजी नंबर पर प्रोसेसिंग या एडवांस फीस मांगता है — यह एडवांस-फीस लोन घोटाला है। असली लोनदाता फीस वितरण में से काटते हैं।",
+          "rank": 0
+        },
+        {
+          "icon": "clock",
+          "text_en": "It creates panic with words like “turant” so you act without thinking.",
+          "text_hi": "यह “turant” जैसे शब्दों से घबराहट पैदा करता है ताकि आप बिना सोचे-समझे कोई कदम उठाएँ।",
+          "rank": 5
+        },
+        {
+          "icon": "phone",
+          "text_en": "It pushes you to call or message an unknown number — real notices come through official channels, not private numbers.",
+          "text_hi": "यह आपसे किसी अनजान नंबर पर कॉल या मैसेज कराना चाहता है — असली सूचनाएँ आधिकारिक रास्ते से आती हैं, निजी नंबरों से नहीं।",
+          "rank": 9
+        },
+        {
+          "icon": "phone",
+          "text_en": "First it creates panic, then it gives you a personal number to call — that combination is the scammer’s script.",
+          "text_hi": "पहले घबराहट पैदा करता है, फिर कॉल के लिए निजी नंबर देता है — ठग की कहानी इसी क्रम में चलती है।",
+          "rank": 10
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "turant",
+        "9090909090"
+      ]
+    }
+  },
+  {
+    "id": "R16",
+    "label": "Work-from-home task with a joining deposit",
+    "expect": "scam",
+    "text": "Work from home: earn Rs 3000 daily by reviewing hotels. Pay Rs 500 joining deposit. Telegram t.me/hotelwork",
+    "result": {
+      "verdict": "scam",
+      "score": 80,
+      "reasons": [
+        {
+          "icon": "phone",
+          "text_en": "It demands a registration fee or deposit for a task or job and moves you to a private contact — that is a task-scam funnel.",
+          "text_hi": "यह टास्क या नौकरी के नाम पर रजिस्ट्रेशन फीस/डिपॉज़िट मांगकर निजी संपर्क पर ले जाता है — यह टास्क-स्कैम का रास्ता है।",
+          "rank": 0
+        },
+        {
+          "icon": "gift",
+          "text_en": "It offers easy money — a part-time “liking videos” / “typing work” job. This is how task scams begin.",
+          "text_hi": "यह आसान पैसे का लालच देता है — “वीडियो लाइक करने” / “टाइपिंग वर्क” वाली पार्ट-टाइम नौकरी। टास्क-घोटाला यहीं से शुरू होता है।",
+          "rank": 7
+        },
+        {
+          "icon": "phone",
+          "text_en": "It moves the chat to WhatsApp or Telegram — the favourite corner of scam gangs.",
+          "text_hi": "यह बातचीत को WhatsApp या Telegram पर ले जाता है — ठगों का पसंदीदा ठिकाना।",
+          "rank": 9
+        }
+      ],
+      "links": [
+        {
+          "url": "t.me/hotelwork",
+          "verdict": "safe",
+          "reason": {
+            "en": "An ordinary website link. Nothing obviously wrong, but stay alert if the message felt scary.",
+            "hi": "सामान्य वेबसाइट लिंक। कुछ भी गलत नहीं दिखता — संदेश डरावना लगे तो सावधान रहें।",
+            "text_en": "An ordinary website link. Nothing obviously wrong, but stay alert if the message felt scary.",
+            "text_hi": "सामान्य वेबसाइट लिंक। कुछ भी गलत नहीं दिखता — संदेश डरावना लगे तो सावधान रहें।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "Work from home",
+        "earn Rs"
+      ]
+    }
+  },
+  {
+    "id": "R17",
+    "label": "Webcam-recording blackmail with a crypto demand",
+    "expect": "scam",
+    "text": "I have your webcam recording. Transfer Rs 15,000 in bitcoin or I upload it to your office group.",
+    "result": {
+      "verdict": "scam",
+      "score": 70,
+      "reasons": [
+        {
+          "icon": "chat",
+          "text_en": "This is blackmail: it claims to have a private video or photos and demands money. Do not pay, do not reply — report it to the police or at cybercrime.gov.in.",
+          "text_hi": "यह ब्लैकमेल है: निजी वीडियो या फोटो होने का दावा करके पैसे मांगे जा रहे हैं। न भुगतान करें, न जवाब दें — पुलिस या cybercrime.gov.in पर रिपोर्ट करें।",
+          "rank": 0
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": []
+    }
+  },
+  {
+    "id": "R18",
+    "label": "Parcel-contraband threat with a settlement demand",
+    "expect": "scam",
+    "text": "Your parcel contains narcotics. Case registered. Pay Rs 25,000 settlement or police will come to your address.",
+    "result": {
+      "verdict": "scam",
+      "score": 75,
+      "reasons": [
+        {
+          "icon": "siren",
+          "text_en": "It claims your parcel holds narcotics or illegal goods and asks for a “settlement”. Customs and police never settle a case over a message.",
+          "text_hi": "यह दावा करता है कि आपके पार्सल में नारकोटिक्स या अवैध सामान है और “सेटलमेंट” माँगता है। कस्टम्स और पुलिस कभी संदेश से केस नहीं निपटाते।",
+          "rank": 0
+        },
+        {
+          "icon": "siren",
+          "text_en": "It threatens you with arrest, legal action, seizure or SIM blocking — real authorities never warn like this over SMS.",
+          "text_hi": "इसमें गिरफ़्तारी, कानूनी कार्रवाई, ज़ब्ती या SIM बंद करने की धमकी है — असली सरकारी अधिकारी कभी SMS में ऐसी चेतावनी नहीं देते।",
+          "rank": 2
+        },
+        {
+          "icon": "bank",
+          "text_en": "It speaks in the name of a bank or government body (“NARCOTICS”) — scammers hide behind big names.",
+          "text_hi": "यह किसी बैंक या सरकारी विभाग (“NARCOTICS”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
+          "rank": 3
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "narcotics",
+        "police"
+      ]
+    }
+  },
+  {
+    "id": "R19",
+    "label": "Delivery context does not excuse an OTP sent to a phone number",
+    "expect": "scam",
+    "text": "Delhivery parcel is held. Share the OTP on call 9876500011 to release the shipment.",
+    "result": {
+      "verdict": "scam",
+      "score": 96,
+      "reasons": [
+        {
+          "icon": "key",
+          "text_en": "It asks you to share an OTP, PIN, CVV or UPI PIN — no real bank, app or government office will ever ask for these.",
+          "text_hi": "यह आपसे OTP, PIN, CVV या UPI PIN मांगता है — कोई असली बैंक, ऐप या सरकारी दफ़्तर कभी नहीं मांगते।",
+          "rank": 0
+        },
+        {
+          "icon": "link",
+          "text_en": "It asks for a customs or courier fee through an unofficial payment link or callback — legitimate deliveries do not use a separate fee funnel.",
+          "text_hi": "यह गैर-आधिकारिक भुगतान लिंक या कॉल के जरिए कूरियर/कस्टम्स शुल्क माँगता है — असली डिलीवरी अलग से इस तरह शुल्क नहीं माँगती।",
+          "rank": 0
+        },
+        {
+          "icon": "bank",
+          "text_en": "It references “DELHIVERY” — scammers often imitate well-known companies.",
+          "text_hi": "इसमें “DELHIVERY” का नाम है — ठग अक्सर मशहूर कंपनियों का नाटक करते हैं।",
+          "rank": 8
+        },
+        {
+          "icon": "phone",
+          "text_en": "It pushes you to call or message an unknown number — real notices come through official channels, not private numbers.",
+          "text_hi": "यह आपसे किसी अनजान नंबर पर कॉल या मैसेज कराना चाहता है — असली सूचनाएँ आधिकारिक रास्ते से आती हैं, निजी नंबरों से नहीं।",
+          "rank": 9
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "Share the OTP",
+        "9876500011"
+      ]
+    }
+  },
+  {
     "id": "X1",
     "label": "extra",
     "expect": "suspicious",
@@ -4184,8 +4665,14 @@
     "text": "KYC update karo abhi at bank-kyc.top",
     "result": {
       "verdict": "scam",
-      "score": 67,
+      "score": 97,
       "reasons": [
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
         {
           "icon": "key",
           "text_en": "It pushes a “KYC/Aadhaar update” — banks never run KYC updates through message links.",

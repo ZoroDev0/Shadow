@@ -5,8 +5,14 @@
     "text": "FASTag KYC is expired. Submit Aadhaar and pay Rs 120 to reactivate at fastag-update.top",
     "ts": {
       "verdict": "scam",
-      "score": 79,
+      "score": 100,
       "reasons": [
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
         {
           "icon": "key",
           "text_en": "It asks for KYC, Aadhaar, password or card/bank details — a classic phishing hook.",
@@ -123,12 +129,18 @@
     "text": "PM - किसान eKYC pending. Verify now: pmkisan-benefit.click and send OTP",
     "ts": {
       "verdict": "scam",
-      "score": 70,
+      "score": 98,
       "reasons": [
         {
           "icon": "key",
           "text_en": "It asks you to share an OTP, PIN, CVV or UPI PIN — no real bank, app or government office will ever ask for these.",
           "text_hi": "यह आपसे OTP, PIN, CVV या UPI PIN मांगता है — कोई असली बैंक, ऐप या सरकारी दफ़्तर कभी नहीं मांगते।",
+          "rank": 0
+        },
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
           "rank": 0
         },
         {
@@ -776,6 +788,12 @@
           "rank": 0
         },
         {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
+        {
           "icon": "bank",
           "text_en": "It speaks in the name of a bank or government body (“HDFC”) — scammers hide behind big names.",
           "text_hi": "यह किसी बैंक या सरकारी विभाग (“HDFC”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
@@ -966,8 +984,14 @@
     "text": "Your vehicle challan due. Settle now at challan-mumbai-payment.click or press 9 to officer.",
     "ts": {
       "verdict": "scam",
-      "score": 96,
+      "score": 100,
       "reasons": [
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
         {
           "icon": "link",
           "text_en": "A traffic e-challan that avoids the official government portal — real challans are only paid at echallan.parivahan.gov.in.",

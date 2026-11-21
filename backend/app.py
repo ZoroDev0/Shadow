@@ -94,6 +94,25 @@ RE_DA_COERCE = rx("digitalArrestCoerce")
 RE_COURIER_FEE = re.compile(r"(?:(?:courier|parcel|shipment|customs)[^.!?\n]{0,80}(?:fee|duty|charge|payment|pay|held|seized)|(?:fee|duty|charge|payment|pay)[^.!?\n]{0,80}(?:courier|parcel|shipment|customs))", re.I)
 RE_SEX_MEDIA = rx("sextortionMedia")
 RE_SEX_DEMAND = rx("sextortionDemand")
+# Genuine delivery hand-over: a courier/order is named and the OTP is given in
+# person. A message that also carries a link or a phone number is not one.
+RE_ORDER_CONTEXT = re.compile(r"(order|parcel|shipment|package|consignment|awb|tracking|delhivery|bluedart|blue\s+dart|ekart|shiprocket|amazon|flipkart|myntra|swiggy|zomato|jiomart)", re.I)
+RE_HANDOVER_CONTEXT = re.compile(r"(delivery\s+(?:agent|boy|person|executive|partner)|at\s+the\s+(?:door|door\s?step)|door\s?step|in\s+person|while\s+(?:receiving|accepting)|upon\s+delivery|at\s+delivery)", re.I)
+RE_MOBILE_ANY = re.compile(r"(?:\+?91[\s-]?)?\b[6-9]\d{4}[\s-]?\d{5}\b")
+# Upfront "fee to release money/benefit".
+RE_RELEASE_FEE = re.compile(r"(?:(?:verification|processing|release|clearance|activation|service|registration)\s+(?:fee|charge|amount)|pay\s+(?:rs\.?|₹|inr)\s*[\d,]+[^.!?\n]{0,40}\b(?:fee|charge)\b)", re.I)
+RE_RELEASE_TARGET = re.compile(r"(release|instal?ment|subsidy|benefit|claim|refund|prize|amount|payment|policy)", re.I)
+RE_NO_FEE = re.compile(r"(no\s+fee|never\s+(?:ask|charge)|free\s+of\s+cost|without\s+(?:any\s+)?(?:fee|charge)|koi\s+(?:fees?|charge|paise)\s+nahi|कोई\s+(?:शुल्क|फीस)\s+नहीं)", re.I)
+# Approved loan + processing/advance fee via a private contact.
+RE_LOAN_APPROVED = re.compile(r"\bloan\b[^.!?\n]{0,45}approv(?:e|ed|al)|approv(?:e|ed|al)[^.!?\n]{0,20}\bloan\b", re.I)
+RE_LOAN_FEE = re.compile(r"(processing\s+(?:fee|charge)|advance\s+(?:fee|payment)|(?:pay|bhejo|transfer)[^.!?\n]{0,30}(?:fee|charge|rs\.?\s*\d|₹\s*\d))", re.I)
+# Toll/tax/benefit brand + payment on a cheap TLD.
+RE_BENEFIT_BRAND = re.compile(r"(fastag|toll|challan|kyc|aadhaar|uidai|income\s*tax|\bitr\b|refund|subsidy|instal?ment|pension|kisan|ration|scholarship|benefit)", re.I)
+RE_PAY_DEMAND = re.compile(r"(recharge|pay|payment|fee|charge|clearance|update|verify)", re.I)
+# Parcel-contraband threat plus a payment demand.
+RE_CONTRABAND = re.compile(r"(narcotics|drugs?|contraband|banned\s+(?:item|substance|goods)|illegal\s+(?:item|goods|substance)|heroin|cocaine|ganja)", re.I)
+RE_PARCEL = re.compile(r"(parcel|package|shipment|courier|consignment|customs)", re.I)
+RE_SETTLE_DEMAND = re.compile(r"(settlement|\bpay\b|fine|penalty)", re.I)
 RE_PRESS = re.compile(r"(press\s*(?:\d|one|two|nine|ek)\b|दबाएं|दबाओ)", re.I)
 RE_CALL_WORD = re.compile(r"(\bcall\b|\bwhatsapp\b|whats\s?app|\bmsg\b|\bmessage\b|\bcontact\b|\breach\b|\bdial\b|कॉल|संपर्क)", re.I)
 RE_MOBILE = re.compile(r"(?:\+?91[\s-]?)?\b[6-9]\d{4}[\s-]?\d{5}\b")
@@ -355,7 +374,11 @@ def detect_local(raw_text: str) -> dict[str, Any]:
 
     cred_fired = False
     cred_negated = False
+    delivery_handover = bool(RE_ORDER_CONTEXT.search(text) and RE_HANDOVER_CONTEXT.search(text)
+                             and not urls and not RE_MOBILE_ANY.search(text))
     for match in RE_CRED_HARD.finditer(text):
+        if delivery_handover:
+            continue
         if negated_before(text, match.start(), 55):
             cred_negated = True
             continue
@@ -366,6 +389,8 @@ def detect_local(raw_text: str) -> dict[str, Any]:
         cred_fired = True
         highlights.append(match.group(0)[:40])
     for match in RE_CRED_HARD_HI.finditer(text):
+        if delivery_handover:
+            continue
         after = text[match.end():match.end() + 14]
         if NEG_BETWEEN_RE.search(match.group(0)) or re.search(r"न\s*(?:करें|करना|देना|बताना|भेजना)|मत|नहीं|कभी", after):
             cred_negated = True
@@ -553,6 +578,26 @@ def detect_local(raw_text: str) -> dict[str, Any]:
         score += 30
         groups.add("lotteryDocs")
         add_risk(0, "key", "A prize you never entered, asking for Aadhaar, bank details or a “fee” to claim it — that is the trap.", "जिस इनाम में आपने हिस्सा ही नहीं लिया, उसे पाने के लिए आधार, बैंक विवरण या “फ़ीस” मांगी जा रही है — यही जाल है।")
+    if not RE_NO_FEE.search(low) and RE_RELEASE_FEE.search(low) and RE_RELEASE_TARGET.search(low):
+        hard = True
+        score += 30
+        groups.add("releaseFee")
+        add_risk(0, "key", "Money or a benefit is being held back until you pay a “verification”, “processing” or “release” fee. Nothing legitimate releases your own money that way.", "आपका पैसा या लाभ “वेरिफिकेशन”, “प्रोसेसिंग” या “रिलीज़” फीस देने तक रोका जा रहा है। कोई भी असली संस्था आपका पैसा इस तरह नहीं रोकती।")
+    if RE_LOAN_APPROVED.search(low) and RE_LOAN_FEE.search(low) and (has_mobile or contact_link):
+        hard = True
+        score += 30
+        groups.add("loanFee")
+        add_risk(0, "phone", "A “approved” loan that first asks for a processing or advance fee through a private number is an advance-fee loan scam. Real lenders deduct fees from the disbursal.", "“मंज़ूर” लोन पहले निजी नंबर पर प्रोसेसिंग या एडवांस फीस मांगता है — यह एडवांस-फीस लोन घोटाला है। असली लोनदाता फीस वितरण में से काटते हैं।")
+    if risky_link and RE_BENEFIT_BRAND.search(low) and RE_PAY_DEMAND.search(low):
+        hard = True
+        score += 30
+        groups.add("benefitLink")
+        add_risk(0, "link", "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.", "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।")
+    if RE_CONTRABAND.search(low) and RE_PARCEL.search(low) and RE_SETTLE_DEMAND.search(low):
+        hard = True
+        score += 30
+        groups.add("contraband")
+        add_risk(0, "siren", "It claims your parcel holds narcotics or illegal goods and asks for a “settlement”. Customs and police never settle a case over a message.", "यह दावा करता है कि आपके पार्सल में नारकोटिक्स या अवैध सामान है और “सेटलमेंट” माँगता है। कस्टम्स और पुलिस कभी संदेश से केस नहीं निपटाते।")
     if reward_fired and contact_link:
         hard = True
         score += 30

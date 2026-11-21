@@ -253,7 +253,47 @@ const RE_SEX_MEDIA = new RegExp(
   '(private\\s+(?:video|clip|photo|pic|picture|camera)|' +
   'your\\s+(?:private\\s+)?(?:video|photos?|pics?|clips?)|nudes?|' +
   'nude\\s+(?:pics?|photos?|video|clips?)|compromising\\s+(?:video|photo|pic)|hidden\\s+camera|' +
+  '(?:webcam|web\\s?cam)\\s+(?:recording|video|footage)|(?:recording|footage)\\s+of\\s+(?:you|your)|' +
   'निजी\\s+(?:वीडियो|तस्वीर|फोटो|क्लिप)|हमारे\\s+पास[^।.!?\\n]{0,40}(?:वीडियो|तस्वीरें|तस्वीर|फोटो))', 'i');
+
+/* Genuine delivery hand-over: a courier/order is named and the OTP is given
+   in person. A message that also carries a link or a phone number is not a
+   hand-over — that stays a credential ask. */
+const RE_ORDER_CONTEXT = new RegExp(
+  '(order|parcel|shipment|package|consignment|awb|tracking|delhivery|bluedart|blue\\s+dart|' +
+  'ekart|shiprocket|amazon|flipkart|myntra|swiggy|zomato|jiomart)', 'i');
+const RE_HANDOVER_CONTEXT = new RegExp(
+  '(delivery\\s+(?:agent|boy|person|executive|partner)|at\\s+the\\s+(?:door|door\\s?step)|' +
+  'door\\s?step|in\\s+person|while\\s+(?:receiving|accepting)|upon\\s+delivery|at\\s+delivery)', 'i');
+const RE_MOBILE_ANY = /(?:\+?91[\s-]?)?\b[6-9]\d{4}[\s-]?\d{5}\b/;
+
+/* HARD · an upfront "fee to release money/benefit". The fee is the product;
+   a genuine scheme never charges to release what it owes you. */
+const RE_RELEASE_FEE = new RegExp(
+  '(?:(?:verification|processing|release|clearance|activation|service|registration)\\s+(?:fee|charge|amount)|' +
+  'pay\\s+(?:rs\\.?|₹|inr)\\s*[\\d,]+[^.!?\\n]{0,40}\\b(?:fee|charge)\\b)', 'i');
+const RE_RELEASE_TARGET = new RegExp(
+  '(release|instal?ment|subsidy|benefit|claim|refund|prize|amount|payment|policy)', 'i');
+const RE_NO_FEE = new RegExp(
+  '(no\\s+fee|never\\s+(?:ask|charge)|free\\s+of\\s+cost|without\\s+(?:any\\s+)?(?:fee|charge)|' +
+  'koi\\s+(?:fees?|charge|paise)\\s+nahi|कोई\\s+(?:शुल्क|फीस)\\s+नहीं)', 'i');
+
+/* HARD · loan approval + a processing/advance fee pushed to a private contact. */
+const RE_LOAN_APPROVED = new RegExp('\\bloan\\b[^.!?\\n]{0,45}approv(?:e|ed|al)|approv(?:e|ed|al)[^.!?\\n]{0,20}\\bloan\\b', 'i');
+const RE_LOAN_FEE = new RegExp(
+  '(processing\\s+(?:fee|charge)|advance\\s+(?:fee|payment)|(?:pay|bhejo|transfer)[^.!?\\n]{0,30}(?:fee|charge|rs\\.?\\s*\\d|₹\\s*\\d))', 'i');
+
+/* HARD · a payment link on a cheap TLD attached to a toll/tax/benefit brand. */
+const RE_BENEFIT_BRAND = new RegExp(
+  '(fastag|toll|challan|kyc|aadhaar|uidai|income\\s*tax|\\bitr\\b|refund|subsidy|instal?ment|' +
+  'pension|kisan|ration|scholarship|benefit)', 'i');
+const RE_PAY_DEMAND = new RegExp('(recharge|pay|payment|fee|charge|clearance|update|verify)', 'i');
+
+/* HARD · parcel-contraband threat plus a payment demand. */
+const RE_CONTRABAND = new RegExp(
+  '(narcotics|drugs?|contraband|banned\\s+(?:item|substance|goods)|illegal\\s+(?:item|goods|substance)|heroin|cocaine|ganja)', 'i');
+const RE_PARCEL = new RegExp('(parcel|package|shipment|courier|consignment|customs)', 'i');
+const RE_SETTLE_DEMAND = new RegExp('(settlement|\\bpay\\b|fine|penalty)', 'i');
 const RE_SEX_DEMAND = new RegExp(
   '(\\bpay\\b|\\bmoney\\b|\\brs\\.?\\b|₹|\\bupi\\b|bitcoin|\\btransfer\\b|\\bdeposit\\b|blackmail|' +
   'वरना|warna|पैसे|रुपये|देना\\s+होगा|सबको\\s+भेज)', 'i');
@@ -577,8 +617,13 @@ export function detectLocal(rawText) {
   /* ---------- 2 · Credential requests (negation-aware) ---------- */
   let credFired = false, credNegated = false;
   let m;
+  /* "Share the OTP with the delivery agent at the doorstep" is a hand-over,
+     not a request to send a secret anywhere. Links and numbers cancel it. */
+  const deliveryHandover = RE_ORDER_CONTEXT.test(text) && RE_HANDOVER_CONTEXT.test(text)
+    && urls.length === 0 && !RE_MOBILE_ANY.test(text);
   RE_CRED_HARD.lastIndex = 0;
   while ((m = RE_CRED_HARD.exec(text)) !== null) {
+    if (deliveryHandover) continue;
     if (negatedBefore(text, m.index, 55)) { credNegated = true; continue; }
     /* "Enter this OTP in the app" next to a delivered code = instruction
        to yourself, not a scammer asking — skip when the verb is a
@@ -590,6 +635,7 @@ export function detectLocal(rawText) {
   }
   RE_CRED_HARD_HI.lastIndex = 0;
   while ((m = RE_CRED_HARD_HI.exec(text)) !== null) {
+    if (deliveryHandover) continue;
     /* Hindi negation may FOLLOW the verb ("OTP साझा न करें") — check both
        the matched span and a short window after it. */
     const after = text.slice(m.index + m[0].length, m.index + m[0].length + 14);
@@ -826,6 +872,30 @@ export function detectLocal(rawText) {
     hard = true; score += 30; groups.add('lotteryDocs');
     addRisk(0, 'key', 'A prize you never entered, asking for Aadhaar, bank details or a “fee” to claim it — that is the trap.',
       'जिस इनाम में आपने हिस्सा ही नहीं लिया, उसे पाने के लिए आधार, बैंक विवरण या “फ़ीस” मांगी जा रही है — यही जाल है।');
+  }
+  /* 9g · pay a fee to “release” money or a benefit */
+  if (!RE_NO_FEE.test(low) && RE_RELEASE_FEE.test(low) && RE_RELEASE_TARGET.test(low)) {
+    hard = true; score += 30; groups.add('releaseFee');
+    addRisk(0, 'key', 'Money or a benefit is being held back until you pay a “verification”, “processing” or “release” fee. Nothing legitimate releases your own money that way.',
+      'आपका पैसा या लाभ “वेरिफिकेशन”, “प्रोसेसिंग” या “रिलीज़” फीस देने तक रोका जा रहा है। कोई भी असली संस्था आपका पैसा इस तरह नहीं रोकती।');
+  }
+  /* 9h · approved loan + processing/advance fee via private contact */
+  if (RE_LOAN_APPROVED.test(low) && RE_LOAN_FEE.test(low) && (hasMobile || contactLink)) {
+    hard = true; score += 30; groups.add('loanFee');
+    addRisk(0, 'phone', 'A “approved” loan that first asks for a processing or advance fee through a private number is an advance-fee loan scam. Real lenders deduct fees from the disbursal.',
+      '“मंज़ूर” लोन पहले निजी नंबर पर प्रोसेसिंग या एडवांस फीस मांगता है — यह एडवांस-फीस लोन घोटाला है। असली लोनदाता फीस वितरण में से काटते हैं।');
+  }
+  /* 9i · toll/tax/benefit brand + payment on a cheap TLD */
+  if (riskyLink && RE_BENEFIT_BRAND.test(low) && RE_PAY_DEMAND.test(low)) {
+    hard = true; score += 30; groups.add('benefitLink');
+    addRisk(0, 'link', 'A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.',
+      'टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।');
+  }
+  /* 9j · parcel-contraband threat + payment demand */
+  if (RE_CONTRABAND.test(low) && RE_PARCEL.test(low) && RE_SETTLE_DEMAND.test(low)) {
+    hard = true; score += 30; groups.add('contraband');
+    addRisk(0, 'siren', 'It claims your parcel holds narcotics or illegal goods and asks for a “settlement”. Customs and police never settle a case over a message.',
+      'यह दावा करता है कि आपके पार्सल में नारकोटिक्स या अवैध सामान है और “सेटलमेंट” माँगता है। कस्टम्स और पुलिस कभी संदेश से केस नहीं निपटाते।');
   }
   if (rewardFired && contactLink) {
     hard = true; score += 30; groups.add('rewardContact');
