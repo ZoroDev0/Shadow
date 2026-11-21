@@ -1,0 +1,3364 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════════
+  ScamShield — paste a suspicious SMS / WhatsApp message / link,
+  get a plain-language verdict in seconds. Single file, zero setup.
+  ─────────────────────────────────────────────────────────────────────
+  NAME SUGGESTION: "Kavach" (कवच — Hindi/Sanskrit for "armor").
+  One short word, understood across India, and the metaphor (an armor
+  that shields you) matches the product exactly. Rebranding is a
+  search-and-replace of "ScamShield" in this file.
+  ─────────────────────────────────────────────────────────────────────
+  Sections in the <script>: CONFIG · I18N · STATE · DETECTION ·
+  UI COMPONENTS · ANIMATIONS · EVENT HANDLERS
+  All detection lives in one async analyze() with an offline fallback,
+  ready to move to a backend (see API_BASE in CONFIG).
+  ═══════════════════════════════════════════════════════════════════════
+-->
+<html lang="en" data-theme="light" data-ts="n">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Paste any suspicious SMS, WhatsApp message or link and get a plain-language verdict in seconds. Works offline, English & हिन्दी.">
+<meta name="theme-color" id="metaTheme" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ScamShield — Is that message a scam?</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v5c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9V6l7-3z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+/* Pre-paint theme application — avoids a flash of the wrong theme. */
+try{
+  var __s=JSON.parse(localStorage.getItem('scamshield.v1')||'{}');
+  var __th=__s.theme||'auto';
+  var __d=__th==='dark'||(__th!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  var __r=document.documentElement;
+  __r.dataset.theme=__d?'dark':'light';
+  __r.dataset.ts=__s.ts||'n';
+  var __m=document.querySelector('meta[name=theme-color]');
+  if(__m){__m.content=__d?'#000000':'#ffffff';}
+}catch(e){}
+</script>
+<style>
+/* ════════════════════════ DESIGN TOKENS ════════════════════════ */
+:root{
+  /* Neutral scale — 12 pure steps, no tinted grays anywhere. */
+  --n-0:#000000; --n-100:#0a0a0a; --n-200:#161616; --n-300:#232323;
+  --n-400:#3a3a3a; --n-500:#575757; --n-600:#767676; --n-700:#9c9c9c;
+  --n-800:#c4c4c4; --n-900:#e3e3e3; --n-950:#f2f2f2; --n-1000:#ffffff;
+  --font-ui:'Inter','Noto Sans Devanagari',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-display:'Plus Jakarta Sans','Noto Sans Devanagari','Inter',system-ui,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r-sm:10px; --r-md:14px; --r-lg:20px; --r-xl:26px; --r-full:999px;
+  --ease-spring:cubic-bezier(.2,.8,.2,1);
+  --ease-overshoot:cubic-bezier(.34,1.35,.5,1);
+  --d1:180ms; --d2:300ms; --d3:450ms;
+  --shadow-1:0 1px 2px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.05);
+  --shadow-2:0 4px 14px rgba(0,0,0,.09),0 2px 4px rgba(0,0,0,.05);
+  --shadow-3:0 14px 44px rgba(0,0,0,.18),0 4px 12px rgba(0,0,0,.08);
+}
+/* Light: white + very light gray. Dark: true OLED black. */
+html[data-theme="light"]{
+  --bg:var(--n-950); --surface:var(--n-1000); --surface-2:var(--n-900);
+  --surface-3:var(--n-800); --border:var(--n-900); --border-strong:var(--n-700);
+  --text:var(--n-0); --text-muted:var(--n-500);
+  --accent-fill:var(--n-0); --accent-on:var(--n-1000);
+  --glass:rgba(255,255,255,.74); --ripple:rgba(0,0,0,.14);
+  --scrim:rgba(0,0,0,.34); --hl-bg:var(--n-0); --hl-fg:var(--n-1000);
+}
+html[data-theme="dark"]{
+  --bg:var(--n-0); --surface:var(--n-100); --surface-2:var(--n-200);
+  --surface-3:var(--n-300); --border:var(--n-300); --border-strong:var(--n-500);
+  --text:var(--n-1000); --text-muted:var(--n-600);
+  --accent-fill:var(--n-1000); --accent-on:var(--n-0);
+  --glass:rgba(10,10,10,.66); --ripple:rgba(255,255,255,.18);
+  --scrim:rgba(0,0,0,.62); --hl-bg:var(--n-1000); --hl-fg:var(--n-0);
+}
+
+/* ════════════════════════ RESET / BASE ════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:17px;-webkit-text-size-adjust:100%}
+html[data-ts="l"]{font-size:19px}
+html[data-ts="xl"]{font-size:21.5px}
+html,body{height:100%}
+body{font-family:var(--font-ui);background:var(--bg);color:var(--text);
+  line-height:1.6;font-size:1rem;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font-family:inherit;color:inherit}
+img{max-width:100%;display:block}
+::selection{background:var(--accent-fill);color:var(--accent-on)}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--text);outline-offset:2px;border-radius:6px}
+.skip{position:fixed;top:10px;left:10px;z-index:120;transform:translateY(-300%);
+  background:var(--accent-fill);color:var(--accent-on);padding:10px 18px;
+  border-radius:var(--r-sm);font-weight:600;transition:transform var(--d2)}
+.skip:focus{transform:none}
+/* [hidden] must always win over any component display rule — bug fix:
+   .thumb-row{display:flex} was overriding the hidden attribute, so the
+   screenshot row showed on load with a broken image icon. */
+[hidden]{display:none!important}
+html[lang="hi"] .hero-title,html[lang="hi"] h1,html[lang="hi"] .v-label{letter-spacing:0}
+
+/* Icon slots (inline SVG injected by JS, consistent 1.75px stroke) */
+[data-icon]{display:inline-flex;flex:none;width:20px;height:20px}
+[data-icon] svg{width:100%;height:100%;display:block}
+
+/* ════════════════════════ LAYOUT ════════════════════════ */
+main{height:100dvh;overflow-y:auto;overscroll-behavior-y:none;position:relative;scroll-behavior:smooth}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;
+  height:58px;padding:0 14px;background:var(--glass);
+  -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);
+  border-bottom:1px solid transparent;transition:border-color var(--d2)}
+.topbar.scrolled{border-bottom-color:var(--border)}
+.tb-mark{width:26px;height:26px;color:var(--text)}
+.tb-title{font:700 1.05rem var(--font-display);letter-spacing:-.02em;opacity:0;
+  transform:translateY(5px);transition:opacity var(--d2),transform var(--d2) var(--ease-spring)}
+.topbar.scrolled .tb-title{opacity:1;transform:none}
+.tb-spacer{flex:1}
+.wrap{max-width:780px;margin:0 auto;padding:20px 18px 140px}
+.screen{display:none}
+.screen.active{display:block;animation:axisIn var(--d3) var(--ease-spring) both}
+@keyframes axisIn{from{opacity:0;transform:translateX(calc(var(--ax,1)*26px))}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}}
+
+/* Sidebar (desktop ≥ 920px) */
+.sidebar{display:none;position:fixed;top:0;left:0;bottom:0;width:252px;z-index:45;
+  flex-direction:column;gap:4px;padding:20px 14px;background:var(--surface);
+  border-right:1px solid var(--border)}
+.side-brand{display:flex;align-items:center;gap:10px;padding:4px 10px 20px;
+  font:800 1.15rem var(--font-display);letter-spacing:-.02em}
+.side-brand [data-icon]{width:26px;height:26px}
+.side-nav{display:flex;flex-direction:column;gap:4px}
+.side-item{display:flex;align-items:center;gap:12px;height:48px;padding:0 16px;white-space:nowrap;
+  border:0;background:none;border-radius:var(--r-full);color:var(--text-muted);
+  font:600 .95rem var(--font-ui);cursor:pointer;position:relative;overflow:hidden;
+  transition:background var(--d1),color var(--d1)}
+.side-item:hover{background:var(--surface-2)}
+.side-item.active{background:var(--surface-2);color:var(--text)}
+.side-foot{margin-top:auto;display:grid;gap:10px;padding:12px 8px 4px}
+.side-hint{font-size:.72rem;color:var(--text-muted);line-height:1.6}
+/* Sidebar footer button: never wrap (bug fix: "How it works" wrapped
+   onto two lines) */
+.side-foot .btn{white-space:nowrap;justify-content:center}
+.side-ver{font-size:.72rem;color:var(--text-muted)}
+
+/* Bottom navigation (mobile) */
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:46;display:flex;
+  background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+  border-top:1px solid var(--border);padding:6px 6px calc(7px + env(safe-area-inset-bottom))}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  min-height:54px;padding:5px 0;border:0;background:none;cursor:pointer;
+  color:var(--text-muted);font:600 .7rem var(--font-ui);transition:color var(--d1)}
+.nav-item:active{transform:scale(.96)}
+.nav-ic{position:relative;display:flex;align-items:center;justify-content:center;
+  width:58px;height:30px}
+.nav-ic::before{content:"";position:absolute;inset:4px 13px;border-radius:var(--r-full);
+  background:transparent;transition:background var(--d2) var(--ease-spring)}
+.nav-item.active{color:var(--text)}
+.nav-item.active .nav-ic::before{background:var(--surface-3)}
+.nav-ic [data-icon]{position:relative;width:22px;height:22px}
+
+/* FAB (mobile, jump to Check) */
+.fab{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:44;
+  width:58px;height:58px;border-radius:18px;border:0;cursor:pointer;
+  background:var(--accent-fill);color:var(--accent-on);box-shadow:var(--shadow-3);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform var(--d2) var(--ease-spring),opacity var(--d2)}
+.fab:active{transform:scale(.9)}
+.fab.hide{opacity:0;transform:scale(.5);pointer-events:none}
+.fab [data-icon]{width:26px;height:26px}
+
+/* ════════════════════════ CONTROLS ════════════════════════ */
+/* Buttons: filled / tonal / outlined / text (Material style) */
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;
+  justify-content:center;gap:9px;height:48px;padding:0 20px;border-radius:var(--r-full);
+  border:1.5px solid transparent;cursor:pointer;user-select:none;
+  font:600 .92rem/1 var(--font-ui);-webkit-tap-highlight-color:transparent;
+  transition:transform var(--d1) var(--ease-spring),background var(--d1),
+  border-color var(--d1),opacity var(--d1)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn [data-icon]{width:20px;height:20px}
+.btn-filled{background:var(--accent-fill);color:var(--accent-on)}
+.btn-tonal{background:var(--surface-2);color:var(--text)}
+.btn-outline{background:transparent;border-color:var(--border-strong);color:var(--text)}
+.btn-text{background:transparent;color:var(--text);padding:0 14px}
+.btn-lg{height:54px;font-size:1rem}
+.btn-block{width:100%}
+.btn-inv{background:var(--accent-on);color:var(--accent-fill)}
+.btn-inv-text{background:transparent;color:var(--accent-on);opacity:.85;
+  text-decoration:underline;text-underline-offset:3px;height:44px}
+.btn-inv-outline{background:transparent;border-color:currentColor;color:inherit;
+  text-decoration:none;height:42px;font-size:.85rem}
+.iconbtn{width:40px;height:40px;border-radius:var(--r-full);border:0;background:none;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--text);transition:background var(--d1),transform var(--d1)}
+.iconbtn:hover{background:var(--surface-2)}
+.iconbtn:active{transform:scale(.92)}
+
+/* Chips (assist + filter) */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;overflow:hidden;height:40px;padding:0 15px;border-radius:var(--r-full);
+  border:1px solid var(--border-strong);background:var(--surface);cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;font:500 .86rem var(--font-ui);
+  color:var(--text);transition:transform var(--d1) var(--ease-spring),background var(--d1),color var(--d1)}
+.chip:active{transform:scale(.96)}
+.chip.on{background:var(--accent-fill);color:var(--accent-on);border-color:var(--accent-fill)}
+
+/* Segmented control */
+.seg{display:inline-flex;background:var(--surface-2);border-radius:var(--r-full);padding:4px;gap:2px}
+.seg button{position:relative;overflow:hidden;border:0;background:transparent;cursor:pointer;
+  height:40px;padding:0 14px;border-radius:var(--r-full);color:var(--text-muted);
+  display:inline-flex;align-items:center;gap:7px;font:600 .86rem var(--font-ui);
+  transition:color var(--d1),background var(--d2) var(--ease-spring)}
+.seg button [data-icon]{width:17px;height:17px}
+.seg button.on{background:var(--accent-fill);color:var(--accent-on)}
+
+/* iOS-style toggle switch */
+.switch{position:relative;width:52px;height:32px;flex:none;display:inline-block}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:2}
+.switch .trk{position:absolute;inset:0;border-radius:var(--r-full);background:var(--surface-3);
+  border:1.5px solid var(--border-strong);
+  transition:background var(--d2) var(--ease-spring),border-color var(--d2)}
+.switch .thb{position:absolute;top:50%;left:3px;width:25px;height:25px;border-radius:50%;
+  background:var(--n-1000);box-shadow:0 1px 3px rgba(0,0,0,.3);
+  transform:translateY(-50%);
+  transition:transform var(--d2) var(--ease-overshoot),background var(--d2)}
+.switch input:checked ~ .trk{background:var(--accent-fill);border-color:var(--accent-fill)}
+.switch input:checked ~ .thb{transform:translate(20px,-50%);background:var(--accent-on)}
+.switch input:focus-visible ~ .trk{outline:2px solid var(--text);outline-offset:2px}
+
+/* Text field with floating label (Material filled style) */
+.field{position:relative;background:var(--surface-2);border:1.5px solid var(--border-strong);
+  border-radius:var(--r-lg);transition:border-color var(--d1)}
+.field:focus-within{border-color:var(--text)}
+.field textarea{width:100%;min-height:150px;resize:vertical;border:0;background:transparent;
+  color:var(--text);font:400 1rem/1.65 var(--font-ui);padding:26px 16px 14px;outline:none}
+.field label{position:absolute;left:17px;top:18px;color:var(--text-muted);
+  font:500 1rem var(--font-ui);pointer-events:none;transform-origin:left top;
+  transition:transform var(--d2) var(--ease-spring),color var(--d2)}
+.field:focus-within label,.field.has-value label{transform:translateY(-11px) scale(.72)}
+.field.nudge{animation:nudge .4s var(--ease-spring)}
+@keyframes nudge{0%,100%{transform:none}25%{transform:translateX(-7px)}
+  50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-xl);box-shadow:var(--shadow-1)}
+
+/* Ripple (monochrome) */
+.ripple{position:absolute;border-radius:50%;background:var(--ripple);
+  transform:scale(0);opacity:1;pointer-events:none;
+  animation:rippleGrow .55s var(--ease-spring) forwards}
+@keyframes rippleGrow{to{transform:scale(2.4);opacity:0}}
+
+/* ════════════════════════ CHECK SCREEN ════════════════════════ */
+.hero{padding:22px 0 24px;text-align:center}
+.hero-logo{width:62px;height:62px;margin:0 auto 14px;border:1.5px solid var(--border-strong);
+  border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;
+  color:var(--text)}
+.hero-logo [data-icon]{width:34px;height:34px}
+.hero-title{font:800 clamp(2.2rem,7vw,3rem)/1.04 var(--font-display);letter-spacing:-.035em}
+.hero-tag{margin:12px auto 0;max-width:44ch;color:var(--text-muted);font-size:1.02rem;line-height:1.65}
+.check-card{padding:16px}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn-row .btn{flex:1 1 190px}
+.thumb-row{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px;
+  background:var(--surface-2);border-radius:var(--r-md)}
+.thumb-row img{width:54px;height:54px;object-fit:cover;border-radius:var(--r-sm)}
+.thumb-meta{flex:1;min-width:0;display:grid;gap:2px}
+.thumb-meta strong{font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thumb-meta span{font-size:.8rem;color:var(--text-muted)}
+.examples{margin-top:22px}
+.ex-label{font:600 .8rem var(--font-ui);color:var(--text-muted);text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:10px}
+#loadSlot,#inlineResult{margin-top:18px}
+/* Desktop bug fix: scrollIntoView clipped the verdict behind the sticky
+   58px topbar — scroll-margin-top keeps it fully visible. */
+#inlineResult{scroll-margin-top:76px}
+
+/* Loading skeleton */
+.load-card{padding:20px;display:grid;gap:12px}
+.sk-bar{height:15px;border-radius:8px;position:relative;overflow:hidden;background:var(--surface-2)}
+.sk-bar::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent,var(--surface-3),transparent);
+  animation:shimmer 1.15s infinite}
+@keyframes shimmer{to{transform:translateX(100%)}}
+.load-status{display:flex;align-items:center;gap:10px;font:600 .92rem var(--font-ui);
+  color:var(--text-muted)}
+.spin{width:20px;height:20px;flex:none;border-radius:50%;
+  border:2px solid var(--surface-3);border-top-color:var(--text);animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ════════════════════════ RESULT ════════════════════════ */
+.result{display:grid;gap:14px}
+.result .card{padding:18px}
+.res-card h3,.why-card h3{font:700 .98rem var(--font-ui);margin-bottom:10px}
+.verdict{display:flex;align-items:center;gap:16px;padding:18px 20px;
+  border-radius:var(--r-lg);border:1.5px solid var(--border-strong);background:var(--surface)}
+.v-ic{width:54px;height:54px;flex:none;color:var(--text)}
+.v-body{flex:1;min-width:0}
+.v-label{font:500 clamp(1.4rem,5vw,1.85rem)/1.1 var(--font-display)}
+.v-sub{font-size:.78rem;opacity:.72;margin-top:3px;font-weight:600}
+.sev{display:flex;gap:5px;margin-top:8px}
+.sev i{width:26px;height:6px;border-radius:3px;border:1.5px solid currentColor;opacity:.55}
+/* Shape-coded verdicts — meaning never depends on color */
+.v-safe{animation:fadeUp .45s var(--ease-spring) both}
+.v-safe .sev i:first-child{background:currentColor;opacity:1}
+.v-suspicious{border-width:2px;background:var(--surface-2);animation:fadeUp .45s var(--ease-spring) both}
+.v-suspicious .v-label{font-weight:700}
+.v-suspicious .sev i:nth-child(-n+2){background:currentColor;opacity:1}
+.v-suspicious .v-ic{animation:pulse1 .65s .15s var(--ease-spring)}
+@keyframes pulse1{0%{transform:scale(1)}45%{transform:scale(1.08)}100%{transform:scale(1)}}
+.v-scam{background:var(--accent-fill);color:var(--accent-on);border-color:var(--accent-fill);
+  border-width:3px;animation:scamIn .55s var(--ease-spring) both}
+.v-scam .v-label{font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.v-scam .sev i{background:currentColor;opacity:1}
+.v-scam .v-ic{color:var(--accent-on)}
+@keyframes scamIn{0%{opacity:0;transform:scale(.92)}38%{opacity:1;transform:scale(1.02)}
+  55%{transform:translateX(-8px) scale(1)}72%{transform:translateX(5px)}
+  86%{transform:translateX(-3px)}100%{transform:none}}
+.v-sentence{font-size:1.02rem;line-height:1.65;padding:2px 4px}
+/* Risk gauge */
+.res-grid{display:grid;gap:14px}
+.gauge-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 18px}
+.gauge-wrap{position:relative;width:150px;height:150px}
+.gauge-wrap svg{width:100%;height:100%}
+.g-trk{fill:none;stroke:var(--surface-3);stroke-width:10}
+.g-val{fill:none;stroke:currentColor;stroke-width:10;stroke-linecap:round;
+  transform:rotate(-90deg);transform-origin:center;stroke-dasharray:326.73;
+  stroke-dashoffset:326.73;transition:stroke-dashoffset 1s var(--ease-spring)}
+.g-center{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center}
+.g-num{font:800 2.3rem/1 var(--font-display);letter-spacing:-.03em}
+.g-den{font:600 .75rem var(--font-ui);color:var(--text-muted);margin-top:3px}
+.g-lb{font:600 .78rem var(--font-ui);color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.07em;margin-top:6px}
+.g-v{font:700 .95rem var(--font-ui);margin-top:2px}
+/* Reasons */
+.why-card ul{list-style:none}
+.why-card li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;
+  border-bottom:1px solid var(--border)}
+.why-card li:last-child{border-bottom:0;padding-bottom:2px}
+.why-card li [data-icon]{width:22px;height:22px;margin-top:3px;color:var(--text)}
+.why-card li span.wr{flex:1;font-size:.95rem;line-height:1.55}
+.stagger>*{animation:fadeUp .4s var(--ease-spring) both;
+  animation-delay:calc(var(--i,0)*70ms + 120ms)}
+/* Links */
+.link-row{padding:13px 0;border-bottom:1px solid var(--border)}
+.link-row:last-child{border-bottom:0;padding-bottom:2px}
+.link-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dom{font:600 .9rem var(--font-mono);word-break:break-all}
+.dom .d{background:var(--hl-bg);color:var(--hl-fg);border-radius:4px;padding:0 3px;font-weight:700}
+.dom .u{border-bottom:2px solid currentColor;font-weight:700}
+.link-why{font-size:.88rem;color:var(--text-muted);line-height:1.55;margin-top:7px}
+.vs{display:flex;gap:26px;flex-wrap:wrap;margin-top:10px}
+.vs-l{display:block;font:700 .68rem var(--font-ui);letter-spacing:.07em;
+  text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+/* Verdict badges (history + links) */
+.vb{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:var(--r-full);
+  font:700 .68rem var(--font-ui);letter-spacing:.06em;text-transform:uppercase;flex:none}
+.vb.safe{border:1.5px solid var(--border-strong);color:var(--text)}
+.vb.suspicious{background:var(--surface-3);color:var(--text)}
+.vb.scam{background:var(--accent-fill);color:var(--accent-on)}
+/* Original message with inverted highlights */
+.orig{white-space:pre-wrap;word-break:break-word;background:var(--surface-2);
+  border-radius:var(--r-md);padding:14px 16px;font-size:.95rem;line-height:1.75}
+mark.hl{background:var(--hl-bg);color:var(--hl-fg);border-radius:5px;
+  padding:0 4px;font-weight:700}
+/* Advice steps */
+.steps{display:grid;gap:10px}
+.step{display:flex;gap:14px;align-items:flex-start;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px}
+.step .n{width:30px;height:30px;border-radius:var(--r-full);flex:none;
+  background:var(--accent-fill);color:var(--accent-on);
+  display:flex;align-items:center;justify-content:center;font:700 .88rem var(--font-ui)}
+.step .s-txt{flex:1;font-size:.95rem;line-height:1.6;align-self:center}
+/* Result actions */
+.res-actions{display:flex;flex-wrap:wrap;gap:10px}
+.res-actions .btn{flex:1 1 170px}
+.res-actions .btn-text{flex:0 0 auto}
+
+/* ════════════════════════ HISTORY ════════════════════════ */
+.scr-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:6px 0 16px}
+.scr-head h1{font:700 1.55rem var(--font-display);letter-spacing:-.02em}
+.scr-sub{color:var(--text-muted);margin:-8px 0 18px;font-size:.95rem;line-height:1.6}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:14px}
+.stat .num{font:800 1.9rem/1 var(--font-display);letter-spacing:-.02em}
+.stat .lb{color:var(--text-muted);font-size:.76rem;font-weight:600;margin-top:5px;
+  line-height:1.35}
+.filters{margin-bottom:14px}
+.hrow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;margin-bottom:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  cursor:pointer;position:relative;overflow:hidden;text-align:left;
+  transition:transform var(--d1) var(--ease-spring),border-color var(--d1)}
+.hrow:active{transform:scale(.985)}
+.hrow.removing{animation:slideOut .28s var(--ease-spring) both}
+@keyframes slideOut{to{opacity:0;transform:translateX(40px)}}
+.hmid{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.snip{font-size:.92rem;line-height:1.45;overflow:hidden;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical}
+.htime{font-size:.76rem;color:var(--text-muted);font-weight:500}
+.hdel{flex:none;color:var(--text-muted)}
+.empty{text-align:center;padding:38px 14px 20px}
+.empty-art{width:132px;height:132px;margin:0 auto 12px;color:var(--text-muted)}
+.empty-art svg{width:100%;height:100%}
+.empty h2{font:700 1.25rem var(--font-display)}
+.empty p{color:var(--text-muted);margin:8px auto 20px;max-width:34ch;line-height:1.6}
+
+/* ════════════════════════ PROTECT ════════════════════════ */
+.prot-card{display:flex;gap:14px;align-items:flex-start;padding:18px;margin-bottom:12px}
+.pc-ic{width:44px;height:44px;border-radius:var(--r-md);background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;flex:none}
+.pc-ic [data-icon]{width:23px;height:23px}
+.pc-main{flex:1;min-width:0}
+.pc-main h3{font:700 1rem var(--font-ui)}
+.pc-desc{color:var(--text-muted);font-size:.88rem;line-height:1.55;margin-top:3px}
+.pc-status{display:flex;align-items:center;gap:7px;margin-top:10px;font:600 .8rem var(--font-ui)}
+.pc-status .dot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--text);flex:none}
+.pc-status.on .dot{background:var(--text)}
+.prot-card .switch{margin-top:6px}
+.sim-card{padding:18px;margin-top:22px}
+.sim-card h2{font:700 1.1rem var(--font-display);letter-spacing:-.01em}
+.sim-card .scr-sub{margin:4px 0 0}
+.btn-col{display:grid;gap:10px;margin-top:16px}
+.btn-col .btn{justify-content:flex-start}
+
+/* ════════════════════════ SETTINGS ════════════════════════ */
+.set-card{padding:4px 18px;margin-bottom:14px}
+.set-row{display:flex;align-items:center;gap:14px;padding:15px 0;
+  border-bottom:1px solid var(--border)}
+.set-row:last-child{border-bottom:0}
+.s-main{flex:1;min-width:0}
+.s-main h3{font:600 .98rem var(--font-ui)}
+.s-main p{color:var(--text-muted);font-size:.84rem;margin-top:2px;line-height:1.55}
+.set-row .seg{flex:none}
+.about-card{padding:18px}
+.about-card h3{font:700 .98rem var(--font-ui);margin-bottom:8px}
+.about-card p{font-size:.92rem;line-height:1.65;margin-bottom:8px}
+.about-card .muted{color:var(--text-muted)}
+.help-card{display:flex;align-items:center;gap:14px;background:var(--accent-fill);
+  color:var(--accent-on);border-radius:var(--r-lg);padding:16px 18px;margin-top:12px}
+.help-card [data-icon]{width:26px;height:26px}
+.help-main{flex:1;display:grid}
+.help-lb{font:600 .72rem var(--font-ui);text-transform:uppercase;letter-spacing:.06em;opacity:.8}
+.help-num{font:800 1.65rem/1.15 var(--font-display);letter-spacing:-.02em}
+
+/* ════════════════════════ SHEETS / DIALOGS ════════════════════════ */
+.scrim{position:fixed;inset:0;z-index:55;background:var(--scrim);opacity:0;
+  pointer-events:none;transition:opacity var(--d2)}
+.scrim.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:var(--shadow-3);
+  transform:translateY(105%);transition:transform var(--d3) var(--ease-overshoot);
+  max-height:88dvh;display:flex;flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom)}
+.sheet.open{transform:translateY(0)}
+.sheet-handle{padding:10px 0 6px;display:flex;justify-content:center;cursor:grab;
+  touch-action:none;flex:none}
+.sheet-handle i{width:42px;height:5px;border-radius:3px;background:var(--surface-3)}
+.sheet-title-row{display:flex;align-items:center;justify-content:space-between;
+  gap:10px;padding:2px 18px 8px;flex:none}
+.sheet-title-row h3{font:700 1.1rem var(--font-display);letter-spacing:-.01em}
+.sheet-body{overflow-y:auto;padding:0 18px 28px}
+.how-l{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.how-l:last-of-type{border-bottom:0}
+.how-l [data-icon]{width:24px;height:24px;margin-top:2px;flex:none}
+.how-l h3{font:700 .95rem var(--font-ui)}
+.how-l p{color:var(--text-muted);font-size:.9rem;line-height:1.6;margin-top:3px}
+.how-priv{font-size:.84rem;color:var(--text-muted);background:var(--surface-2);
+  border-radius:var(--r-md);padding:12px 14px;margin:6px 0 16px;line-height:1.6}
+.dlg{position:fixed;inset:0;z-index:70;display:flex;align-items:center;
+  justify-content:center;padding:24px;background:var(--scrim);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity var(--d2)}
+.dlg.show{opacity:1;pointer-events:auto}
+.dlg-box{background:var(--surface);border-radius:var(--r-xl);padding:24px;
+  max-width:350px;width:100%;box-shadow:var(--shadow-3);transform:scale(.94);
+  transition:transform var(--d2) var(--ease-overshoot)}
+.dlg.show .dlg-box{transform:scale(1)}
+.dlg-box h3{font:700 1.1rem var(--font-display);margin-bottom:8px}
+.dlg-box p{color:var(--text-muted);font-size:.92rem;line-height:1.6;margin-bottom:20px}
+.dlg-actions{display:flex;justify-content:flex-end;gap:6px}
+
+/* ════════════════════════ SNACKBAR / TOASTS / BANNER ════════════════════════ */
+.snackbar{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));
+  z-index:85;max-width:min(92vw,480px);background:var(--accent-fill);color:var(--accent-on);
+  padding:13px 20px;border-radius:var(--r-md);box-shadow:var(--shadow-3);
+  font:600 .9rem var(--font-ui);text-align:center;opacity:0;
+  transform:translate(-50%,16px);pointer-events:none;
+  transition:opacity var(--d2),transform var(--d2) var(--ease-spring)}
+.snackbar.show{opacity:1;transform:translate(-50%,0)}
+.desk-toast{position:fixed;right:16px;bottom:16px;z-index:80;display:flex;gap:12px;
+  width:min(400px,calc(100vw - 32px));padding:14px 16px;background:var(--glass);
+  -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+  border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-3);
+  transform:translateY(14px);opacity:0;pointer-events:none;
+  transition:transform var(--d3) var(--ease-spring),opacity var(--d2)}
+.desk-toast.show{transform:none;opacity:1;pointer-events:auto}
+.dt-ic{width:22px;height:22px;margin-top:2px}
+.dt-main{flex:1;min-width:0}
+.dt-main p{font:600 .9rem var(--font-ui);line-height:1.5}
+.dt-link{background:none;border:0;padding:7px 0 0;cursor:pointer;color:var(--text);
+  font:700 .86rem var(--font-ui);text-decoration:underline;text-underline-offset:3px}
+.sms-banner{position:fixed;top:0;left:0;right:0;z-index:75;display:flex;
+  flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top) + 10px) 12px 12px;
+  transform:translateY(-130%);transition:transform var(--d3) var(--ease-overshoot)}
+.sms-banner.show{transform:translateY(0)}
+.sms-card{width:min(430px,100%);background:var(--glass);
+  -webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);
+  border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-3);
+  padding:12px 14px;display:flex;gap:11px}
+.sms-app-ic{width:38px;height:38px;border-radius:50%;flex:none;background:var(--accent-fill);
+  color:var(--accent-on);display:flex;align-items:center;justify-content:center}
+.sms-app-ic [data-icon]{width:19px;height:19px}
+.sms-main{flex:1;min-width:0}
+.sms-meta{display:flex;justify-content:space-between;gap:8px;font:600 .76rem var(--font-ui);
+  color:var(--text-muted)}
+.sms-sender{font:700 .9rem var(--font-ui);margin-top:1px}
+.sms-body{font-size:.88rem;line-height:1.5;margin-top:2px;word-break:break-word}
+.sms-warn{display:flex;gap:8px;align-items:center;margin-top:10px;padding:9px 12px;
+  border-radius:var(--r-sm);background:var(--accent-fill);color:var(--accent-on);
+  font:600 .82rem var(--font-ui);line-height:1.4}
+.sms-warn [data-icon]{width:17px;height:17px}
+.sms-actions{display:flex;gap:8px;margin-top:8px;justify-content:flex-end;width:min(430px,100%)}
+.sms-actions .btn{height:40px;font-size:.84rem;padding:0 16px}
+
+/* ════════════════════════ SCAM-SITE OVERLAY ════════════════════════ */
+.scam-ov{position:fixed;inset:0;z-index:90;display:flex;align-items:center;
+  justify-content:center;padding:22px;background:var(--scrim);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  opacity:0;pointer-events:none;transition:opacity var(--d2)}
+.scam-ov.show{opacity:1;pointer-events:auto}
+.ov-panel{background:var(--accent-fill);color:var(--accent-on);border-radius:var(--r-xl);
+  padding:34px 26px;max-width:440px;width:100%;text-align:center;
+  box-shadow:var(--shadow-3);transform:scale(.92);
+  transition:transform var(--d3) var(--ease-overshoot)}
+.scam-ov.show .ov-panel{transform:scale(1)}
+.ov-ic{width:64px;height:64px;margin:0 auto 14px}
+.ov-ic svg{width:100%;height:100%}
+.ov-panel h2{font:800 1.5rem var(--font-display);letter-spacing:-.02em}
+.ov-dom{font:700 .95rem var(--font-mono);display:inline-block;margin:12px 0 4px;
+  border:1.5px solid currentColor;border-radius:var(--r-sm);padding:7px 13px;word-break:break-all}
+.ov-body{font-size:.94rem;line-height:1.65;opacity:.86;margin:10px 0 22px}
+.ov-actions{display:grid;gap:8px}
+
+/* ════════════════════════ HERO EXTRAS ════════════════════════ */
+.hero-cta{margin-top:16px}
+.status-chip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;
+  margin-top:14px;border:1px solid var(--border-strong);border-radius:var(--r-full);
+  background:var(--surface);font:600 .8rem var(--font-ui);color:var(--text)}
+.status-chip [data-icon]{width:16px;height:16px;flex:none}
+/* Read-aloud button: two icon slots, CSS toggles them */
+.btn .ic-b{display:none}
+.btn.speaking .ic-a{display:none}
+.btn.speaking .ic-b{display:inline-flex}
+
+/* ════════════════════════ DEMO STORY (full-screen stepper) ════════════════════════ */
+.demo-ov{position:fixed;inset:0;z-index:95;background:var(--bg);display:flex;
+  align-items:center;justify-content:center;padding:18px;opacity:0;
+  pointer-events:none;transition:opacity var(--d2)}
+.demo-ov.show{opacity:1;pointer-events:auto}
+.demo-panel{width:min(560px,100%);max-height:100dvh;display:flex;flex-direction:column;
+  transform:translateY(16px) scale(.98);opacity:.6;
+  transition:transform var(--d3) var(--ease-overshoot),opacity var(--d2)}
+.demo-ov.show .demo-panel{transform:none;opacity:1}
+.demo-head{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:2px 2px 14px;flex:none}
+.demo-head h2{font:800 1.25rem var(--font-display);letter-spacing:-.02em}
+.demo-scroll{overflow-y:auto;min-height:0}
+.demo-card{background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-xl);padding:22px;box-shadow:var(--shadow-2)}
+.demo-step{display:none}
+.demo-step.cur{display:block;animation:demoIn .45s var(--ease-spring) both}
+.demo-step.cur.fromL{animation-name:demoInL}
+@keyframes demoIn{from{opacity:0;transform:translateX(34px)}}
+@keyframes demoInL{from{opacity:0;transform:translateX(-34px)}}
+.demo-step h3{font:700 1.18rem var(--font-display);letter-spacing:-.01em;margin-bottom:8px}
+.demo-step .d-body{color:var(--text-muted);line-height:1.7;font-size:.97rem}
+.demo-avatar{width:86px;height:86px;border-radius:50%;background:var(--surface-2);
+  border:1.5px solid var(--border-strong);display:flex;align-items:center;
+  justify-content:center;margin:8px auto 18px}
+.demo-avatar [data-icon]{width:44px;height:44px}
+.demo-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.demo-tag{display:inline-flex;align-items:center;height:32px;padding:0 13px;
+  border:1px solid var(--border-strong);border-radius:var(--r-full);
+  font:600 .78rem var(--font-ui);background:var(--surface)}
+/* Phone mock — step 2 */
+.phone{max-width:330px;margin:18px auto 0;background:var(--surface);
+  border:1.5px solid var(--border-strong);border-radius:var(--r-lg);overflow:hidden}
+.phone-head{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;background:var(--surface-2);font:600 .78rem var(--font-ui)}
+.phone-body{padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start}
+.bubble{background:var(--surface-2);border:1px solid var(--border);
+  border-radius:4px 16px 16px 16px;padding:10px 13px;max-width:100%;
+  font-size:.88rem;line-height:1.55;word-break:break-word}
+.bubble b{display:block;font-size:.72rem;letter-spacing:.05em;color:var(--text-muted);
+  margin-bottom:5px}
+.bubble .b-time{display:block;font-size:.7rem;color:var(--text-muted);margin-top:5px}
+/* Step 3 split view */
+.demo-split{display:grid;grid-template-columns:1fr;gap:12px;margin-top:4px}
+@media (min-width:560px){.demo-split{grid-template-columns:1fr 1fr}}
+.split-card{background:var(--surface-2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px}
+.split-h{display:flex;align-items:center;gap:9px;font:700 .92rem var(--font-ui);margin-bottom:12px}
+.split-h [data-icon]{width:20px;height:20px;flex:none}
+.split-list{list-style:none;display:grid;gap:10px;margin:0;padding:0}
+.split-list li{display:flex;gap:10px;align-items:flex-start;font-size:.87rem;line-height:1.5}
+.split-list li [data-icon]{width:17px;height:17px;flex:none;margin-top:2px}
+.demo-verdict{padding:12px 14px;margin-bottom:12px}
+.demo-verdict .v-ic{width:36px;height:36px}
+.demo-verdict .v-label{font-size:1.2rem}
+.demo-dots{display:flex;gap:6px;justify-content:center;padding-top:18px;flex:none}
+.demo-dots button{width:30px;height:30px;border:0;background:none;cursor:pointer;
+  border-radius:50%;display:flex;align-items:center;justify-content:center}
+.demo-dots button i{width:8px;height:8px;border-radius:50%;background:var(--surface-3);
+  transition:transform var(--d2) var(--ease-spring),background var(--d2)}
+.demo-dots button.on i{background:var(--text);transform:scale(1.35)}
+.demo-dots button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.demo-foot{display:flex;gap:10px;padding-top:14px;flex:none}
+.demo-foot .btn{flex:1}
+.rot-l{transform:rotate(90deg)}
+
+/* ════════════════════════ TEST LAB ════════════════════════ */
+.lab-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.lab-stat{background:var(--surface-2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:12px;text-align:center}
+.lab-stat .num{font:800 1.6rem/1 var(--font-display);letter-spacing:-.02em}
+.lab-stat .lb{color:var(--text-muted);font-size:.72rem;font-weight:600;margin-top:4px}
+.lab-fail-head{font:700 .88rem var(--font-ui);margin:2px 0 10px}
+.lab-row{display:flex;align-items:flex-start;gap:10px;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:var(--r-md);padding:11px 13px;
+  margin-bottom:8px;font-size:.84rem;line-height:1.5}
+.lab-row .vb{margin-top:1px}
+.lab-row strong{display:block;margin-bottom:2px}
+.lab-ok{display:flex;align-items:center;gap:9px;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;
+  font:600 .88rem var(--font-ui)}
+.lab-ok [data-icon]{width:19px;height:19px;flex:none}
+
+/* ════════════════════════ BREAKPOINTS ════════════════════════ */
+@media (min-width:920px){
+  .bottom-nav,.fab,.topbar{display:none}
+  .sidebar{display:flex}
+  /* Bug fix: the content column was centered in the whole viewport, so it
+     sat left-heavy with a gap on the right. Padding the scroll container
+     by the sidebar width centers .wrap in the space RIGHT of the sidebar. */
+  main{height:100dvh;padding-left:252px}
+  .wrap{max-width:820px;padding:44px 40px 80px}
+  .res-grid{grid-template-columns:280px 1fr;align-items:start}
+  .snackbar{bottom:24px}
+  .sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(620px,94vw);
+    max-height:84vh;border-radius:var(--r-xl);
+    transform:translate(-50%,-46%) scale(.95);opacity:0;
+    transition:transform var(--d3) var(--ease-overshoot),opacity var(--d2)}
+  .sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1}
+  .sheet-handle{display:none}
+  .sheet-title-row{padding-top:22px}
+}
+
+/* ════════════════════════ REDUCED MOTION ════════════════════════ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;
+    animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+html[data-rm="1"] *,html[data-rm="1"] *::before,html[data-rm="1"] *::after{
+  animation-duration:.01ms!important;animation-iteration-count:1!important;
+  transition-duration:.01ms!important}
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+
+<!-- ══════════ SIDEBAR (desktop) ══════════ -->
+<aside class="sidebar" aria-label="Primary">
+  <div class="side-brand"><span data-icon="shield"></span><span>ScamShield</span></div>
+  <nav class="side-nav" aria-label="Tabs">
+    <button class="side-item active" data-tab="check" aria-current="page"><span data-icon="scan"></span><span data-i18n="nav_check"></span></button>
+    <button class="side-item" data-tab="history"><span data-icon="history"></span><span data-i18n="nav_history"></span></button>
+    <button class="side-item" data-tab="protect"><span data-icon="shieldCheck"></span><span data-i18n="nav_protect"></span></button>
+    <button class="side-item" data-tab="settings"><span data-icon="sliders"></span><span data-i18n="nav_settings"></span></button>
+  </nav>
+  <div class="side-foot">
+    <button class="btn btn-tonal btn-block" id="btnHowSide"><span data-icon="info"></span><span data-i18n="how_btn"></span></button>
+    <p class="side-hint" data-i18n="hint_short"></p>
+    <p class="side-ver">ScamShield v1.0 · demo</p>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<main id="main">
+  <header class="topbar" id="topbar">
+    <span class="tb-mark" data-icon="shield"></span>
+    <span class="tb-title">ScamShield</span>
+    <span class="tb-spacer"></span>
+    <button class="iconbtn" id="btnHowTop" data-i18n-aria="how_title" aria-label="How it works"><span data-icon="info"></span></button>
+  </header>
+
+  <div class="wrap" id="wrap">
+
+    <!-- ════ CHECK SCREEN ════ -->
+    <section class="screen active" id="screen-check" aria-label="Check a message">
+      <div class="hero">
+        <div class="hero-logo" data-icon="shield"></div>
+        <h1 class="hero-title">ScamShield</h1>
+        <p class="hero-tag" data-i18n="tagline"></p>
+        <div class="hero-cta">
+          <button class="btn btn-outline" id="btnDemo" type="button"><span data-icon="play"></span><span data-i18n="demo_t"></span></button>
+        </div>
+        <div class="status-chip" role="status"><span data-icon="lock"></span><span id="privTxt"></span></div>
+      </div>
+
+      <div class="card check-card">
+        <div class="field" id="fieldMsg">
+          <label for="msgInput" data-i18n="field_label"></label>
+          <textarea id="msgInput" rows="5" maxlength="4000" spellcheck="false" aria-label="Paste the message or link here"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-filled btn-lg" id="btnCheck"><span data-icon="scan"></span><span data-i18n="btn_check"></span></button>
+          <button class="btn btn-tonal" id="btnPaste"><span data-icon="clipboard"></span><span data-i18n="btn_paste"></span></button>
+          <button class="btn btn-outline" id="btnUpload"><span data-icon="image"></span><span data-i18n="btn_upload"></span></button>
+        </div>
+        <div class="thumb-row" id="thumbRow" hidden>
+          <img id="thumbImg" alt="Screenshot preview">
+          <div class="thumb-meta"><strong id="thumbName"></strong><span data-i18n="soon"></span></div>
+          <button class="iconbtn" id="thumbRemove" data-i18n-aria="remove" aria-label="Remove"><span data-icon="x"></span></button>
+        </div>
+      </div>
+
+      <div class="examples">
+        <p class="ex-label" data-i18n="examples_label"></p>
+        <div class="chips" id="exChips"></div>
+      </div>
+
+      <div id="loadSlot"></div>
+      <div id="inlineResult" aria-live="polite"></div>
+    </section>
+
+    <!-- ════ HISTORY SCREEN ════ -->
+    <section class="screen" id="screen-history" aria-label="History">
+      <header class="scr-head">
+        <h1 data-i18n="hist_title"></h1>
+        <button class="btn btn-text" id="btnClear"><span data-icon="trash"></span><span data-i18n="clear"></span></button>
+      </header>
+      <div class="stats" id="histStats"></div>
+      <div class="chips filters" id="histFilters"></div>
+      <div id="histList"></div>
+      <div class="empty" id="histEmpty" hidden>
+        <div class="empty-art" data-icon="emptyArt"></div>
+        <h2 data-i18n="empty_t"></h2>
+        <p data-i18n="empty_s"></p>
+        <button class="btn btn-filled" id="emptyCta" data-i18n="empty_cta"></button>
+      </div>
+    </section>
+
+    <!-- ════ PROTECT SCREEN ════ -->
+    <section class="screen" id="screen-protect" aria-label="Protect my devices">
+      <header class="scr-head"><h1 data-i18n="protect_title"></h1></header>
+      <p class="scr-sub" data-i18n="protect_sub"></p>
+      <div id="protList"></div>
+      <div class="card sim-card">
+        <h2 data-i18n="sim_title"></h2>
+        <p class="scr-sub" data-i18n="sim_sub"></p>
+        <div class="btn-col">
+          <button class="btn btn-tonal" id="simSms"><span data-icon="bell"></span><span data-i18n="sim_sms"></span></button>
+          <button class="btn btn-tonal" id="simCopy"><span data-icon="copy"></span><span data-i18n="sim_copy"></span></button>
+          <button class="btn btn-tonal" id="simSite"><span data-icon="octaX"></span><span data-i18n="sim_site"></span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ SETTINGS SCREEN ════ -->
+    <section class="screen" id="screen-settings" aria-label="Settings">
+      <header class="scr-head"><h1 data-i18n="set_title"></h1></header>
+
+      <div class="card set-card">
+        <div class="set-row">
+          <div class="s-main"><h3 data-i18n="set_lang"></h3></div>
+          <div class="seg" id="segLang" role="group" aria-label="Language">
+            <button data-val="en" class="on">English</button>
+            <button data-val="hi">हिन्दी</button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div class="s-main"><h3 data-i18n="set_theme"></h3></div>
+          <div class="seg" id="segTheme" role="group" aria-label="Theme">
+            <button data-val="light"><span data-icon="sun"></span><span data-i18n="th_light"></span></button>
+            <button data-val="dark"><span data-icon="moon"></span><span data-i18n="th_dark"></span></button>
+            <button data-val="auto" class="on"><span data-icon="auto"></span><span data-i18n="th_auto"></span></button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div class="s-main"><h3 data-i18n="set_ts"></h3></div>
+          <div class="seg" id="segTs" role="group" aria-label="Text size">
+            <button data-val="n" class="on" data-i18n="ts_n"></button>
+            <button data-val="l" data-i18n="ts_l"></button>
+            <button data-val="xl" data-i18n="ts_xl"></button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div class="s-main"><h3 data-i18n="set_rm"></h3><p data-i18n="set_rm_d"></p></div>
+          <label class="switch"><input type="checkbox" id="swRm" aria-label="Reduce motion"><span class="trk"></span><span class="thb"></span></label>
+        </div>
+        <div class="set-row">
+          <div class="s-main"><h3 data-i18n="how_title"></h3></div>
+          <button class="btn btn-text" id="btnHowSet"><span data-i18n="open"></span><span data-icon="chevD"></span></button>
+        </div>
+        <div class="set-row">
+          <div class="s-main"><h3 data-i18n="lab_t"></h3><p data-i18n="lab_d"></p></div>
+          <button class="btn btn-text" id="btnLab"><span data-i18n="open"></span><span data-icon="chevD"></span></button>
+        </div>
+      </div>
+
+      <div class="card about-card">
+        <h3 data-i18n="about_title"></h3>
+        <p class="muted" data-i18n="about_v"></p>
+        <p data-i18n="about_d"></p>
+        <p class="muted" data-i18n="about_disc"></p>
+        <div class="help-card">
+          <span data-icon="phone"></span>
+          <div class="help-main"><span class="help-lb" data-i18n="helpline_t"></span><span class="help-num">1930</span></div>
+          <a class="btn btn-inv-outline" href="https://cybercrime.gov.in" target="_blank" rel="noopener"><span data-icon="external"></span><span>cybercrime.gov.in</span></a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ══════════ BOTTOM NAV (mobile) + FAB ══════════ -->
+<nav class="bottom-nav" aria-label="Tabs">
+  <button class="nav-item active" data-tab="check" aria-current="page" data-i18n-aria="nav_check" aria-label="Check"><span class="nav-ic"><span data-icon="scan"></span></span><span class="nav-lb" data-i18n="nav_check"></span></button>
+  <button class="nav-item" data-tab="history" data-i18n-aria="nav_history" aria-label="History"><span class="nav-ic"><span data-icon="history"></span></span><span class="nav-lb" data-i18n="nav_history"></span></button>
+  <button class="nav-item" data-tab="protect" data-i18n-aria="nav_protect" aria-label="Protect"><span class="nav-ic"><span data-icon="shieldCheck"></span></span><span class="nav-lb" data-i18n="nav_protect"></span></button>
+  <button class="nav-item" data-tab="settings" data-i18n-aria="nav_settings" aria-label="Settings"><span class="nav-ic"><span data-icon="sliders"></span></span><span class="nav-lb" data-i18n="nav_settings"></span></button>
+</nav>
+<button class="fab hide" id="fab" data-i18n-aria="nav_check" aria-label="Check a message"><span data-icon="shieldCheck"></span></button>
+
+<!-- ══════════ SHEET SCRIM ══════════ -->
+<div class="scrim" id="scrim"></div>
+
+<!-- ══════════ RESULT SHEET (mobile) ══════════ -->
+<section class="sheet" id="sheetResult" role="dialog" aria-modal="true" aria-label="Scan result">
+  <div class="sheet-handle" data-drag><i></i></div>
+  <div class="sheet-title-row">
+    <h3 data-i18n="res_title"></h3>
+    <button class="iconbtn" id="resClose" data-i18n="close" aria-label="Close"><span data-icon="x"></span></button>
+  </div>
+  <div class="sheet-body" id="slotResult" aria-live="polite"></div>
+</section>
+
+<!-- ══════════ HOW-IT-WORKS SHEET ══════════ -->
+<section class="sheet" id="sheetHow" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+  <div class="sheet-handle" data-drag><i></i></div>
+  <div class="sheet-title-row">
+    <h3 id="howTitle" data-i18n="how_title"></h3>
+    <button class="iconbtn" id="howClose" data-i18n="close" aria-label="Close"><span data-icon="x"></span></button>
+  </div>
+  <div class="sheet-body">
+    <div class="how-l"><span data-icon="scan"></span><div><h3 data-i18n="how_l1t"></h3><p data-i18n="how_l1d"></p></div></div>
+    <div class="how-l"><span data-icon="link"></span><div><h3 data-i18n="how_l2t"></h3><p data-i18n="how_l2d"></p></div></div>
+    <div class="how-l"><span data-icon="chat"></span><div><h3 data-i18n="how_l3t"></h3><p data-i18n="how_l3d"></p></div></div>
+    <p class="how-priv" data-i18n="how_priv"></p>
+    <button class="btn btn-filled btn-block" id="howClose2" data-i18n="close"></button>
+  </div>
+</section>
+
+<!-- ══════════ CONFIRM DIALOG ══════════ -->
+<div class="dlg" id="dlgClear" role="alertdialog" aria-modal="true" aria-labelledby="dlgClearT">
+  <div class="dlg-box">
+    <h3 id="dlgClearT" data-i18n="clear_q"></h3>
+    <p data-i18n="clear_d"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-text" id="dlgCancel" data-i18n="cancel"></button>
+      <button class="btn btn-filled" id="dlgOk" data-i18n="confirm"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ANDROID SMS BANNER ══════════ -->
+<div class="sms-banner" id="smsBanner" role="alert">
+  <div class="sms-card">
+    <div class="sms-app-ic" data-icon="phoneDev"></div>
+    <div class="sms-main">
+      <div class="sms-meta"><strong>Messages</strong><span id="smsTime"></span></div>
+      <div class="sms-sender">AD-SBIKYC</div>
+      <p class="sms-body" id="smsBody"></p>
+      <div class="sms-warn"><span data-icon="shieldCheck"></span><span data-i18n="sms_warn"></span></div>
+    </div>
+  </div>
+  <div class="sms-actions">
+    <button class="btn btn-outline" id="smsDismiss" data-i18n="sms_dismiss"></button>
+    <button class="btn btn-filled" id="smsCheck" data-i18n="sms_check"></button>
+  </div>
+</div>
+
+<!-- ══════════ DESKTOP CLIPBOARD TOAST ══════════ -->
+<div class="desk-toast" id="deskToast" role="status">
+  <span class="dt-ic" data-icon="alertTri"></span>
+  <div class="dt-main">
+    <p data-i18n="toast_copy_t"></p>
+    <button class="dt-link" id="dtCheck" data-i18n="toast_check"></button>
+  </div>
+  <button class="iconbtn" id="dtClose" data-i18n="close" aria-label="Close"><span data-icon="x"></span></button>
+</div>
+
+<!-- ══════════ SNACKBAR ══════════ -->
+<div class="snackbar" id="snack" role="status"><span id="snackTxt"></span></div>
+
+<!-- ══════════ SCAM-SITE OVERLAY ══════════ -->
+<div class="scam-ov" id="scamOv" role="alertdialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ov-panel">
+    <div class="ov-ic" data-icon="octaX"></div>
+    <h2 id="ovTitle" data-i18n="ov_title"></h2>
+    <p class="ov-dom" id="ovDom">sbi-kyc-update.xyz</p>
+    <p class="ov-body" data-i18n="ov_body"></p>
+    <div class="ov-actions">
+      <button class="btn btn-inv btn-lg btn-block" id="ovBack" data-i18n="ov_back"></button>
+      <button class="btn btn-inv-text btn-block" id="ovCont" data-i18n="ov_cont"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ TEST LAB SHEET ════════ -->
+<section class="sheet" id="sheetLab" role="dialog" aria-modal="true" aria-labelledby="labTitle">
+  <div class="sheet-handle" data-drag><i></i></div>
+  <div class="sheet-title-row">
+    <h3 id="labTitle" data-i18n="lab_t"></h3>
+    <button class="iconbtn" id="labClose" data-i18n="close" aria-label="Close"><span data-icon="x"></span></button>
+  </div>
+  <div class="sheet-body">
+    <button class="btn btn-filled btn-block" id="labRun" type="button"><span data-icon="scan"></span><span data-i18n="lab_run"></span></button>
+    <div id="labOut" aria-live="polite"></div>
+    <p class="how-priv" style="margin-top:14px" data-i18n="lab_note"></p>
+  </div>
+</section>
+
+<!-- ════════ ONBOARDING SHEET (first launch only) ════════ -->
+<section class="sheet" id="sheetOnb" role="dialog" aria-modal="true" aria-labelledby="onbTitle">
+  <div class="sheet-handle" data-drag><i></i></div>
+  <div class="sheet-title-row">
+    <h3 id="onbTitle" data-i18n="onb_t"></h3>
+    <button class="btn btn-text" id="onbSkip" data-i18n="onb_skip"></button>
+  </div>
+  <div class="sheet-body">
+    <div class="how-l"><span data-icon="clipboard"></span><div><h3 data-i18n="onb_s1_t"></h3><p data-i18n="onb_s1_d"></p></div></div>
+    <div class="how-l"><span data-icon="scan"></span><div><h3 data-i18n="onb_s2_t"></h3><p data-i18n="onb_s2_d"></p></div></div>
+    <div class="how-l"><span data-icon="shieldCheck"></span><div><h3 data-i18n="onb_s3_t"></h3><p data-i18n="onb_s3_d"></p></div></div>
+    <button class="btn btn-filled btn-block" id="onbGo" type="button" data-i18n="onb_go"></button>
+  </div>
+</section>
+
+<!-- ════════ DEMO STORY (full-screen stepper for judges) ════════ -->
+<div class="demo-ov" id="demoOv" role="dialog" aria-modal="true" aria-labelledby="demoTitle">
+  <div class="demo-panel">
+    <header class="demo-head">
+      <h2 id="demoTitle" data-i18n="demo_t"></h2>
+      <button class="iconbtn" id="demoClose" data-i18n="close" aria-label="Close"><span data-icon="x"></span></button>
+    </header>
+    <div class="demo-scroll">
+      <div class="demo-card">
+        <section class="demo-step" data-step="0">
+          <div class="demo-avatar" data-icon="user"></div>
+          <h3 data-i18n="d1_t"></h3>
+          <p class="d-body" data-i18n="d1_b"></p>
+          <div class="demo-tags">
+            <span class="demo-tag">58 · Mumbai</span>
+            <span class="demo-tag" data-i18n="d1_t1"></span>
+            <span class="demo-tag" data-i18n="d1_t2"></span>
+          </div>
+        </section>
+        <section class="demo-step" data-step="1">
+          <h3 data-i18n="d2_t"></h3>
+          <p class="d-body" data-i18n="d2_b"></p>
+          <div class="phone">
+            <div class="phone-head"><strong>Messages</strong><span data-i18n="demo_time"></span></div>
+            <div class="phone-body">
+              <div class="bubble"><b>AD-SBIKYC</b><span id="demoBubble"></span><span class="b-time" data-i18n="demo_time"></span></div>
+            </div>
+          </div>
+        </section>
+        <section class="demo-step" data-step="2">
+          <h3 data-i18n="d3_t"></h3>
+          <div class="demo-split">
+            <div class="split-card">
+              <div class="split-h"><span data-icon="octaX"></span><span data-i18n="d3_wo"></span></div>
+              <ul class="split-list">
+                <li><span data-icon="x"></span><span data-i18n="d3_s1"></span></li>
+                <li><span data-icon="x"></span><span data-i18n="d3_s2"></span></li>
+                <li><span data-icon="x"></span><span data-i18n="d3_s3"></span></li>
+                <li><span data-icon="x"></span><span data-i18n="d3_s4"></span></li>
+              </ul>
+            </div>
+            <div class="split-card">
+              <div class="split-h"><span data-icon="shieldCheck"></span><span data-i18n="d3_w"></span></div>
+              <div class="verdict v-scam demo-verdict"><span class="v-ic" data-icon="octaX"></span>
+                <div class="v-body"><div class="v-label" data-i18n="v_scam"></div>
+                <div class="sev" aria-hidden="true"><i></i><i></i><i></i></div></div></div>
+              <ul class="split-list">
+                <li><span data-icon="checkCircle"></span><span data-i18n="d3_a2"></span></li>
+                <li><span data-icon="checkCircle"></span><span data-i18n="d3_a3"></span></li>
+                <li><span data-icon="checkCircle"></span><span data-i18n="d3_a4"></span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="demo-dots" id="demoDots" role="group"></div>
+    <footer class="demo-foot">
+      <button class="btn btn-outline" id="demoBack" type="button"><span data-icon="chevD" class="rot-l"></span><span data-i18n="demo_back"></span></button>
+      <button class="btn btn-filled" id="demoNext" type="button" data-i18n="demo_next"></button>
+    </footer>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+
+<script>
+"use strict";
+/* ══════════════════════════════════════════════════════════════════
+   CONFIG
+   ══════════════════════════════════════════════════════════════════ */
+const APP_NAME = 'ScamShield';
+const APP_VERSION = '1.0';
+const STORAGE_KEY = 'scamshield.v1';
+/* Set to your backend origin (e.g. "https://api.example.com") to send
+   checks to a real server. Empty = fully offline, local rules only.
+   Expected response shape — see analyze() in the DETECTION section. */
+const API_BASE = "";
+const TABS = ['check', 'history', 'protect', 'settings'];
+
+/* Realistic example messages (3 scams, 2 genuine). */
+const EXAMPLES = [
+  { label: { en: 'Fake SBI KYC scam', hi: 'फर्ज़ी SBI KYC घोटाला' },
+    text: 'Dear Customer, your SBI NetBanking has been BLOCKED because your KYC has expired. Update your KYC immediately to avoid permanent account closure: http://sbi-kyc-update.xyz/verify — State Bank of India (no reply)' },
+  { label: { en: 'Electricity cut-off scam', hi: 'बिजली कटौती घोटाला' },
+    text: 'ELECTRICITY BOARD: Your electricity connection will be DISCONNECTED tonight at 9:30 PM due to unpaid bill. Update your payment now: https://bill-update-desk.top/pay or call 9312345678 — Electricity Dept' },
+  { label: { en: 'Customs "digital arrest" scam', hi: 'कस्टम्स "डिजिटल अरेस्ट" घोटाला' },
+    text: 'CUSTOMS ALERT: A parcel booked in your name containing illegal items has been SEIZED by Mumbai Customs. A case will be filed. To avoid ARREST and legal action, call the investigating officer immediately: +91 99871 20458, or verify at customs-clearance-info.click' },
+  { label: { en: 'Real bank OTP', hi: 'असली बैंक OTP' },
+    text: 'Your One Time Password (OTP) for HDFC Bank NetBanking login is 582914. OTP is valid for 10 minutes. HDFC Bank will NEVER ask you to share this OTP with anyone. Do not share it. Helpline: 1800 123 1234' },
+  { label: { en: 'Swiggy order update', hi: 'Swiggy ऑर्डर अपडेट' },
+    text: 'Your Swiggy order #4567821 from Andhra Gunpowder is out for delivery. Sunil will deliver it in about 15 minutes. Track your order at swiggy.com/track/4567821 — Enjoy your meal!' }
+];
+
+/* Demo texts used by the Protect-screen simulations. */
+const SIM_SMS_TEXT = 'Your SBI KYC is expired. Update now: sbi-kyc-update.xyz/verify';
+const SIM_COPY_TEXT = 'Dear Customer, your SBI account will be BLOCKED within 24 hours. Verify now: http://sbi-netverify.xyz/pay';
+
+/* Priya's message — used by the "See a demo story" stepper and its
+   "check it yourself" CTA. Detected as SCAM by the engine. */
+const DEMO_SMS = 'Dear Customer, your SBI NetBanking has been BLOCKED because your KYC has expired. Update your KYC immediately to avoid permanent closure: http://sbi-kyc-update.xyz/verify — SBI';
+
+/* ══════════════════════════════════════════════════════════════════
+   I18N — every UI string in English + हिन्दी
+   ══════════════════════════════════════════════════════════════════ */
+const I18N = {
+  skip:            { en: 'Skip to content', hi: 'सीधे content पर जाएँ' },
+  tagline:         { en: 'Paste any suspicious SMS, WhatsApp message or link and get a plain-language verdict in seconds.',
+                     hi: 'कोई भी शक वाला SMS, WhatsApp संदेश या लिंक पेस्ट करें — सरल भाषा में जवाब पाएं।' },
+  nav_check:       { en: 'Check', hi: 'जाँच' },
+  nav_history:     { en: 'History', hi: 'इतिहास' },
+  nav_protect:     { en: 'Protect', hi: 'सुरक्षा' },
+  nav_settings:    { en: 'Settings', hi: 'सेटिंग्स' },
+  hint_short:      { en: 'Shortcuts: 1–4 switch tabs · Ctrl/⌘ + Enter checks · Esc closes', hi: 'शॉर्टकट: 1–4 टैब बदलें · Ctrl/⌘ + Enter जाँच · Esc बंद करे' },
+  field_label:     { en: 'Paste the message or link here', hi: 'संदेश या लिंक यहाँ पेस्ट करें' },
+  btn_check:       { en: 'Check now', hi: 'अभी जाँचें' },
+  btn_paste:       { en: 'Paste from clipboard', hi: 'क्लिपबोर्ड से पेस्ट करें' },
+  btn_upload:      { en: 'Upload screenshot', hi: 'स्क्रीनशॉट अपलोड करें' },
+  soon:            { en: 'Screenshot reading coming soon', hi: 'स्क्रीनशॉट पढ़ने की सुविधा जल्द आ रही है' },
+  remove:          { en: 'Remove', hi: 'हटाएँ' },
+  examples_label:  { en: 'Try an example', hi: 'उदाहरण आज़माएँ' },
+  pasted:          { en: 'Pasted from clipboard', hi: 'क्लिपबोर्ड से पेस्ट हो गया' },
+  paste_fail:      { en: "Couldn't read the clipboard — long-press the box and choose Paste.", hi: 'क्लिपबोर्ड नहीं पढ़ पाए — बॉक्स पर दबाकर Paste चुनें।' },
+  err_empty:       { en: 'Paste a message or link first.', hi: 'पहले कोई संदेश या लिंक पेस्ट करें।' },
+  err_generic:     { en: 'Something went wrong — please try again.', hi: 'कुछ गड़बड़ हुई — फिर कोशिश करें।' },
+  loading1:        { en: 'Reading message…', hi: 'संदेश पढ़ा जा रहा है…' },
+  loading2:        { en: 'Checking links…', hi: 'लिंक जाँचे जा रहे हैं…' },
+  loading3:        { en: 'Preparing advice…', hi: 'सलाह तैयार हो रही है…' },
+  res_title:       { en: 'Scan result', hi: 'जाँच का नतीजा' },
+  v_safe:          { en: 'SAFE', hi: 'सुरक्षित' },
+  v_susp:          { en: 'BE CAREFUL', hi: 'सावधान' },
+  v_scam:          { en: 'SCAM', hi: 'घोटाला' },
+  sent_safe:       { en: 'This message looks safe. We found no strong warning signs in it.', hi: 'यह संदेश सुरक्षित लगता है। इसमें कोई बड़ा खतरे का संकेत नहीं मिला।' },
+  sent_susp:       { en: 'This message has some warning signs. Be careful and verify before you act.', hi: 'इस संदेश में कुछ चेतावनी वाले संकेत हैं। कोई कदम उठाने से पहले जाँच-परख लें।' },
+  sent_scam:       { en: 'This message is almost certainly a scam. Do not click anything, do not call back, do not reply.', hi: 'यह संदेश लगभग पक्का घोटाला है। इसमें कुछ भी न दबाएँ, न कॉल करें, जवाब भी न दें।' },
+  sev_fmt:         { en: 'Risk level {n} of 3', hi: 'जोखिम स्तर: 3 में से {n}' },
+  score_label:     { en: 'Risk score', hi: 'जोखिम स्कोर' },
+  why_title:       { en: 'Why we think so', hi: 'हमें ऐसा क्यों लगता है' },
+  links_title:     { en: 'Links found in this message', hi: 'संदेश में मिले लिंक' },
+  msg_title:       { en: 'Your message — risky parts marked', hi: 'आपका संदेश — खतरनाक हिस्से चिह्नित' },
+  vs_msg:          { en: 'In the message', hi: 'संदेश में' },
+  vs_real:         { en: 'Real website', hi: 'असली वेबसाइट' },
+  advice_title:    { en: 'What to do now', hi: 'अब क्या करें' },
+  act_copy:        { en: 'Copy warning to share with family', hi: 'चेतावनी कॉपी करें' },
+  act_report:      { en: 'Report this scam', hi: 'घोटाला रिपोर्ट करें' },
+  act_again:       { en: 'Check another', hi: 'दूसरा संदेश जाँचें' },
+  copied:          { en: 'Copied — paste it in your family group', hi: 'कॉपी हो गया — अपने परिवार के group में भेजें' },
+  reporting:       { en: 'Opening the National Cyber Crime portal…', hi: 'राष्ट्रीय साइबर अपराध पोर्टल खुल रहा है…' },
+  hist_title:      { en: 'History', hi: 'इतिहास' },
+  stat_total:      { en: 'Checked', hi: 'जाँचे गए' },
+  stat_scam:       { en: 'Scams blocked', hi: 'घोटाले रोके' },
+  stat_safe:       { en: 'Safe messages', hi: 'सुरक्षित संदेश' },
+  filter_all:      { en: 'All', hi: 'सब' },
+  filter_scam:     { en: 'Scam', hi: 'घोटाला' },
+  filter_susp:     { en: 'Suspicious', hi: 'संदिग्ध' },
+  filter_safe:     { en: 'Safe', hi: 'सुरक्षित' },
+  clear:           { en: 'Clear history', hi: 'इतिहास मिटाएँ' },
+  clear_q:         { en: 'Clear all history?', hi: 'पूरा इतिहास मिटाएँ?' },
+  clear_d:         { en: 'All past checks will be removed from this device.', hi: 'इस डिवाइस की सभी पिछली जाँचें हट जाएँगी।' },
+  cancel:          { en: 'Cancel', hi: 'रद्द करें' },
+  confirm:         { en: 'Clear', hi: 'मिटाएँ' },
+  cleared:         { en: 'History cleared', hi: 'इतिहास मिटा दिया गया' },
+  removed:         { en: 'Removed', hi: 'हटा दिया गया' },
+  del_label:       { en: 'Delete this check', hi: 'यह जाँच हटाएँ' },
+  empty_t:         { en: 'No checks yet', hi: 'अभी तक कोई जाँच नहीं' },
+  empty_s:         { en: 'Paste a message on the Check tab — every result will be saved here.', hi: 'जाँच टैब पर कोई संदेश पेस्ट करें — सारे नतीजे यहाँ सुरक्षित रहेंगे।' },
+  empty_cta:       { en: 'Check a message', hi: 'संदेश जाँचें' },
+  just_now:        { en: 'just now', hi: 'अभी' },
+  m_ago:           { en: '{n} min ago', hi: '{n} मिनट पहले' },
+  h_ago:           { en: '{n} h ago', hi: '{n} घंटे पहले' },
+  d_ago:           { en: '{n} d ago', hi: '{n} दिन पहले' },
+  protect_title:   { en: 'Protect my devices', hi: 'अपने डिवाइस सुरक्षित करें' },
+  protect_sub:     { en: 'These layers are a demo for now — turn them on and try the simulations below.', hi: 'ये सुरक्षा परतें अभी डेमो हैं — चालू करके नीचे दिए सिमुलेशन आज़माएँ।' },
+  prot_ext:        { en: 'Browser Extension (Chrome)', hi: 'ब्राउज़र एक्सटेंशन (Chrome)' },
+  prot_ext_d:      { en: 'Checks every page you open and blocks lookalike bank sites before they load.', hi: 'खुलने वाले हर पेज की जाँच करके नकली बैंक साइटें वहीं रोक देता है।' },
+  prot_and:        { en: 'Android notification scanner', hi: 'Android नोटिफिकेशन स्कैनर' },
+  prot_and_d:      { en: 'Reads incoming SMS and alerts you instantly if a message looks like a scam.', hi: 'आने वाले SMS पढ़कर घोटाले जैसा लगने पर तुरंत चेतावनी देता है।' },
+  prot_dsk:        { en: 'Windows / Mac clipboard watcher', hi: 'Windows / Mac क्लिपबोर्ड वॉचर' },
+  prot_dsk_d:      { en: 'Watches the text you copy and warns you before you paste it somewhere risky.', hi: 'आप जो टेक्स्ट copy करते हैं उसे देखकर खतरे पर चेतावनी देता है।' },
+  on:              { en: 'Active · demo', hi: 'सक्रिय · डेमो' },
+  off:             { en: 'Off', hi: 'बंद' },
+  sim_title:       { en: 'See it in action', hi: 'खुद देखें' },
+  sim_sub:         { en: 'This is how ScamShield would warn you in real life.', hi: 'असली ज़िंदगी में ScamShield ऐसे ही चेतावनी देता है।' },
+  sim_sms:         { en: 'Simulate incoming SMS', hi: 'SMS नोटिफिकेशन देखें' },
+  sim_copy:        { en: 'Simulate copied text', hi: 'कॉपी किया टेक्स्ट देखें' },
+  sim_site:        { en: 'Simulate scam website', hi: 'घोटाला वेबसाइट देखें' },
+  sms_warn:        { en: 'ScamShield: SCAM — fake SBI link. Do not tap.', hi: 'ScamShield: घोटाला — फर्ज़ी SBI लिंक। न दबाएँ।' },
+  sms_check:       { en: 'Check', hi: 'जाँचें' },
+  sms_dismiss:     { en: 'Dismiss', hi: 'हटाएँ' },
+  toast_copy_t:    { en: 'Warning: the text you just copied looks like a scam', hi: 'चेतावनी: आपने जो टेक्स्ट copy किया है वह घोटाला जैसा लगता है' },
+  toast_check:     { en: 'Check it', hi: 'जाँचें' },
+  ov_title:        { en: 'Dangerous site blocked', hi: 'ख़तरनाक वेबसाइट रोक दी गई' },
+  ov_body:         { en: 'This site imitates sbi.co.in and may steal your bank login, OTP and money.', hi: 'यह साइट sbi.co.in की नकल है और आपका बैंक पासवर्ड, OTP और पैसे चुरा सकती है।' },
+  ov_back:         { en: 'Go back to safety', hi: 'वापस सुरक्षित जाएँ' },
+  ov_cont:         { en: 'I understand the risk, continue', hi: 'जोखिम समझता हूँ, फिर भी खोलें' },
+  ov_back_msg:     { en: 'Good choice — nothing was opened.', hi: 'सही फैसला — कुछ भी नहीं खुला।' },
+  ov_cont_msg:     { en: 'Stay careful — never enter your bank login there.', hi: 'सावधान रहें — वहाँ अपनी बैंक login कभी न डालें।' },
+  set_title:       { en: 'Settings', hi: 'सेटिंग्स' },
+  set_lang:        { en: 'Language', hi: 'भाषा' },
+  set_theme:       { en: 'Theme', hi: 'थीम' },
+  th_light:        { en: 'Light', hi: 'हल्की' },
+  th_dark:         { en: 'Dark', hi: 'गहरी' },
+  th_auto:         { en: 'Auto', hi: 'ऑटो' },
+  set_ts:          { en: 'Text size', hi: 'टेक्स्ट का आकार' },
+  ts_n:            { en: 'Normal', hi: 'सामान्य' },
+  ts_l:            { en: 'Large', hi: 'बड़ा' },
+  ts_xl:           { en: 'Extra large', hi: 'बहुत बड़ा' },
+  set_rm:          { en: 'Reduce motion', hi: 'कम एनिमेशन' },
+  set_rm_d:        { en: 'Turn off animations for a calmer experience.', hi: 'शांत अनुभव के लिए एनिमेशन बंद कर देता है।' },
+  open:            { en: 'Open', hi: 'खोलें' },
+  how_title:       { en: 'How ScamShield works', hi: 'ScamShield कैसे काम करता है' },
+  how_l1t:         { en: '1 · Reading the message', hi: '1 · संदेश पढ़ना' },
+  how_l1d:         { en: 'We look for panic words, threats, and requests for OTP, PIN, KYC or Aadhaar.', hi: 'हम घबराहट भरे शब्द, धमकियाँ और OTP, PIN, KYC या आधार मांगने वाली बातें ढूँढते हैं।' },
+  how_l2t:         { en: '2 · Checking the links', hi: '2 · लिंक जाँचना' },
+  how_l2d:         { en: 'Every link is compared with the real websites of Indian banks and services.', hi: 'हर लिंक की तुलना भारतीय बैंकों और सेवाओं की असली वेबसाइटों से होती है।' },
+  how_l3t:         { en: '3 · Explaining it simply', hi: '3 · सरल भाषा में समझाना' },
+  how_l3d:         { en: 'Findings become a simple verdict and clear next steps — no jargon.', hi: 'नतीजा और अगले कदम आसान शब्दों में मिलते हैं — कोई तकनीकी बात नहीं।' },
+  how_priv:        { en: 'Checks run privately on your device unless a server is connected. Nothing is uploaded in this demo.', hi: 'जाँच आपके ही डिवाइस पर, निजी तौर पर होती है (जब तक कोई सर्वर जुड़ा न हो)। इस डेमो में कुछ भी अपलोड नहीं होता।' },
+  close:           { en: 'Close', hi: 'बंद करें' },
+  about_title:     { en: 'About', hi: 'ऐप के बारे में' },
+  about_v:         { en: 'Version 1.0 · demo build', hi: 'संस्करण 1.0 · डेमो' },
+  about_d:         { en: 'ScamShield helps ordinary people spot digital fraud in India — no security knowledge needed.', hi: 'ScamShield आम लोगों को डिजिटल ठगी पहचानने में मदद करता है — कोई तकनीकी ज्ञान ज़रूरी नहीं।' },
+  about_disc:      { en: 'Best-effort guidance. When in doubt, call your bank on the number printed on your card, or the national helpline 1930.', hi: 'यह सलाह best-effort है। शक हो तो अपने कार्ड पर छपे नंबर पर बैंक को कॉल करें या राष्ट्रीय हेल्पलाइन 1930 पर।' },
+  helpline_t:      { en: 'National Cyber Crime Helpline', hi: 'राष्ट्रीय साइबर अपराध हेल्पलाइन' },
+  /* — Sidebar (shorter label, keeps the button on one line) — */
+  how_btn:         { en: 'How it works', hi: 'कैसे काम करता है' },
+  /* — Demo story — */
+  demo_t:          { en: 'See a demo story', hi: 'डेमो कहानी देखें' },
+  demo_next:       { en: 'Next', hi: 'आगे' },
+  demo_back:       { en: 'Back', hi: 'पीछे' },
+  demo_time:       { en: 'now', hi: 'अभी' },
+  demo_try:        { en: 'Check Priya’s message yourself', hi: 'प्रिया का संदेश खुद जाँचें' },
+  demo_step:       { en: 'Step {n} of 3', hi: 'चरण: 3 में से {n}' },
+  d1_t:            { en: 'Meet Priya', hi: 'प्रिया से मिलिए' },
+  d1_b:            { en: 'Priya is a 58-year-old school teacher in Mumbai. She uses her phone for WhatsApp, UPI and family photos — she is not a technical person. She is exactly the kind of person scammers hunt for.', hi: 'प्रिया मुंबई की 58 साल की स्कूल टीचर हैं। वह फ़ोन को WhatsApp, UPI और पारिवारिक फ़ोटो के लिए इस्तेमाल करती हैं — तकनीकी जानकारी नहीं रखतीं। ठग ऐसे ही लोगों को ढूँढते हैं।' },
+  d1_t1:           { en: 'School teacher', hi: 'स्कूल टीचर' },
+  d1_t2:           { en: 'Uses WhatsApp daily', hi: 'रोज़ WhatsApp इस्तेमाल' },
+  d2_t:            { en: 'The attack', hi: 'हमला' },
+  d2_b:            { en: 'One evening, this SMS lands on her phone. It looks official, it frightens her, and it gives her only a few minutes to act.', hi: 'एक शाम उनके फ़ोन पर यह SMS आता है। यह आधिकारिक दिखता है, डराता है, और कुछ ही मिनट में काम करने को कहता है।' },
+  d3_t:            { en: 'Without vs With ScamShield', hi: 'बिना बनाम ScamShield के साथ' },
+  d3_wo:           { en: 'Without ScamShield', hi: 'बिना ScamShield' },
+  d3_w:            { en: 'With ScamShield', hi: 'ScamShield के साथ' },
+  d3_s1:           { en: 'In panic, she taps the link', hi: 'घबराहट में वह लिंक खोल देती हैं' },
+  d3_s2:           { en: 'The site looks exactly like SBI’s', hi: 'वेबसाइट बिल्कुल SBI जैसी दिखती है' },
+  d3_s3:           { en: 'She enters her login, then the OTP that follows', hi: 'वह अपना login भरती हैं, फिर आने वाला OTP' },
+  d3_s4:           { en: 'By morning, Rs 40,000 is gone from her account', hi: 'सुबह तक खाते से ₹40,000 चले जाते हैं' },
+  d3_a2:           { en: 'Do not tap the link — it is a fake SBI site', hi: 'लिंक न खोलें — यह फर्ज़ी SBI साइट है' },
+  d3_a3:           { en: 'SBI never asks for KYC over SMS', hi: 'SBI कभी SMS से KYC नहीं मांगता' },
+  d3_a4:           { en: 'She shows her son, blocks the sender — money stays safe', hi: 'वह बेटे को दिखाती हैं, भेजने वाले को ब्लॉक करती हैं — पैसे सुरक्षित' },
+  /* — Read aloud — */
+  read_t:          { en: 'Read aloud', hi: 'पढ़कर सुनाएँ' },
+  read_stop:       { en: 'Stop reading', hi: 'आवाज़ रोकें' },
+  read_no:         { en: 'Speech is not available in this browser.', hi: 'इस ब्राउज़र में आवाज़ उपलब्ध नहीं है।' },
+  /* — Share — */
+  share_t:         { en: 'Share with family', hi: 'परिवार के साथ साझा करें' },
+  share_wa:        { en: 'Share on WhatsApp', hi: 'WhatsApp पर भेजें' },
+  share_open:      { en: 'Opening WhatsApp — warning copied for you', hi: 'WhatsApp खुल रहा है — चेतावनी कॉपी हो गई' },
+  share_done:      { en: 'Shared', hi: 'साझा हो गया' },
+  /* — Test lab — */
+  lab_t:           { en: 'Test lab', hi: 'टेस्ट लैब' },
+  lab_d:           { en: 'Run the built-in accuracy suite on this device.', hi: 'बिल्ट-इन सटीकता जाँच इसी डिवाइस पर चलाएँ।' },
+  lab_run:         { en: 'Run tests', hi: 'टेस्ट चलाएँ' },
+  lab_total:       { en: 'Cases', hi: 'मामले' },
+  lab_pass:        { en: 'Passed', hi: 'पास' },
+  lab_acc:         { en: 'Accuracy', hi: 'सटीकता' },
+  lab_fail:        { en: 'Failing messages', hi: 'नाकाम संदेश' },
+  lab_none:        { en: 'No failures — every case passed.', hi: 'कोई असफलता नहीं — हर मामला पास।' },
+  lab_note:        { en: 'The same results table is printed in the browser console (F12).', hi: 'यही नतीजे ब्राउज़र कंसोल (F12) में भी छपते हैं।' },
+  /* — On-device / server status chip — */
+  priv_on:         { en: 'On-device analysis: your message never leaves this phone', hi: 'ऑन-डिवाइस जाँच: आपका संदेश इस फ़ोन से बाहर नहीं जाता' },
+  priv_srv:        { en: 'Connected to ScamShield server', hi: 'ScamShield सर्वर से जुड़ा है' },
+  /* — First-launch onboarding — */
+  onb_t:           { en: 'Welcome to ScamShield', hi: 'ScamShield में आपका स्वागत है' },
+  onb_s1_t:        { en: 'Paste', hi: 'पेस्ट' },
+  onb_s1_d:        { en: 'Copy any doubtful SMS or WhatsApp message into the big box.', hi: 'कोई भी शक वाला SMS या WhatsApp संदेश बड़े बॉक्स में कॉपी करें।' },
+  onb_s2_t:        { en: 'Check', hi: 'जाँच' },
+  onb_s2_d:        { en: 'Read the verdict in plain language — and the reasons behind it.', hi: 'सरल भाषा में नतीजा पढ़ें — और उसके पीछे की वजहें।' },
+  onb_s3_t:        { en: 'Stay safe', hi: 'सुरक्षित रहें' },
+  onb_s3_d:        { en: 'Never share OTP or PIN. Report scams at cybercrime.gov.in or 1930.', hi: 'OTP या PIN कभी साझा न करें। घोटाले cybercrime.gov.in या 1930 पर रिपोर्ट करें।' },
+  onb_go:          { en: 'Get started', hi: 'शुरू करें' },
+  onb_skip:        { en: 'Skip', hi: 'छोड़ें' }
+};
+function t(key, n) {
+  const e = I18N[key];
+  if (!e) return key;
+  let s = e[state.lang] || e.en;
+  if (typeof n === 'number') s = s.replace('{n}', n);
+  return s;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   STATE — persisted via a safe localStorage wrapper
+   ══════════════════════════════════════════════════════════════════ */
+const store = (() => {
+  try {
+    const k = '__ss_test__';
+    window.localStorage.setItem(k, '1');
+    window.localStorage.removeItem(k);
+    return window.localStorage;
+  } catch (e) { /* private mode / disabled storage → in-memory fallback */
+    const m = {};
+    return {
+      getItem: k => (k in m ? m[k] : null),
+      setItem: (k, v) => { m[k] = String(v); },
+      removeItem: k => { delete m[k]; }
+    };
+  }
+})();
+
+const DEFAULTS = {
+  lang: 'en', theme: 'auto', ts: 'n', rm: null,
+  toggles: { ext: true, and: false, dsk: false },
+  history: [],
+  onboarded: false   /* first-launch onboarding shown once */
+};
+let state = loadState();
+
+function loadState() {
+  try {
+    const raw = JSON.parse(store.getItem(STORAGE_KEY) || '{}');
+    return {
+      lang: raw.lang === 'hi' ? 'hi' : 'en',
+      theme: ['light', 'dark', 'auto'].includes(raw.theme) ? raw.theme : 'auto',
+      ts: ['n', 'l', 'xl'].includes(raw.ts) ? raw.ts : 'n',
+      rm: typeof raw.rm === 'boolean' ? raw.rm : null,
+      onboarded: !!raw.onboarded,
+      toggles: Object.assign({}, DEFAULTS.toggles, raw.toggles && typeof raw.toggles === 'object' ? raw.toggles : {}),
+      history: Array.isArray(raw.history) ? raw.history.slice(0, 100) : []
+    };
+  } catch (e) { return JSON.parse(JSON.stringify(DEFAULTS)); }
+}
+function saveState() {
+  try { store.setItem(STORAGE_KEY, JSON.stringify({
+    lang: state.lang, theme: state.theme, ts: state.ts, rm: state.rm,
+    toggles: state.toggles, history: state.history.slice(0, 100),
+    onboarded: state.onboarded
+  })); } catch (e) { /* storage full — keep running in memory */ }
+}
+
+/* Session-only state */
+state.screen = 'check';
+state.histFilter = 'all';
+state.lastResult = null;
+state.lastText = '';
+state.resultLoc = null; /* 'inline' | 'sheet' | null */
+
+/* DOM helpers */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const escRe = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rmActive = () => document.documentElement.dataset.rm === '1';
+const mqDesk = window.matchMedia('(min-width: 920px)');
+const mqDark = window.matchMedia('(prefers-color-scheme: dark)');
+const mqRM = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+/* ══════════════════════════════════════════════════════════════════
+   DETECTION — the entire engine. One async entry point (analyze) +
+   a self-contained rule-based fallback (detectLocal).
+   Everything between DETECTION-START and DETECTION-END can be lifted
+   into a backend endpoint as-is: POST {text} → return detectLocal(text).
+   Result shape (also the API contract when API_BASE is set):
+     {
+       verdict: "safe" | "suspicious" | "scam",
+       score: 0–100,
+       reasons: [{icon, text_en, text_hi}],        // 3–5 items
+       links:   [{url, verdict, reason:{en,hi}, lookalike_of}],
+       advice:  [{text_en, text_hi}],
+       highlights: ["OTP", "sbi-kyc-update.xyz", …]
+     }
+   ══════════════════════════════════════════════════════════════════ */
+/*DETECTION-START*/
+
+/* ══════════════════════════════════════════════════════════════════════
+   1 · SCORE MODEL — every weight, bonus and floor, documented
+   ══════════════════════════════════════════════════════════════════════
+   LINK points (per link, added to the message score):
+     official domain / official subdomain ............ −20  (genuine)
+     bare IP address (http://192.168.5.4/login) ...... +30  scam
+     punycode label (xn--…) .......................... +30  scam
+     brand-token lookalike (sbi-kyc-update.xyz,
+       hdfcbank-secure.com, 1c1cibank-kyc-update.com,
+       iciclbank.com typosquat, sbi.co.in.verify-kyc.top
+       real domain embedded as an inner subdomain) ... +38  scam
+     official body w/o one official domain in host
+       (customs-clearance-info.click, aadhaar-…) ..... +26  scam
+     URL shortener (bit.ly, tinyurl, …) .............. +24  suspicious
+     cheap scam TLD (.xyz .top .click .info …) ....... +24  suspicious
+     two or more hyphens in the host ................ +14  suspicious
+     http:// (no TLS) ................................ +8
+     otherwise-plain domain ......................... +4
+     bare link with almost no message text ........... +10
+
+   TEXT signal groups (each fires at most once, adds one reason):
+     G·impersonation   bank/gov body name +12 · consumer brand +6
+     G·urgency         9 + 2 per extra hit, capped at 17
+     G·credential      soft ask (KYC/Aadhaar/card details/"9-digit
+                       code") +20 · "update your KYC" +20 · generic
+                       "update/verify your details/payment/bill" +12
+     G·threat          16 + 3 per extra hit, capped at 25
+     G·riskyLink       any link with verdict ≠ safe (points above)
+     G·callback         "call/WhatsApp/message + number", a personal
+                       10-digit mobile, or "press 9 to talk to an
+                       officer" ...................... +10  (toll-free
+                       1800/1860 numbers never fire)
+     G·reward          lottery/prize/KBC bait +14, +8 more when a
+                       claim path (risky link or number) exists
+     G·job             task/part-time "earn by liking videos" +22
+     plus one group per hard category below
+
+   HARD categories — each adds +30 and FLOORS THE SCORE AT 70 (scam):
+     H1  asks for OTP / PIN / CVV / UPI PIN (incl. Hinglish &
+         Devanagari "OTP साझा करें"), unless negated ("never share")
+     H2  asks to install AnyDesk/TeamViewer/QuickSupport/RustDesk
+     H3  asks to move money to a "safe account" / RBI account
+     H4  digital arrest: authority (CBI/police/customs/…) + coercion
+         (video call, "stay on the call", "do not tell anyone", …)
+     H5  sextortion: private video/photos + payment demand
+     H6  task-scam funnel: job bait + private contact number
+     H7  prize bait + "send Aadhaar/bank details/a fee to claim"
+     (H1/H2/H3/H4/H5 are the user-specified hard signals; H6/H7 are
+      documented extras — both patterns are near-certain scams.)
+
+   Extra pattern points (no group of their own):
+     pending/due bill-challan-emi pressure ............ +10
+     unsolicited 10-digit mobile in the text ......... +6
+     panic + number combo (urgency or threat AND a
+       callback number / mobile) ..................... +15
+     SHOUTING / many exclamation marks ............... +6
+
+   Combination logic:
+     2 distinct groups fire  → +8 bonus  AND score floored at 30
+     3+ groups fire          → +14 bonus (instead of +8), floor 30
+     any HARD category      → score floored at 70 → verdict scam
+
+   Genuine-message negatives (applied before floors):
+     "never share your OTP"-style negation .......... −12
+     each official-domain link ..................... −20
+     routine delivery-update phrasing .............. −8
+     "no action required / automated message" ...... −8
+
+   Verdict thresholds: score > 65 → scam · 30–65 → suspicious · < 30 safe
+   Known trade-offs (deliberate): short brands like "sbi/hdfc/axis" are
+   matched as whole labels or label prefixes, never inside longer
+   English words; "upi" only as a whole label (cupid.com stays safe);
+   known genuine brand-affiliated sites are whitelisted in REAL_DOMAINS.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 2 · Reference tables ──────────────────────────────────────────── */
+
+/* Official domains. A host that IS one of these, or ends with
+   ".<one of these>", is treated as genuine (−20). Extend freely. */
+const REAL_DOMAINS = ['sbi.co.in', 'onlinesbi.sbi', 'hdfcbank.com',
+  'icicibank.com', 'axisbank.com', 'pnbindia.in', 'bankofbaroda.co.in',
+  'canarabank.com', 'kotak.com', 'paytm.com', 'phonepe.com', 'amazon.in',
+  'flipkart.com', 'swiggy.com', 'zomato.com', 'irctc.co.in',
+  'indiapost.gov.in', 'trai.gov.in', 'incometax.gov.in', 'gst.gov.in',
+  'npci.org.in', 'cybercrime.gov.in', 'rbi.org.in', 'airtel.in', 'jio.com',
+  'mahadiscom.in', 'bsesdelhi.com', 'bescom.org', 'tatapower.com',
+  'parivahan.gov.in', 'fedex.com', 'bluedart.com', 'dhl.com',
+  'delhivery.com', 'uidai.gov.in', 'sbicard.com', 'hdfc.com',
+  'hdfclife.com', 'hdfcergo.com', 'iciciprulife.com', 'icicilombard.com',
+  'amazonpay.in', 'paytmmoney.com', 'kotaksecurities.com', 'amazonaws.com',
+  'jiomart.com', 'jiocinema.com'];
+
+/* Brand token found inside a hostname label → the official domain it
+   imitates. mode 'eq'  : token must be a whole label segment only
+                        (short tokens where substring hits would be
+                         false positives, e.g. upi → cupid.com)
+   mode 'seg'  : whole segment OR the segment starts with the token
+                        (3–4 letter brands: sbi, hdfc, axis, mseb…)
+   default     : token may appear anywhere in the segment (long brands)
+   real null   : official body with no single official site → strong
+                 scam link, but no side-by-side diff is shown.        */
+const BRAND_TOKENS = [
+  { tok: 'sbi',        real: 'sbi.co.in',       mode: 'seg' },
+  { tok: 'onlinesbi',  real: 'onlinesbi.sbi' },
+  { tok: 'yono',       real: 'onlinesbi.sbi',   mode: 'seg' },
+  { tok: 'hdfcbank',   real: 'hdfcbank.com' },
+  { tok: 'hdfc',       real: 'hdfcbank.com',    mode: 'seg' },
+  { tok: 'icicibank',  real: 'icicibank.com' },
+  { tok: 'icici',      real: 'icicibank.com',   mode: 'seg' },
+  { tok: 'axisbank',   real: 'axisbank.com' },
+  { tok: 'axis',       real: 'axisbank.com',    mode: 'seg' },
+  { tok: 'pnb',        real: 'pnbindia.in',     mode: 'seg' },
+  { tok: 'kotak',      real: 'kotak.com' },
+  { tok: 'canara',     real: 'canarabank.com' },
+  { tok: 'bankofbaroda', real: 'bankofbaroda.co.in' },
+  { tok: 'paytm',      real: 'paytm.com' },
+  { tok: 'phonepe',    real: 'phonepe.com' },
+  { tok: 'gpay',       real: null,              mode: 'seg' },
+  { tok: 'amazon',     real: 'amazon.in' },
+  { tok: 'flipkart',   real: 'flipkart.com' },
+  { tok: 'swiggy',     real: 'swiggy.com' },
+  { tok: 'zomato',     real: 'zomato.com' },
+  { tok: 'irctc',      real: 'irctc.co.in' },
+  { tok: 'airtel',     real: 'airtel.in' },
+  { tok: 'jio',        real: 'jio.com',         mode: 'seg' },
+  { tok: 'mseb',       real: 'mahadiscom.in',   mode: 'seg' },
+  { tok: 'msedcl',     real: 'mahadiscom.in' },
+  { tok: 'mahadiscom', real: 'mahadiscom.in' },
+  { tok: 'mahavitaran', real: 'mahadiscom.in' },
+  { tok: 'bses',       real: 'bsesdelhi.com',   mode: 'seg' },
+  { tok: 'bescom',     real: 'bescom.org' },
+  { tok: 'tatapower',  real: 'tatapower.com' },
+  { tok: 'indiapost',  real: 'indiapost.gov.in' },
+  { tok: 'trai',       real: 'trai.gov.in',     mode: 'seg' },
+  { tok: 'rbi',        real: 'rbi.org.in',      mode: 'seg' },
+  { tok: 'upi',        real: 'npci.org.in',     mode: 'eq' },
+  { tok: 'npci',       real: 'npci.org.in' },
+  { tok: 'gst',        real: 'gst.gov.in',      mode: 'eq' },
+  { tok: 'incometax',  real: 'incometax.gov.in' },
+  { tok: 'customs',    real: null,              mode: 'seg' },
+  { tok: 'cbic',       real: null,              mode: 'seg' },
+  { tok: 'parivahan',  real: 'parivahan.gov.in' },
+  { tok: 'echallan',   real: 'parivahan.gov.in' },
+  { tok: 'cybercrime', real: 'cybercrime.gov.in' },
+  { tok: 'aadhaar',    real: null,              mode: 'seg' },
+  { tok: 'uidai',      real: 'uidai.gov.in' }
+];
+
+const SHORTENERS = new Set(['bit.ly', 'tinyurl.com', 'is.gd', 'cutt.ly',
+  'rb.gy', 'goo.gl', 'ow.ly', 'buff.ly', 'rebrand.ly', 'shorturl.at',
+  't.ly', 't.co', 'bit.do', 'tiny.cc']);
+
+const BAD_TLDS = new Set(['xyz', 'top', 'click', 'info', 'tk', 'ml', 'ga',
+  'cf', 'gq', 'buzz', 'surf', 'work', 'rest', 'icu', 'sbs', 'cfd',
+  'monster', 'quest']);
+
+/* Homoglyph passes — applied to each host label before token matching:
+   1c1cibank → icicibank (1→i), hdfcbank.c0m → hdfcbank.com (0→o),
+   rn → m, vv → w. Second pass tries 1→l for l/i confusable brands. */
+const HOMOGLYPH_PASSES = [
+  [['rn', 'm'], ['vv', 'w'], ['0', 'o'], ['1', 'i'], ['3', 'e'], ['5', 's']],
+  [['rn', 'm'], ['vv', 'w'], ['0', 'o'], ['1', 'l'], ['5', 's']]
+];
+
+const CAPS_OK = new Set(['OTP', 'PIN', 'CVV', 'KYC', 'SBI', 'HDFC', 'ICICI',
+  'PNB', 'UPI', 'TRAI', 'CBI', 'PAN', 'SMS', 'NDPS', 'FIR', 'PM', 'AM',
+  'RBI', 'ATM', 'CUSTOMS', 'ALERT', 'NETBANKING', 'YONO', 'KBC', 'MSEB',
+  'IMPS', 'NEFT', 'ED', 'A/C', 'RATAN']);
+
+/* ── 3 · Text-signal patterns (EN + Hinglish + Devanagari) ────────────
+   Note: JS \b is ASCII-only, so Devanagari alternatives are NEVER put
+   inside \b groups — they sit at the top level of the alternation.     */
+
+/* Urgency & panic: EN + turant/abhi/aaj raat/band ho jayega/kat jayega
+   + तुरंत/अभी/आज रात/ब्लॉक/कट जाएगी … */
+const RE_URG = new RegExp(
+  '(\\bblock(?:ed|ing)?\\b|\\block(?:ed|ing)?\\b|\\bsuspend(?:ed)?\\b|' +
+  'deactivat(?:e|ed|ion)|disconnec(?:t|ted|tion)|will\\s+be\\s+cut|cut\\s+off|' +
+  '\\bimmediately\\b|\\burgent(?:ly)?\\b|within\\s+\\d+\\s?(?:hours?|hrs?|days?|minutes?|mins?)|' +
+  'last\\s+warning|final\\s+(?:warning|notice)|\\btonight\\b|today\\s+itself|' +
+  'right\\s+now|act\\s+now|\\bexpires?\\s+(?:today|tonight|soon|immediately|now|in\\s+\\d+\\s*(?:hours?|hrs?|minutes?|mins?))\\b|\\bexpired\\b|expir(?:y|ation)|last\\s+day|\\bdeadline\\b|' +
+  'turant|\\babhi\\b|jaldi|aaj\\s+raat|aaj\\s+hi|band\\s+ho\\s+ja(?:y|ye)?g|' +
+  'kat\\s+ja(?:y|ye)?g|aakhri|\\d+\\s?ghant[oe]|' +
+  'तुरंत|तुरन्त|अभी|आज\\s+रात|आज\\s+ही|ब्लॉक|बंद|बन्द|कट\\s+जाएगा|कट\\s+जाएगी|कट\\s+जायेगा|कट\\s+जायेगी|' +
+  'निलंबित|समाप्त|अवरुद्ध|अंतिम|\\d+\\s?घंटे)', 'gi');
+
+/* Threats: arrest/legal action/case filed/SIM block/giraftar/kanooni
+   karwai + गिरफ्तार/कानूनी कार्रवाई/जेल/वारंट … */
+const RE_THREAT = new RegExp(
+  '(\\barrest(?:ed)?\\b|\\blegal\\s+(?:action|notice)\\b|\\bpolice\\b|\\bfir\\b|' +
+  'case\\s+(?:will\\s+be|has\\s+been|is)\\s+(?:filed|registered|booked)|' +
+  '\\bwarrant\\b|non-?bailable|\\bseized\\b|\\bdetained\\b|digital\\s+arrest|' +
+  'narcotics|money\\s+laundering|illegal\\s+(?:items|goods|content|parcel)|' +
+  'sim\\s+(?:card\\s+)?(?:will\\s+be\\s+)?(?:blocked?|suspended|deactivated)|' +
+  'giraftar|giraftari|kanooni\\s+(?:karwai|karvai|action)|' +
+  'कानूनी\\s+कार्रवाई|गिरफ्तार|गिरफ़्तार|जेल|वारंट|ज़ब्त|जब्त|मुकदमा|मुक़दमा|केस\\s+दर्ज|अवैध|नारकोटिक्स)', 'gi');
+
+/* Credential ask, HARD tier (OTP/PIN/CVV/UPI PIN) — verb then noun,
+   negation-aware ("never … share this OTP" does NOT fire).           */
+const RE_CRED_HARD = new RegExp(
+  '(\\b(?:share|send|provide|give|type|enter|update|confirm|bhejo|bhejen|bhej|batana|batao|dena|dijiye)\\b|' +
+  'साझा|भेजें|भेजो|दीजिए)[^.!?\\n]{0,45}' +
+  '(\\b(?:otp|upi\\s*pin|pin)\\b(?!\\s?code)|\\bcvv\\b|\\bcvc\\b|ओटीपी)', 'gi');
+
+/* Credential ask, HARD tier, noun-first (Hindi word order):
+   "OTP साझा करें", "पिन भेजें" — negated by मत/नहीं/कभी/न करें in between. */
+const RE_CRED_HARD_HI = new RegExp(
+  '(\\b(?:otp|pin)\\b|ओटीपी|पिन)[^।.!?\\n]{0,30}' +
+  '(साझा|भेजें|भेजो|दीजिए|दिजिए|बताएं|बताइए|देना\\s+होगा|दें)', 'gi');
+
+/* Credential ask, SOFT tier (+20): KYC/Aadhaar/password/card-bank
+   account details/screen code/"9-digit code", or noun-first
+   "KYC update …". PAN is deliberately NOT here (PAN-update requests
+   are far more common in genuine mail) — PAN only scores +12 below. */
+const RE_CRED_SOFT = new RegExp(
+  '(\\b(?:share|send|provide|give|type|upload|submit|bhejo|bhejen|bhej|batana|batao|dena|dijiye)\\b|' +
+  'साझा|भेजें|भेजो|दीजिए|बताएं)[^.!?\\n]{0,45}' +
+  '(\\b(?:kyc|aadhaar|aadhar|adhar|password|card\\s+details?|bank\\s+details?|account\\s+details?|' +
+  'screen\\s+(?:sharing\\s+)?code)\\b|(?:\\d|one|two|nine)[\\s-]?digit\\s+code|' +
+  'आधार|केवाईसी|पासवर्ड)', 'gi');
+
+const RE_CRED_NOUNFIRST = new RegExp(
+  '(\\b(?:kyc|otp|aadhaar|aadhar|adhar)\\b|आधार)[^.!?\\n]{0,20}' +
+  '(\\b(?:update|verify|confirm)\\b|अपडेट|सत्यापित)', 'gi');
+
+/* Credential expiring/pending: "your KYC has expired", "KYC is pending" */
+const RE_CRED_EXPIRE = new RegExp(
+  '(\\b(?:otp|kyc|aadhaar|aadhar|adhar|pan|password)\\b)[^.!?\\n]{0,25}' +
+  '(\\b(?:expired?|expiring|expire|pending|suspended|blocked)\\b|खत्म|बंद\\s+हो)', 'gi');
+
+/* Generic "update/verify your details/payment/bill/PAN" — the soft
+   +12 tier, incl. Hinglish verb ("bill update karein") and reversed
+   noun-first order. */
+const RE_CRED_UPDATE = new RegExp(
+  '(\\b(?:update|verify|confirm|re-?verify)\\b[^.!?\\n]{0,25}\\b(?:your\\s+)?(?:details?|payment|address|account|bill|pan)\\b' +
+  '|\\b(?:details?|payment|account|bill|pan|kyc)\\b[^.!?\\n]{0,15}\\b(?:update|verify|confirm)\\b' +
+  '|\\b(?:update|verify|confirm)\\b[^.!?\\n]{0,25}\\b(?:karein|karo|karne|kijiye)\\b)', 'gi');
+
+/* Bank / government impersonation (body is named in the message). */
+const RE_GOV_IMP = new RegExp(
+  '(\\bsbi\\b|\\blic\\b|\\bjio\\b|\\bairtel\\b|vodafone|state\\s+bank|\\byono\\b|\\bhdfc\\b|\\bicici\\b|\\baxis\\b|\\bpnb\\b|' +
+  'punjab\\s+national|bank\\s+of\\s+baroda|canara\\s+bank|union\\s+bank|\\bkotak\\b|indusind|' +
+  '\\brbi\\b|reserve\\s+bank|\\bupi\\b|\\btrai\\b|\\bcbi\\b|narcotics|customs|mumbai\\s+customs|' +
+  'india\\s+post|indiapost|income\\s+tax|\\bgst\\b|\\baadhaar\\b|\\buidai\\b|passport\\s+office|' +
+  'electricity\\s+(?:board|dept|department)|\\bmseb\\b|msedcl|\\bbses\\b|\\bbescom\\b|tata\\s+power|' +
+  'mahadiscom|mahavitaran|cyber\\s+(?:cell|crime)|ed\\s+officer|' +
+  'bijli|vidyut|बिजली|विद्युत|पुलिस|रिज़र्व\\s+बैंक|रिजर्व\\s+बैंक|साइबर\\s+सेल)', 'gi');
+
+/* Well-known consumer brands — silent +6, becomes a visible reason
+   only when other risk signals are present. */
+const RE_CONSUMER_IMP = new RegExp(
+  '(\\bpaytm\\b|\\bphonepe\\b|google\\s+pay|\\bgpay\\b|\\bamazon\\b|\\bflipkart\\b|' +
+  '\\bswiggy\\b|\\bzomato\\b|\\bmyntra\\b|\\bairtel\\b|\\bjio\\b|vodafone|\\blic\\b|tata\\s+power|\\birctc\\b|' +
+  '\\buber\\b|\\bola\\b|rapido|netflix|\\bfedex\\b|bluedart|blue\\s+dart|\\bdhl\\b|delhivery|\\bekart\\b)', 'gi');
+
+/* Reward bait: lottery / won / prize / KBC / लॉटरी / जीते … */
+const RE_REWARD = new RegExp(
+  '(\\blottery\\b|lucky\\s+draw|\\bwon\\b|\\bwinner\\b|jackpot|crorepati|\\bprize\\b|\\bkbc\\b|' +
+  'free\\s+(?:gift|recharge|charge|iphone)|लॉटरी|करोड़पति|इनाम|केबीसी|जीते|जीता|जीतें)', 'gi');
+
+/* Job / task scams: part-time job, earn by liking videos, typing work,
+   prepaid tasks, रोज कमाई … */
+const RE_JOB = new RegExp(
+  '(\\bpart\\s?-?\\s?time\\b[^.!?\\n]{0,20}\\b(?:job|work)\\b|typing\\s+(?:job|work)|' +
+  'form\\s+filling|data\\s+entry|work\\s+from\\s+home|pre-?paid\\s+tasks?|' +
+  'daily\\s+(?:earning|income|payout|kaam|kamai)|' +
+  'earn(?:ing)?\\s+(?:rs\\.?|₹|money|daily|per\\s+day|per\\s+month|upto|up\\s+to)|' +
+  'by\\s+(?:liking|watching|rating|subscribing|reviewing)|liking\\s+(?:youtube\\s+)?videos|' +
+  'रोज(?:ा|े)?\\s*(?:कमाई|पैसे)|घर\\s+बैठे)', 'gi');
+
+/* HARD · instant-loan app funnel: approval bait + no-document promise + fee demand/APK. */
+const RE_LOAN_APP = new RegExp(
+   '(instant\\s+loan|pre-?approved\\s+loan|loan\\s+approved)' +
+   '[\\s\\S]{0,120}?(no\\s+documents?|without\\s+documents?|zero\\s+documents?|processing\\s+(?:fee|charges)|\\.apk)', 'gi');
+
+const RE_LOAN_APP2 = new RegExp(
+   '\\bloan\\b[^.!?\\n]{0,40}\\bapproved\\b[\\s\\S]{0,120}?(no\\s+documents?|without\\s+documents?|zero\\s+documents?|\\.apk|\\bpay\\b[^.!?\\n]{0,30}processing\\s+(?:fee|charges))', 'gi');
+
+/* HARD · remote-control apps — nobody legitimate ever asks this. */
+const RE_REMOTE = new RegExp(
+  '(anydesk|any\\s+desk|teamviewer|team\\s+viewer|quicksupport|quick\\s+support|rustdesk|' +
+  'remotepc|supremo|gotoassist|screen\\s+sharing\\s+app|' +
+  'remote\\s+(?:access|control|support)\\s+(?:app|software|application)|' +
+  'रिमोट\\s+(?:एक्सेस|कंट्रोल|सपोर्ट))', 'gi');
+
+/* HARD · "safe account" / RBI-account money transfer (digital arrest). */
+const RE_SAFE_ACCT = new RegExp(
+  '(\\b(?:transfer|move|deposit|shift)\\b[^.!?\\n]{0,60}\\b(?:safe\\s+(?:account|keeping|locker)|rbi\\s+account|reserve\\s+bank)\\b' +
+  '|\\b(?:transfer|move|deposit|shift|send)\\b[^.!?\\n]{0,45}\\b(?:money|funds|amount)\\b[^.!?\\n]{0,45}\\bsafe\\s+(?:account|locker)\\b' +
+  '|सुरक्षित\\s+खाते?|सेफ\\s+खाते?)', 'gi');
+
+/* HARD · digital arrest = named authority + coercion. */
+const RE_DA_AUTH = new RegExp(
+  '(\\bcbi\\b|enforcement\\s+directorate|\\bed\\b|\\bed\\s+(?:officer|notice|office)|\\bpolice\\b|\\bcustoms\\b|narcotics|' +
+  'cyber\\s+(?:cell|crime|police)|interpol|judicial|magistrate|digital\\s+arrest|\\brbi\\b|' +
+  'पुलिस|कस्टम्स|साइबर\\s+पुलिस|नारकोटिक्स)', 'gi');
+const RE_DA_COERCE = new RegExp(
+  '(video\\s?-?\\s?call|stay\\s+on\\s+(?:the\\s+)?call|do\\s+not\\s+(?:tell|disconnect|hang\\s?up)|' +
+  'don\'?t\\s+(?:tell|disconnect|hang\\s?up)|safe\\s+(?:account|keeping)|transfer\\s+(?:money|funds)|' +
+  'digital\\s+arrest|online\\s+(?:detention|arrest)|under\\s+arrest|under\\s+investigation|investigation|verification\\s+deposit|deposit\\s+required|' +
+  'वीडियो\\s+कॉल|डिजिटल\\s+अरेस्ट|ऑनलाइन\\s+अरेस्ट|किसी\\s+को\\s+न\\s+बताएं|कॉल\\s+पर\\s+रुके)', 'gi');
+
+/* HARD · sextortion / blackmail: intimate media + payment demand.
+   Bare "send" is deliberately NOT a demand — "send me your photos
+   from the trip" from a friend must stay safe. */
+const RE_SEX_MEDIA = new RegExp(
+  '(private\\s+(?:video|clip|photo|pic|picture|camera)|' +
+  'your\\s+(?:private\\s+)?(?:video|photos?|pics?|clips?)|nudes?|' +
+  'nude\\s+(?:pics?|photos?|video|clips?)|compromising\\s+(?:video|photo|pic)|hidden\\s+camera|' +
+  'निजी\\s+(?:वीडियो|तस्वीर|फोटो|क्लिप)|हमारे\\s+पास[^।.!?\\n]{0,40}(?:वीडियो|तस्वीरें|तस्वीर|फोटो))', 'gi');
+const RE_SEX_DEMAND = new RegExp(
+  '(\\bpay\\b|\\bmoney\\b|\\brs\\.?\\b|₹|\\bupi\\b|bitcoin|\\btransfer\\b|\\bdeposit\\b|blackmail|' +
+  'वरना|warna|पैसे|रुपये|देना\\s+होगा|सबको\\s+भेज)', 'gi');
+
+/* "Press 9 to speak to an officer" — classic call-back trick. */
+const RE_PRESS = new RegExp('(press\\s*(?:\\d|one|two|nine|ek)\\b|दबाएं|दबाओ)', 'gi');
+
+/* Contact-channel words + unsolicited mobile numbers (toll-free
+   1800/1860 and short codes never match). */
+const RE_CALL_WORD = /(\bcall\b|\bwhatsapp\b|whats\s?app|\bmsg\b|\bmessage\b|\bcontact\b|\breach\b|\bdial\b|कॉल|संपर्क)/g;
+const RE_MOBILE = /(?:\+?91[\s-]?)?\b[6-9]\d{4}[\s-]?\d{5}\b/g;
+
+/* WhatsApp / Telegram contact-me links (t.me, wa.me, chat.whatsapp.com) */
+const RE_CONTACT_LINK = /(?:^|[./])(?:wa\.me|t\.me|telegram\.me|chat\.whatsapp\.com|api\.whatsapp\.com)(?:[./]|$)/gi;
+
+/* e-challan / चालान */
+const RE_CHALLAN = /(challan|चालान)/gi;
+
+/* "bill pending", "payment due" pressure (soft, not a group). */
+const RE_PENDING_PAY = /(\b(?:bill|payment|challan|emi)\b[^.!?\n]{0,20}\b(?:pending|due|overdue)\b)/gi;
+
+/* OTP that was sent TO you (code near the word) — a genuine marker. */
+const OTP_TO_YOU_RE = /(\b(?:otp|code|password)\b[^.!?\n]{0,25}\b\d{4,8}\b|\b\d{4,8}\b[^.!?\n]{0,25}\b(?:otp|code)\b)/i;
+
+/* "Never share your OTP"-style reassurance — negates credential asks. */
+const NEG_SHARE_RE = /(\b(?:never|no\s+one|nobody)\b[^.!?\n]{0,45}\b(?:otp|pin|cvv|kyc|password|ask|share)\b|\b(?:do\s+not|don'?t|dont)\s+(?:share|ask|call)\b|\b(?:otp|pin|kyc|aadhaar?)\b[^.!?\n]{0,30}\b(?:mat|nahi|kabhi)\b|कभी\s+नहीं|साझा\s+मत|मत\s+करें|न\s+करें)/i;
+const NEG_BEFORE_RE = /\b(?:never|do\s+not|don'?t|dont|won'?t|not|mat|nahi|kabhi)\b|कभी|मत|नहीं|न\s+कर/i;
+const NEG_BETWEEN_RE = /कभी|मत|नहीं|न\s+कर|न\s+दें|\b(?:mat|nahi|kabhi)\b/i;
+
+/* Genuine-message markers */
+const RE_DELIVERY = /(out\s+for\s+delivery|will\s+be\s+delivered|your\s+order|delivery\s+partner|order\s?#\d|track\s+your\s+(?:order|package)|\bshipped\b|arriving\s+(?:today|tomorrow)|आपका\s+ऑर्डर|डिलीवरी)/i;
+const RE_NO_ACTION = /(no\s+action\s+(?:is\s+)?(?:required|needed)|ignore\s+(?:this|if|when)|automated\s+message|informational\s+message|do\s+not\s+reply)/i;
+
+/* ── 4 · URL extraction & helpers ──────────────────────────────────── */
+const TLD_SRC = '(?:com|in|net|org|xyz|top|click|info|io|app|gov|edu|tk|ml|ga|cf|gq|me|co|biz|live|shop|online|site|link|icu|sbs|cfd|rest|quest|ly|gy|to|cc|ms|gg|be|tv|sbi)';
+const URL_RE = new RegExp(
+  '(?:https?://|www\\.)[^\\s<>"\u0060]+|(?:[a-z0-9][\\w-]*\\.)+' + TLD_SRC + '(?![\\w-])(?:/[^\\s<>"\u0060]*)?', 'gi');
+
+function extractUrls(text) {
+  const found = [];
+  let m;
+  URL_RE.lastIndex = 0;
+  while ((m = URL_RE.exec(text)) !== null && found.length < 8) {
+    if (m.index > 0 && text[m.index - 1] === '@') continue; /* email address */
+    const url = m[0].replace(/[.,!?;:)\]]+$/, '');
+    if (url.length > 4 && !found.includes(url)) found.push(url);
+  }
+  return found;
+}
+function urlHost(url) {
+  try {
+    let h = url.toLowerCase().replace(/^[a-z]+:\/\//, '').split('/')[0];
+    const at = h.lastIndexOf('@');
+    if (at > -1) h = h.slice(at + 1);
+    h = h.split(':')[0];
+    return h.replace(/^www\./, '') || h;
+  } catch (e) { return ''; }
+}
+function realDomainOf(host) {
+  if (REAL_DOMAINS.includes(host)) return host;
+  for (const d of REAL_DOMAINS) if (host.endsWith('.' + d)) return d;
+  return null;
+}
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+/* Is `host` a fake of a real bank/service/government domain?
+   Order: punycode → real-domain-embedded-as-subdomain → brand token
+   (raw spelling) → brand token (homoglyph-normalised) → typosquat
+   (1–2 letter misspelling). Never fires for official domains.       */
+function findLookalike(host) {
+  if (realDomainOf(host)) return null;
+  const labels = host.split('.');
+  for (const l of labels) {
+    if (l.indexOf('xn--') === 0) return { kind: 'punycode', real: null, brand: l };
+  }
+  /* real domain embedded inside a longer address: sbi.co.in.verify-kyc.top */
+  for (const d of REAL_DOMAINS) {
+    if (host.indexOf(d) > -1) return { kind: 'embedded', real: d, brand: d };
+  }
+  const passes = [null].concat(HOMOGLYPH_PASSES);
+  for (const pass of passes) {
+    for (const label of labels) {
+      if (label.length < 3) continue;
+      let form = label;
+      if (pass) for (const pair of pass) form = form.split(pair[0]).join(pair[1]);
+      const segs = form.split(/[^a-z0-9]+/).filter(Boolean);
+      for (const bt of BRAND_TOKENS) {
+        let hit = false;
+        if (bt.mode === 'eq') hit = segs.indexOf(bt.tok) > -1;
+        else if (bt.mode === 'seg') hit = segs.indexOf(bt.tok) > -1 || segs.some(function (s) { return s.indexOf(bt.tok) === 0; });
+        else hit = segs.some(function (s) { return s.indexOf(bt.tok) > -1; });
+        if (hit) return { kind: pass ? 'homoglyph' : 'lookalike', real: bt.real, brand: bt.tok };
+      }
+    }
+  }
+  /* 1–2 letter typosquat of a real domain: iciclbank.com, hdfcbnk.com */
+  for (const label of labels) {
+    if (label.length < 6 || label.length > 30 || /\d/.test(label)) continue;
+    for (const d of REAL_DOMAINS) {
+      const core = d.split('.').slice(0, -1).join('.');
+      if (core.length >= 6 && levenshtein(label, core) <= 2) {
+        return { kind: 'typo', real: d, brand: core };
+      }
+    }
+  }
+  return null;
+}
+function worstVerdict(a, b) {
+  const order = { safe: 0, suspicious: 1, scam: 2 };
+  return order[b] > order[a] ? b : a;
+}
+
+/* ── 5 · Link analysis (points feed the message score) ─────────────── */
+function analyzeLink(url) {
+  const host = urlHost(url);
+  const out = { url, host, verdict: 'safe', reason: null, lookalike_of: null, pts: 0 };
+  if (!host || host.indexOf('.') === -1) return out;
+  const real = realDomainOf(host);
+  if (real) {
+    out.pts = -20;
+    out.reason = { en: 'The link points to the real official website ' + host + '.',
+                   hi: 'लिंक असली आधिकारिक वेबसाइट ' + host + ' पर जाता है।' };
+    return out;
+  }
+  const look = findLookalike(host);
+  const tld = host.split('.').pop();
+  const isIP = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host);
+  const isShort = SHORTENERS.has(host);
+  const hyphens = (host.match(/-/g) || []).length;
+
+  if (isIP) {
+    out.pts += 30; out.verdict = 'scam';
+    out.reason = { en: 'The link is just a raw number address (IP) — real banks never send these.',
+                   hi: 'लिंक सिर्फ एक नंबर-पता (IP) है — असली बैंक कभी ऐसा पता नहीं भेजते।' };
+  } else if (look) {
+    if (look.kind === 'punycode') {
+      out.pts += 30; out.verdict = 'scam';
+      out.reason = { en: 'The link uses foreign-character (punycode) tricks to imitate a real website.',
+                     hi: 'लिंक विदेशी-अक्षर (punycode) की चाल से असली वेबसाइट की नकल करता है।' };
+    } else if (look.kind === 'embedded') {
+      out.pts += 38; out.verdict = 'scam'; out.lookalike_of = look.real;
+      out.reason = { en: 'The real website “' + look.real + '” is hidden inside a longer fake address — only the ending counts.',
+                     hi: 'असली वेबसाइट “' + look.real + '” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।' };
+    } else if (!look.real) {
+      out.pts += 26; out.verdict = 'scam';
+      out.reason = { en: 'The address puts an official body (“' + look.brand.toUpperCase() + '”) inside a website that is not its official site.',
+                     hi: 'पते में आधिकारिक निकाय (“' + look.brand.toUpperCase() + '”) का नाम है, पर वह उसकी आधिकारिक साइट नहीं है।' };
+    } else {
+      out.pts += 38; out.verdict = 'scam'; out.lookalike_of = look.real;
+      if (look.kind === 'homoglyph' || look.kind === 'typo') {
+        out.reason = { en: '“' + host + '” uses look-alike letters to imitate the real website “' + look.real + '”.',
+                       hi: '“' + host + '” एक जैसे दिखने वाले अक्षरों से असली वेबसाइट “' + look.real + '” की नकल है।' };
+      } else {
+        out.reason = { en: 'The link “' + host + '” is a fake copy of the real website “' + look.real + '”.',
+                       hi: 'लिंक “' + host + '” असली वेबसाइट “' + look.real + '” की नकल है।' };
+      }
+    }
+  }
+  if (isShort) {
+    out.pts += 24; out.verdict = worstVerdict(out.verdict, 'suspicious');
+    if (!out.reason) out.reason = { en: 'The link is shortened (' + host + ') to hide where it really leads.',
+      hi: 'लिंक छोटा किया गया है (' + host + ') ताकि असली पता छिप जाए।' };
+  } else if (BAD_TLDS.has(tld)) {
+    out.pts += 24; out.verdict = worstVerdict(out.verdict, 'suspicious');
+    if (!out.reason) out.reason = { en: 'The link ends in “.' + tld + '” — a cheap domain type that scammers often use.',
+      hi: 'लिंक का अंत “.' + tld + '” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।' };
+  }
+  if (hyphens >= 2) {
+    out.pts += 14; out.verdict = worstVerdict(out.verdict, 'suspicious');
+    if (!out.reason) out.reason = { en: 'The address has many hyphens (' + host + ') — a trick to look official.',
+      hi: 'पते में कई हाइफन (-) हैं (' + host + ') — आधिकारिक दिखने की चाल है।' };
+  }
+  if (/^http:\/\//i.test(url)) out.pts += 8;
+  if (!out.reason) {
+    out.pts += 4;
+    out.reason = { en: 'An ordinary website link. Nothing obviously wrong, but stay alert if the message felt scary.',
+      hi: 'सामान्य वेबसाइट लिंक। कुछ भी गलत नहीं दिखता — संदेश डरावना लगे तो सावधान रहें।' };
+  }
+  return out;
+}
+
+/* ── 6 · Advice per verdict ────────────────────────────────────────── */
+const ADVICE = {
+  scam: [
+    { text_en: 'Do not click the link or call any number in this message.',
+      text_hi: 'इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।' },
+    { text_en: 'Never share OTP, PIN, CVV or KYC details — real banks never ask for them.',
+      text_hi: 'OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।' },
+    { text_en: 'Call your bank yourself on the number printed on your card or passbook.',
+      text_hi: 'अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।' },
+    { text_en: 'Report it at cybercrime.gov.in or call 1930 (free, 24×7).',
+      text_hi: 'cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।' }
+  ],
+  suspicious: [
+    { text_en: 'Do not act on the message yet — no clicks, no calls, no codes.',
+      text_hi: 'अभी इस संदेश पर कोई कदम न उठाएँ — न लिंक, न कॉल, न कोई कोड।' },
+    { text_en: 'Open your bank’s official app yourself, or call the number printed on your card.',
+      text_hi: 'बैंक का आधिकारिक ऐप खुद खोलें, या कार्ड पर छपे नंबर पर कॉल करें।' },
+    { text_en: 'If it turns out to be fake, report it at cybercrime.gov.in or call 1930.',
+      text_hi: 'फर्ज़ी निकले तो cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें।' }
+  ],
+  safe: [
+    { text_en: 'No action needed for this message.',
+      text_hi: 'इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।' },
+    { text_en: 'Remember: banks and government offices never ask for OTP or PIN over calls or messages.',
+      text_hi: 'याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।' },
+    { text_en: 'Share ScamShield with your family to keep them safe too.',
+      text_hi: 'अपने परिवार को भी सुरक्षित रखने के लिए ScamShield उनके साथ साझा करें।' }
+  ]
+};
+
+/* ── 7 · Small helpers ─────────────────────────────────────────────── */
+function collectHits(re, text, cap) {
+  re.lastIndex = 0;
+  const hits = [];
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    if (hits.indexOf(m[0]) === -1) hits.push(m[0]);
+    if (hits.length >= (cap || 12)) break;
+  }
+  return hits;
+}
+function negatedBefore(text, idx, span) {
+  const win = text.slice(Math.max(0, idx - (span || 55)), idx).toLowerCase();
+  return NEG_BEFORE_RE.test(win);
+}
+
+/* ── 8 · Local rule-based detector (the offline brain) ─────────────── */
+function detectLocal(rawText) {
+  const text = String(rawText || '').slice(0, 4000);
+  const low = text.toLowerCase();
+  let score = 0;
+  let hard = false;                       /* any HARD category fired */
+  const groups = new Set();               /* distinct signal groups */
+  const riskReasons = [];                 /* {icon,text_en,text_hi,rank} */
+  const safeReasons = [];
+  const highlights = [];
+  const links = [];
+
+  const addRisk = function (rank, icon, en, hi, hl) {
+    riskReasons.push({ icon: icon, text_en: en, text_hi: hi, rank: rank });
+    if (hl) for (let i = 0; i < hl.length; i++) if (hl[i]) highlights.push(String(hl[i]).slice(0, 60));
+  };
+  const addSafe = function (icon, en, hi) { safeReasons.push({ icon: icon, text_en: en, text_hi: hi }); };
+
+  /* ---------- 1 · Links ---------- */
+  const urls = extractUrls(text);
+  let riskyLink = false;
+  let sawRealDomain = false;
+  for (let i = 0; i < urls.length; i++) {
+    const la = analyzeLink(urls[i]);
+    score += la.pts;
+    links.push({
+      url: la.url, verdict: la.verdict,
+      reason: { en: la.reason.en, hi: la.reason.hi, text_en: la.reason.en, text_hi: la.reason.hi },
+      lookalike_of: la.lookalike_of
+    });
+    if (la.verdict !== 'safe') {
+      riskyLink = true;
+      if (la.lookalike_of) {
+        addRisk(0, 'link', la.reason.en, la.reason.hi, [la.host]);
+      } else if (la.verdict === 'scam') {
+        addRisk(0, 'link', la.reason.en, la.reason.hi, [la.host]);
+      } else {
+        addRisk(4, 'link', la.reason.en, la.reason.hi, [la.host]);
+      }
+    } else if (realDomainOf(la.host)) {
+      sawRealDomain = true;
+      addSafe('link', la.reason.en, la.reason.hi);
+    }
+  }
+  if (riskyLink) groups.add('riskyLink');
+  /* bare link with no message around it */
+  if (urls.length && text.replace(/\s+/g, ' ').trim().length <= urls[0].length + 12) {
+    score += 10;
+    addRisk(12, 'link', 'The message is only a link, with no explanation — be careful.',
+      'संदेश सिर्फ एक लिंक है, कोई और जानकारी नहीं — सावधान रहें।');
+  }
+
+  /* ---------- 2 · Credential requests (negation-aware) ---------- */
+  let credFired = false, credNegated = false;
+  let m;
+  RE_CRED_HARD.lastIndex = 0;
+  while ((m = RE_CRED_HARD.exec(text)) !== null) {
+    if (negatedBefore(text, m.index, 55)) { credNegated = true; continue; }
+    /* "Enter this OTP in the app" next to a delivered code = instruction
+       to yourself, not a scammer asking — skip when the verb is a
+       self-action AND an OTP-to-you pattern is present. */
+    const verb = (m[1] || '').toLowerCase();
+    if (/^(enter|type|confirm)$/.test(verb.trim()) && OTP_TO_YOU_RE.test(text)) continue;
+    hard = true; credFired = true;
+    highlights.push(String(m[0]).slice(0, 40));
+  }
+  RE_CRED_HARD_HI.lastIndex = 0;
+  while ((m = RE_CRED_HARD_HI.exec(text)) !== null) {
+    /* Hindi negation may FOLLOW the verb ("OTP साझा न करें") — check both
+       the matched span and a short window after it. */
+    const after = text.slice(m.index + m[0].length, m.index + m[0].length + 14);
+    if (NEG_BETWEEN_RE.test(m[0]) || /न\s*(?:करें|करना|देना|बताना|भेजना)|मत|नहीं|कभी/.test(after)) {
+      credNegated = true; continue;
+    }
+    hard = true; credFired = true;
+    highlights.push(String(m[0]).slice(0, 40));
+  }
+  if (credFired) {
+    score += 30; groups.add('credential');
+    addRisk(0, 'key', 'It asks you to share an OTP, PIN, CVV or UPI PIN — no real bank, app or government office will ever ask for these.',
+      'यह आपसे OTP, PIN, CVV या UPI PIN मांगता है — कोई असली बैंक, ऐप या सरकारी दफ़्तर कभी नहीं मांगते।');
+  } else {
+    const softHits = collectHits(RE_CRED_SOFT, text, 3);
+    const nfHits = collectHits(RE_CRED_NOUNFIRST, text, 3);
+    const exHits = collectHits(RE_CRED_EXPIRE, text, 3);
+    const updHits = collectHits(RE_CRED_UPDATE, text, 3);
+    if (softHits.length) {
+      score += 20; credFired = true;
+      addRisk(1, 'key', 'It asks for KYC, Aadhaar, password or card/bank details — a classic phishing hook.',
+        'यह KYC, आधार, पासवर्ड या कार्ड/बैंक की जानकारी मांगता है — फ़िशिंग की सबसे आम चाल।',
+        softHits.slice(0, 2));
+    }
+    if (nfHits.length) {
+      score += 20; credFired = true;
+      addRisk(1, 'key', 'It pushes a “KYC/Aadhaar update” — banks never run KYC updates through message links.',
+        'यह “KYC/आधार अपडेट” की बात करता है — बैंक कभी संदेश-लिंक से KYC अपडेट नहीं करवाते।',
+        nfHits.slice(0, 2));
+    }
+    if (exHits.length && !credFired) {
+      score += 20; credFired = true;
+      addRisk(1, 'key', 'It says your OTP/KYC/Aadhaar has “expired” or is “pending” and pushes you to act — a standard phishing opener.',
+        'यह कहता है कि आपका OTP/KYC/आधार “समाप्त” या “बाकी” है और जल्दी करने को दबाव बनाता है — फ़िशिंग की आम शुरुआत।',
+        exHits.slice(0, 2));
+    }
+    if (updHits.length && !credFired) {
+      score += 12; credFired = true;
+      addRisk(1, 'key', 'It pushes you to “update/verify your details, payment or bill” through it — never do that from a message.',
+        'यह आपको उसी संदेश से “जानकारी/भुगतान अपडेट या सत्यापित” करने पर मजबूर करता है — संदेश से ऐसा कभी न करें।',
+        updHits.slice(0, 2));
+    }
+  }
+  if (credFired) groups.add('credential');
+  if (credNegated) {
+    addSafe('key', 'It clearly tells you NOT to share the OTP or PIN — something only genuine senders say.',
+      'इसमें साफ़ कहा गया है कि OTP/PIN किसी से साझा न करें — यह असली भेजने वाले ही कहते हैं।');
+  }
+
+  /* ---------- 3 · Impersonation ----------
+     Brand names are matched on the message PROSE only — a brand inside
+     a URL host is the link engine's job (official hosts must not raise
+     an impersonation flag against themselves, e.g. onlinesbi.sbi). */
+  let textNoLinks = text;
+  for (let i = 0; i < urls.length; i++) textNoLinks = textNoLinks.split(urls[i]).join(' ');
+  const lowNoLinks = textNoLinks.toLowerCase();
+  const govHit = collectHits(RE_GOV_IMP, lowNoLinks, 1)[0];
+  const consumerHit = collectHits(RE_CONSUMER_IMP, lowNoLinks, 1)[0];
+  if (govHit) {
+    score += 12; groups.add('impersonation');
+    addRisk(3, 'bank', 'It speaks in the name of a bank or government body (“' + govHit.toUpperCase() + '”) — scammers hide behind big names.',
+      'यह किसी बैंक या सरकारी विभाग (“' + govHit.toUpperCase() + '”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।',
+      [govHit]);
+  } else if (consumerHit) {
+    score += 6; groups.add('impersonation'); /* silent unless other risks */
+  }
+
+  /* ---------- 4 · Threats ---------- */
+  const threatHits = collectHits(RE_THREAT, text, 6);
+  const threatFired = threatHits.length > 0;
+  if (threatFired) {
+    score += Math.min(25, 16 + 3 * (threatHits.length - 1));
+    groups.add('threat');
+    addRisk(2, 'siren', 'It threatens you with arrest, legal action, seizure or SIM blocking — real authorities never warn like this over SMS.',
+      'इसमें गिरफ़्तारी, कानूनी कार्रवाई, ज़ब्ती या SIM बंद करने की धमकी है — असली सरकारी अधिकारी कभी SMS में ऐसी चेतावनी नहीं देते।',
+      threatHits.slice(0, 3));
+  }
+
+  /* ---------- 5 · Urgency / panic ---------- */
+  const urgHits = collectHits(RE_URG, text, 6);
+  const urgFired = urgHits.length > 0;
+  if (urgFired) {
+    score += Math.min(17, 9 + 2 * (urgHits.length - 1));
+    groups.add('urgency');
+    addRisk(5, 'clock', 'It creates panic with words like “' + urgHits.slice(0, 2).join('”, “') + '” so you act without thinking.',
+      'यह “' + urgHits.slice(0, 2).join('”, “') + '” जैसे शब्दों से घबराहट पैदा करता है ताकि आप बिना सोचे-समझे कोई कदम उठाएँ।',
+      urgHits.slice(0, 3));
+  }
+
+  /* ---------- 6 · Callback numbers & mobiles ---------- */
+  const pressHits = collectHits(RE_PRESS, text, 2);
+  const callHits = collectHits(RE_CALL_WORD, low, 2);
+  const mobileHits = collectHits(RE_MOBILE, text, 3);
+  const hasMobile = mobileHits.length > 0;
+  let contactLink = false;
+  for (let i = 0; i < urls.length; i++) {
+    if (RE_CONTACT_LINK.test(urlHost(urls[i]))) { contactLink = true; break; }
+    RE_CONTACT_LINK.lastIndex = 0;
+  }
+  const callbackFired = pressHits.length > 0 || ((callHits.length > 0 || contactLink) && hasMobile);
+  if (pressHits.length) {
+    score += 10; groups.add('callback');
+    addRisk(9, 'phone', 'It tells you to press a key to “speak to an officer” — a classic call-back scam trick.',
+      'यह किसी बटन दबाकर “अफ़सर से बात” करने को कहता है — कॉल-बैक घोटाले की पुरानी चाल।',
+      pressHits.slice(0, 2));
+  } else if (callbackFired) {
+    score += 10; groups.add('callback');
+    addRisk(9, 'phone', 'It pushes you to call or message an unknown number — real notices come through official channels, not private numbers.',
+      'यह आपसे किसी अनजान नंबर पर कॉल या मैसेज कराना चाहता है — असली सूचनाएँ आधिकारिक रास्ते से आती हैं, निजी नंबरों से नहीं।',
+      mobileHits.slice(0, 2));
+  } else if (contactLink) {
+    score += 10; groups.add('callback');
+    addRisk(9, 'phone', 'It moves the chat to WhatsApp or Telegram — the favourite corner of scam gangs.',
+      'यह बातचीत को WhatsApp या Telegram पर ले जाता है — ठगों का पसंदीदा ठिकाना।');
+  }
+  if (hasMobile) {
+    score += 6; /* unsolicited personal mobile number in the text */
+    highlights.push(mobileHits[0]);
+  }
+
+  /* ---------- 7 · Reward bait ---------- */
+  const rewardHits = collectHits(RE_REWARD, text, 3);
+  const rewardFired = rewardHits.length > 0;
+  if (rewardFired) {
+    score += 14; groups.add('reward');
+    if (riskyLink || callbackFired || hasMobile) score += 8;
+    addRisk(6, 'gift', 'It offers a prize or reward that is too good to be true — because it is.',
+      'यह ऐसा इनाम या लॉटरी का लालच देता है जो सच हो ही नहीं सकता।',
+      rewardHits.slice(0, 2));
+  }
+
+  /* ---------- 8 · Job / task bait ---------- */
+  const jobHits = collectHits(RE_JOB, text, 3);
+  const jobFired = jobHits.length > 0;
+  if (jobFired) {
+    score += 22; groups.add('job');
+    addRisk(7, 'gift', 'It offers easy money — a part-time “liking videos” / “typing work” job. This is how task scams begin.',
+      'यह आसान पैसे का लालच देता है — “वीडियो लाइक करने” / “टाइपिंग वर्क” वाली पार्ट-टाइम नौकरी। टास्क-घोटाला यहीं से शुरू होता है।',
+      jobHits.slice(0, 2));
+  }
+
+  /* ---------- 9 · HARD scam categories ---------- */
+  /* 9a · remote-control app */
+  if (RE_REMOTE.test(low)) {
+    hard = true; score += 30; groups.add('remote');
+    addRisk(0, 'monitor', 'It asks you to install a remote-control app (AnyDesk, TeamViewer, QuickSupport…) — that hands your entire phone to a stranger. No real bank or officer ever asks this.',
+      'यह आपसे रिमोट-कंट्रोल ऐप (AnyDesk, TeamViewer, QuickSupport…) इंस्टॉल करने को कहता है — इससे आपका पूरा फ़ोन किसी अजनबी के हाथ चला जाता है। कोई असली बैंक या अफ़सर कभी ऐसा नहीं कहता।');
+  }
+  /* 9b · instant-loan APK/fee funnel */
+  RE_LOAN_APP.lastIndex = 0; RE_LOAN_APP2.lastIndex = 0;
+  if (RE_LOAN_APP.test(low) || RE_LOAN_APP2.test(low)) {
+    hard = true; score += 30; groups.add('loanApp');
+    addRisk(0, 'siren', 'It promises instant approval with no documents, then pushes an APK or demands a processing fee. Real lenders do not collect fees this way.',
+      'यह बिना दस्तावेज़ तुरंत लोन मंज़ूर होने का वादा करके APK या प्रोसेसिंग फीस माँगता है। असली लोनदाता ऐसे शुल्क नहीं लेते।');
+  }
+  /* 9b · "safe account" transfer */
+  if (RE_SAFE_ACCT.test(low)) {
+    hard = true; score += 30; groups.add('safeAccount');
+    addRisk(0, 'siren', 'It wants you to move money to a “safe account” or RBI account — the signature trick of the “digital arrest” scam. No real authority ever parks your money like this.',
+      'यह आपसे पैसे “सेफ खाते” या RBI खाते में डालने को कहता है — “डिजिटल अरेस्ट” घोटाले की पहचान यही है। कोई भी असली अधिकारी ऐसा कभी नहीं करता।');
+  }
+  /* 9c · digital arrest: authority + coercion */
+  if (RE_DA_AUTH.test(low) && RE_DA_COERCE.test(low)) {
+    hard = true; score += 30; groups.add('digitalArrest');
+    addRisk(0, 'siren', 'This has the fingerprints of a “digital arrest” scam: a fake officer, a video call, secrecy and pressure. Police and agencies never work like this.',
+      'इसमें “डिजिटल अरेस्ट” घोटाले के सारे निशान हैं: नकली अफ़सर, वीडियो कॉल, गोपनीयता और दबाव। पुलिस या कोई भी एजेंसी कभी ऐसे काम नहीं करती।');
+  }
+  /* 9d · sextortion / blackmail */
+  if (RE_SEX_MEDIA.test(low) && RE_SEX_DEMAND.test(low)) {
+    hard = true; score += 30; groups.add('sextortion');
+    addRisk(0, 'chat', 'This is blackmail: it claims to have a private video or photos and demands money. Do not pay, do not reply — report it to the police or at cybercrime.gov.in.',
+      'यह ब्लैकमेल है: निजी वीडियो या फोटो होने का दावा करके पैसे मांगे जा रहे हैं। न भुगतान करें, न जवाब दें — पुलिस या cybercrime.gov.in पर रिपोर्ट करें।');
+  }
+  /* 9e · task-scam funnel: job bait + private contact number */
+  if (jobFired && hasMobile) {
+    hard = true; score += 30; groups.add('funnel');
+    addRisk(0, 'phone', 'It funnels you to a personal WhatsApp/Telegram number — exactly how “task scam” gangs recruit victims.',
+      'यह आपको किसी निजी WhatsApp/Telegram नंबर तक ले जाता है — “टास्क स्कैम” गैंग शिकार यहीं से करते हैं।',
+      mobileHits.slice(0, 1));
+  }
+  /* 9f · prize bait + documents/fee to "claim" */
+  if (rewardFired && /(\b(?:send|share|upload|submit|pay|bhejo|bhej)\b[^.!?\n]{0,45}\b(?:aadhaar|aadhar|adhar|bank\s+details?|documents?|id\s+proof|fee|registration|processing)\b|(?:भेजें|साझा)[^.!?\n]{0,45}(?:आधार|कागज़ात|बैंक\s+विवरण))/i.test(low)) {
+    hard = true; score += 30; groups.add('lotteryDocs');
+    addRisk(0, 'key', 'A prize you never entered, asking for Aadhaar, bank details or a “fee” to claim it — that is the trap.',
+      'जिस इनाम में आपने हिस्सा ही नहीं लिया, उसे पाने के लिए आधार, बैंक विवरण या “फ़ीस” मांगी जा रही है — यही जाल है।');
+  }
+
+  /* 9g · a KYC/OTP/details conversation pushed to WhatsApp or Telegram —
+     real banks and government offices never verify customers there. */
+  if (credFired && contactLink) {
+    hard = true; score += 30; groups.add('credContact');
+    addRisk(0, 'phone', 'It moves a KYC/OTP/details conversation to WhatsApp or Telegram — real banks and government offices never verify you there.',
+      'यह KYC/OTP/जानकारी की बातचीत को WhatsApp या Telegram पर ले जाता है — असली बैंक या सरकारी दफ़्तर कभी वहीं सत्यापन नहीं करते।');
+  }
+
+  /* ---------- 10 · UPI refund / collect-request trick ---------- */
+  const hasRefundWord = /\b(?:refund|रिफंड)\b/i.test(low);
+  const hasPinAsk = credFired || /\bupi\s*pin\b|\benter\s+your\s+pin\b|pin\s+डाल/i.test(low);
+  const hasCollect = /\bcollect\s+(?:request|money)\b|scan\s+(?:the\s+|this\s+)?(?:qr|code)\s+(?:to\s+)?(?:receive|get)|कलेक्ट\s+रिक्वेस्ट/i.test(low);
+  if ((hasRefundWord && (hasPinAsk || hasCollect)) || hasCollect) {
+    score += 18; groups.add('upiTrick');
+    addRisk(1, 'key', 'It offers a “refund” that needs your UPI PIN, a QR scan or a collect request — money coming IN never needs a PIN.',
+      'यह “रिफंड” देने के बहाने UPI PIN, QR स्कैन या कलेक्ट रिक्वेस्ट मांगता है — पैसे आने के लिए PIN कभी नहीं चाहिए।');
+  }
+
+  /* ---------- 11 · e-challan ---------- */
+  const challanFired = RE_CHALLAN.test(low);
+  RE_CHALLAN.lastIndex = 0;
+  if (challanFired) {
+    if (riskyLink || callbackFired) {
+      score += 24; groups.add('challan');
+      addRisk(0, 'link', 'A traffic e-challan that avoids the official government portal — real challans are only paid at echallan.parivahan.gov.in.',
+        'ट्रैफ़िक ई-चालान जो आधिकारिक सरकारी पोर्टल से हटकर भुगतान मांगे — असली चालान सिर्फ़ echallan.parivahan.gov.in पर भरा जाता है।');
+    } else if (sawRealDomain && !riskyLink) {
+      addSafe('checkCircle', 'This is a genuine government challan notice pointing to the official parivahan website.',
+        'यह सरकारी चालान की असली सूचना है जो आधिकारिक parivahan वेबसाइट पर ले जाती है।');
+    }
+  }
+
+  /* ---------- 12 · Pending-payment pressure (soft, no group) ---------- */
+  const pendHits = collectHits(RE_PENDING_PAY, text, 2);
+  if (pendHits.length) {
+    score += 10;
+    addRisk(11, 'clock', 'It builds pressure over a “pending/due” bill or challan — pay only inside the official app or website.',
+      'यह “बाकी/due” बिल या चालान का दबाव बनाता है — भुगतान सिर्फ़ आधिकारिक ऐप या वेबसाइट से करें।',
+      pendHits.slice(0, 1));
+  }
+
+  /* ---------- 13 · Panic + private-number combo ---------- */
+  if ((urgFired || threatFired) && (callbackFired || hasMobile)) {
+    score += 15;
+    addRisk(10, 'phone', 'First it creates panic, then it gives you a personal number to call — that combination is the scammer’s script.',
+      'पहले घबराहट पैदा करता है, फिर कॉल के लिए निजी नंबर देता है — ठग की कहानी इसी क्रम में चलती है।');
+  }
+
+  /* ---------- 14 · SHOUTING ---------- */
+  const capsWords = (text.match(/\b[A-Z]{3,}\b/g) || []).filter(function (w) { return !CAPS_OK.has(w); });
+  const bangs = (text.match(/!/g) || []).length;
+  if (capsWords.length >= 3 || bangs >= 3) {
+    score += 6;
+    addRisk(11, 'type', 'SHOUTING in CAPITAL LETTERS and warnings to create panic.',
+      'पूरे CAPITALS में लिखकर घबराहट पैदा करने की कोशिश की गई है।', capsWords.slice(0, 4));
+  }
+
+  /* ---------- 15 · Genuine-message markers (negative weight) ---------- */
+  if (NEG_SHARE_RE.test(low)) {
+    score -= 12;
+    addSafe('checkCircle', 'It clearly reminds you to keep your OTP/PIN private — a sign of a genuine message.',
+      'यह याद दिलाता है कि OTP/PIN निजी रखें — असली संदेश की निशानी।');
+  }
+  if (RE_DELIVERY.test(low)) {
+    score -= 8;
+    addSafe('checkCircle', 'This is a routine delivery update about your own order.',
+      'यह आपके ही ऑर्डर की आम डिलीवरी सूचना है।');
+  }
+  if (RE_NO_ACTION.test(low)) {
+    score -= 8;
+    addSafe('checkCircle', 'It explicitly says no action or no reply is needed — scam messages never do that.',
+      'इसमें साफ़ कहा गया है कि कुछ करने या जवाब देने की ज़रूरत नहीं — घोटाले वाले संदेश ऐसा कभी नहीं कहते।');
+  }
+  if (!credFired && OTP_TO_YOU_RE.test(text)) {
+    addSafe('key', 'This looks like a routine OTP or code sent TO you — nobody is asking you for one.',
+      'यह आपको भेजा गया आम OTP या कोड लगता है — कोई आपसे मांग नहीं रहा।');
+  }
+
+  /* ---------- 16 · Combination logic & floors ---------- */
+  /* ≥2 distinct groups  → +8   and score floored at 30 (suspicious)
+     ≥3 distinct groups  → +14  (instead of +8)
+     any HARD category   → score floored at 70 (scam)                */
+  if (groups.size >= 2) score += groups.size >= 3 ? 14 : 8;
+  if (groups.size >= 2) score = Math.max(score, 30);
+  if (hard) score = Math.max(score, 70);
+  score = Math.max(3, Math.min(100, Math.round(score)));
+
+  /* ---------- 17 · Verdict + reasons ---------- */
+  const verdict = score > 65 ? 'scam' : score >= 30 ? 'suspicious' : 'safe';
+  let reasons;
+  if (verdict === 'safe') {
+    if (safeReasons.length === 0) {
+      addSafe('checkCircle', 'No requests for money, OTP or personal details.', 'पैसे, OTP या निजी जानकारी की कोई मांग नहीं है।');
+    }
+    if (safeReasons.length === 1) {
+      addSafe('checkCircle', 'No threatening or panic-creating language.', 'न धमकी है, न घबराहट पैदा करने वाली भाषा।');
+    }
+    if (safeReasons.length === 2) {
+      addSafe('checkCircle', 'Nothing here pressures you to act quickly.', 'इसमें कहीं भी जल्दी करने का दबाव नहीं है।');
+    }
+    reasons = safeReasons.slice(0, 4);
+  } else {
+    if (!govHit && consumerHit && riskReasons.length) {
+      addRisk(8, 'bank', 'It references “' + consumerHit.toUpperCase() + '” — scammers often imitate well-known companies.',
+        'इसमें “' + consumerHit.toUpperCase() + '” का नाम है — ठग अक्सर मशहूर कंपनियों का नाटक करते हैं।');
+    }
+    riskReasons.sort(function (a, b) { return a.rank - b.rank; });
+    reasons = riskReasons.slice(0, verdict === 'scam' ? 5 : 4);
+    if (!reasons.length) {
+      addRisk(5, 'alertTri', 'Something about this message felt off — treat it with caution.',
+        'इस संदेश में कुछ गड़बड़ लगी — सावधानी से पेश आएँ।');
+      reasons = riskReasons.slice(0, 3);
+    }
+  }
+
+  /* ---------- 18 · Highlights (dedupe, sane lengths) ---------- */
+  const seen = new Set();
+  const hl = highlights
+    .map(function (h) { return String(h).trim(); })
+    .filter(function (h) { return h.length >= 3 && h.length <= 60 && !/[<>&"]/.test(h); })
+    .filter(function (h) { const k = h.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+    .slice(0, 10);
+
+  return { verdict: verdict, score: score, reasons: reasons, links: links, advice: ADVICE[verdict], highlights: hl };
+}
+
+/* ── 9 · Single entry point — API first, offline fallback always ───── */
+async function analyze(input) {
+  const text = String(input || '').slice(0, 4000);
+  if (API_BASE) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(String(API_BASE).replace(/\/$/, '') + '/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (!data || !['safe', 'suspicious', 'scam'].includes(data.verdict) ||
+          typeof data.score !== 'number' || !Array.isArray(data.reasons)) {
+        throw new Error('Unexpected response shape');
+      }
+      return {
+        verdict: data.verdict,
+        score: Math.max(0, Math.min(100, Math.round(data.score))),
+        reasons: data.reasons.slice(0, 5),
+        links: Array.isArray(data.links) ? data.links : [],
+        advice: Array.isArray(data.advice) ? data.advice : ADVICE[data.verdict],
+        highlights: Array.isArray(data.highlights) ? data.highlights : []
+      };
+    } catch (err) {
+      console.warn('[ScamShield] API unavailable, using offline detector:', err.message);
+    }
+  }
+  await sleep(1000); /* demo scanning delay for the local detector */
+  return detectLocal(text);
+}
+
+/* ── 10 · Self-test suite — window.runSelfTests() ────────────────────
+   43 labelled cases: 24 scam · 6 suspicious · 13 genuine.
+   Runs the offline detector synchronously, prints a pass/fail table
+   via console.table and returns { total, passed, accuracy, failures }
+   (accuracy is a percentage 0–100, one decimal).                    */
+function runSelfTests() {
+  const CASES = [
+    /* ── SCAM (24) ─────────────────────────────────────────────── */
+    { id: 'S01', label: 'Fake HDFC login page (brand+word in host)', expect: 'scam',
+      text: 'Your HDFC NetBanking is locked. Login at hdfcbank-secure.com to unlock' },
+    { id: 'S02', label: 'Hinglish SBI KYC + lookalike .xyz link', expect: 'scam',
+      text: 'Aapka SBI account band ho jayega aaj raat. KYC update karne ke liye abhi click karein: http://sbi-kyc-update.xyz' },
+    { id: 'S03', label: 'Hinglish electricity cut + callback number', expect: 'scam',
+      text: 'Aapka bijli connection aaj raat kat jayega. Turant 9312345678 par call karein aur bill update karein.' },
+    { id: 'S04', label: 'Devanagari SBI block + "OTP साझा करें"', expect: 'scam',
+      text: 'आपका SBI खाता ब्लॉक हो गया है। KYC अपडेट के लिए तुरंत OTP साझा करें।' },
+    { id: 'S05', label: 'SBI YONO suspended + AnyDesk install', expect: 'scam',
+      text: 'Your SBI YONO is suspended. Install AnyDesk and share the 9-digit code so our agent can help.' },
+    { id: 'S06', label: 'CBI digital arrest + safe account', expect: 'scam',
+      text: 'CBI officer here. Your Aadhaar is linked to a money laundering case. Stay on the video call, do not tell anyone, transfer money to RBI safe account.' },
+    { id: 'S07', label: 'Sextortion — private video + UPI demand', expect: 'scam',
+      text: 'We have your private video. Pay Rs 20,000 to this UPI id or we will send it to all contacts.' },
+    { id: 'S08', label: 'Part-time job + WhatsApp funnel number', expect: 'scam',
+      text: 'Hi! Part-time job, earn Rs 5000 daily by liking YouTube videos. Message on WhatsApp +91 9876500011 now' },
+    { id: 'S09', label: 'Refund + "share your UPI PIN" + bit.ly', expect: 'scam',
+      text: 'Dear user, Rs 4,850 refund pending. Share your UPI PIN to receive money. Link: bit.ly/3xRefund' },
+    { id: 'S10', label: 'TRAI SIM block + "press 9"', expect: 'scam',
+      text: 'This is TRAI. Your SIM will be blocked in 2 hours. Press 9 to speak to an officer.' },
+    { id: 'S11', label: 'MSEB power cut + mseb-bill.click link', expect: 'scam',
+      text: 'MSEB: Your power will be cut tonight 9:30pm. Pay bill pending Rs 10 via app link http://mseb-bill.click/pay' },
+    { id: 'S12', label: 'KBC lottery + send Aadhaar/bank details', expect: 'scam',
+      text: 'Congratulations! You won Rs 25 lakh in KBC lottery. Send Aadhaar and bank details to claim prize.' },
+    { id: 'S13', label: 'App example: fake SBI KYC expired', expect: 'scam',
+      text: 'Dear Customer, your SBI NetBanking has been BLOCKED because your KYC has expired. Update your KYC immediately to avoid permanent account closure: http://sbi-kyc-update.xyz/verify — State Bank of India (no reply)' },
+    { id: 'S14', label: 'App example: electricity disconnect + .top + number', expect: 'scam',
+      text: 'ELECTRICITY BOARD: Your electricity connection will be DISCONNECTED tonight at 9:30 PM due to unpaid bill. Update your payment now: https://bill-update-desk.top/pay or call 9312345678 — Electricity Dept' },
+    { id: 'S15', label: 'App example: customs parcel "digital arrest"', expect: 'scam',
+      text: 'CUSTOMS ALERT: A parcel booked in your name containing illegal items has been SEIZED by Mumbai Customs. A case will be filed. To avoid ARREST and legal action, call the investigating officer immediately: +91 99871 20458, or verify at customs-clearance-info.click' },
+    { id: 'S16', label: 'Protect demo: SBI KYC expired SMS', expect: 'scam',
+      text: 'Your SBI KYC is expired. Update now: sbi-kyc-update.xyz/verify' },
+    { id: 'S17', label: 'Protect demo: SBI blocked within 24 hours', expect: 'scam',
+      text: 'Dear Customer, your SBI account will be BLOCKED within 24 hours. Verify now: http://sbi-netverify.xyz/pay' },
+    { id: 'S18', label: 'Real domain embedded as subdomain', expect: 'scam',
+      text: 'Your SBI account is suspended. Reactivate at http://sbi.co.in.verify-kyc.top/login' },
+    { id: 'S19', label: 'Homoglyph digits 1c1cibank (1→i)', expect: 'scam',
+      text: 'Dear ICICI customer, your KYC is pending. Complete KYC at 1c1cibank-kyc-update.com now' },
+    { id: 'S20', label: 'Devanagari bijli cut + turant call number', expect: 'scam',
+      text: 'आपकी बिजली आज रात कट जाएगी। तुरंत 9312345678 पर कॉल करें।' },
+    { id: 'S21', label: 'Fake e-challan + .click + mobile', expect: 'scam',
+      text: 'Your vehicle challan of Rs 1,500 is pending. Pay at challan-mumbai-payment.click or call 9876543210 to settle.' },
+    { id: 'S22', label: 'Collect request + "enter your PIN to receive"', expect: 'scam',
+      text: 'You will receive Rs 5,000 refund. Accept the collect request in your UPI app and enter your PIN to receive.' },
+    { id: 'S23', label: 'Hindi sextortion + "वरना सबको भेज देंगे"', expect: 'scam',
+      text: 'हमारे पास आपकी निजी वीडियो है। Rs 30,000 UPI पर भेजो वरना सबको भेज देंगे।' },
+    { id: 'S24', label: 'RBI officer + TeamViewer QuickSupport', expect: 'scam',
+      text: 'RBI helpline: your bank account is under review. Install TeamViewer QuickSupport so our officer can verify your details.' },
+    { id: 'S25', label: 'Instant loan APK with no documents and processing fee', expect: 'scam',
+      text: 'Instant loan Rs 50000 approved! No documents. Download app http://quickcash-loans.apk and pay processing fee Rs 999' },
+    { id: 'S26', label: 'ED notice with video call, secrecy and verification deposit', expect: 'scam',
+      text: 'ED notice: your bank account is under investigation. Join video call immediately and do not tell family. Verification deposit required.' },
+    { id: 'S27', label: 'Loan approved wording variant: no documents + pay processing fee', expect: 'scam',
+      text: 'Congratulations! Your loan of Rs 2 lakh is approved. No documents needed. Pay Rs 1500 processing fee on 9876501234 today!' },
+
+    /* ── SUSPICIOUS (6) ────────────────────────────────────────── */
+    { id: 'P01', label: 'Hinglish SBI threat WITHOUT the link', expect: 'suspicious',
+      text: 'Aapka SBI account band ho jayega aaj raat. KYC update karne ke liye abhi click karein:' },
+    { id: 'P02', label: 'PAN update + .info link (no OTP/PIN ask)', expect: 'suspicious',
+      text: 'Dear user, update your PAN card details immediately: click here https://pan-update.info' },
+    { id: 'P03', label: 'Free gift + bit.ly claim link', expect: 'suspicious',
+      text: 'Congratulations! You won a free gift card. Claim now at bit.ly/freecard' },
+    { id: 'P04', label: '"Share your card details to unblock"', expect: 'suspicious',
+      text: 'Your ATM card is blocked at our end. Kindly share your card details to unblock it.' },
+    { id: 'P05', label: 'Typing work + Telegram contact link', expect: 'suspicious',
+      text: 'Earn money typing work from home. Daily payouts. Join t.me/ework' },
+    { id: 'P06', label: 'Paytm wallet suspended + .top link', expect: 'suspicious',
+      text: 'Dear Paytm user, your wallet will be suspended within 24 hours. Update now at wallet-check.top/verify' },
+    { id: 'P07', label: 'LIC policy lapsed + shortener payment demand', expect: 'suspicious',
+      text: 'Your LIC policy has lapsed. Pay premium now to avoid penalty: bit.ly/lic-pay' },
+
+    /* ── GENUINE (13) — must all stay safe ─────────────────────── */
+    { id: 'G01', label: 'Real bank OTP with "NEVER ask" warning', expect: 'safe',
+      text: 'Your One Time Password (OTP) for HDFC Bank NetBanking login is 582914. OTP is valid for 10 minutes. HDFC Bank will NEVER ask you to share this OTP with anyone. Do not share it. Helpline: 1800 123 1234' },
+    { id: 'G02', label: 'Debit alert naming hdfcbank.com', expect: 'safe',
+      text: 'Rs 1,500 debited from A/c XX1234 on 25-11. Not done by you? Call us on 1800 123 1234 — HDFC Bank. More info: hdfcbank.com/netbanking-safe' },
+    { id: 'G03', label: 'Amazon delivery update', expect: 'safe',
+      text: 'Your Amazon order #402-1234567-7890123 has shipped. Track your package: amazon.in/t/402-1234567-7890123. Arriving Tuesday.' },
+    { id: 'G04', label: 'Swiggy order out for delivery', expect: 'safe',
+      text: 'Your Swiggy order #4567821 from Andhra Gunpowder is out for delivery. Sunil will deliver it in about 15 minutes. Track your order at swiggy.com/track/4567821 — Enjoy your meal!' },
+    { id: 'G05', label: 'Airtel bill reminder (real domain)', expect: 'safe',
+      text: 'Your Airtel postpaid bill of Rs 499 is due on 28 Feb. Pay now at airtel.in/bill or from the Airtel Thanks app.' },
+    { id: 'G06', label: 'IRCTC ticket confirmation', expect: 'safe',
+      text: 'Your IRCTC e-ticket (PNR 4561237890) is confirmed. Train 12951 Mumbai Rajdhani, Coach B4/23, departs Mumbai Central at 17:00. Happy journey!' },
+    { id: 'G07', label: 'Credit card due reminder from the bank', expect: 'safe',
+      text: 'Reminder: your HDFC Bank credit card payment of Rs 12,450 is due on 05-03. Pay via the HDFC Bank app to avoid interest charges.' },
+    { id: 'G08', label: 'Friend asking about dinner', expect: 'safe',
+      text: 'Hey! Are we still on for dinner tomorrow at 7? See you at the usual place.' },
+    { id: 'G09', label: 'Amazon OTP with "do not share"', expect: 'safe',
+      text: '582914 is your Amazon OTP for signing in. Do not share this code with anyone.' },
+    { id: 'G10', label: 'Real traffic challan → echallan.parivahan.gov.in', expect: 'safe',
+      text: 'Traffic e-challan of Rs 1,500 is pending against your vehicle MH01AB1234. Pay at echallan.parivahan.gov.in before the due date.' },
+    { id: 'G11', label: 'School parent-teacher meeting reminder', expect: 'safe',
+      text: 'Reminder: Parent-Teacher Meeting for Class 5-B on Saturday, 10 am, School Hall. Kindly be on time. — Principal' },
+    { id: 'G12', label: 'Gas cylinder delivery today', expect: 'safe',
+      text: 'Your gas cylinder will be delivered today between 2-4 pm. Please keep Rs 550 ready for the delivery person.' },
+    { id: 'G13', label: 'Income-tax refund processed + real site', expect: 'safe',
+      text: 'Income Tax Refund: your refund of Rs 12,430 has been processed. Check the status at incometax.gov.in. No action is required.' },
+    { id: 'G14', label: 'Jio plan-expiry recharge reminder (must stay safe)', expect: 'safe',
+      text: 'Jio: Your plan expires on 25 Nov. Recharge via the MyJio app to continue.' }
+  ];
+
+  const rows = [];
+  const failures = [];
+  let passed = 0;
+  for (let i = 0; i < CASES.length; i++) {
+    const c = CASES[i];
+    let got = 'error', sc = -1, err = '';
+    try {
+      const r = detectLocal(c.text);
+      got = r.verdict; sc = r.score;
+    } catch (e) { err = e.message; }
+    const ok = got === c.expect;
+    if (ok) passed++; else failures.push({ case: c.id, label: c.label, expected: c.expect, got: got, score: sc, error: err });
+    rows.push({ case: c.id, expect: c.expect, got: got, score: sc, result: ok ? 'PASS' : 'FAIL', note: ok ? '' : (err || c.label) });
+  }
+  const total = CASES.length;
+  const accuracy = Math.round((passed / total) * 1000) / 10;
+  const summary = { total: total, passed: passed, accuracy: accuracy, failures: failures };
+  if (typeof console !== 'undefined' && console.table) {
+    try { console.table(rows); } catch (e) { /* non-browser env without table */ }
+    console.log('[ScamShield] self-tests: ' + passed + '/' + total + ' passed (' + accuracy + '%)');
+    if (failures.length) console.log('[ScamShield] failures:', JSON.stringify(failures, null, 2));
+  }
+  return summary;
+}
+/* Expose for the browser console (and any backend test runner). */
+if (typeof window !== 'undefined') window.runSelfTests = runSelfTests;
+else if (typeof globalThis !== 'undefined') globalThis.runSelfTests = runSelfTests;
+
+/*DETECTION-END*/
+
+/* ══════════════════════════════════════════════════════════════════
+   UI COMPONENTS — icons, settings appliers, rendering
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Inline SVG icon set — one consistent 1.75px rounded-stroke style. */
+const I = p => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+const ICONS = {
+  shield:     I('<path d="M12 3l7 3v5c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9V6l7-3z"/>'),
+  shieldCheck:I('<path d="M12 3l7 3v5c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9V6l7-3z"/><path d="M9 11.5l2.1 2.1 4-4.4"/>'),
+  checkCircle:I('<circle cx="12" cy="12" r="9"/><path d="M8.3 12.3l2.4 2.4 5-5.4"/>'),
+  alertTri:   I('<path d="M12 4.2L2.8 19.5h18.4L12 4.2z"/><path d="M12 10v4.2"/><path d="M12 17.1v.1"/>'),
+  halfRing:   I('<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18z" fill="currentColor" stroke="none"/>'),
+  octaX:      I('<path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2L8.2 3z"/><path d="M9.4 9.4l5.2 5.2M14.6 9.4l-5.2 5.2"/>'),
+  clock:      I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.4 2"/>'),
+  key:        I('<circle cx="7.5" cy="15.5" r="3.5"/><path d="M10.2 12.8L20 3m-3.6 1.2l2.4 2.4"/>'),
+  bank:       I('<path d="M3.5 9.5L12 4l8.5 5.5"/><path d="M5 10v8M9.7 10v8M14.3 10v8M19 10v8"/><path d="M3.5 20.5h17"/>'),
+  link:       I('<path d="M10.4 13.6a4 4 0 005.7 0l3.2-3.2a4 4 0 10-5.7-5.7l-1.3 1.3"/><path d="M13.6 10.4a4 4 0 00-5.7 0l-3.2 3.2a4 4 0 105.7 5.7l1.3-1.3"/>'),
+  siren:      I('<path d="M6 20h12"/><path d="M7.5 20v-5.5a4.5 4.5 0 019 0V20"/><path d="M12 4.5v2M5.6 7.6l1.5 1.5M18.4 7.6l-1.5 1.5"/>'),
+  gift:       I('<path d="M20 12v8.5H4V12"/><path d="M2.5 8.5h19V12h-19z"/><path d="M12 8.5v12"/><path d="M12 8.5C10.2 8.5 7.8 8 7.8 6c0-1.8 3-2.3 4.2 2.5 1.2-4.8 4.2-4.3 4.2-2.5 0 2-2.4 2.5-4.2 2.5z"/>'),
+  type:       I('<path d="M5 7V5h14v2M12 5v14M9.5 19h5"/>'),
+  copy:       I('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4.5A1.5 1.5 0 013 13.5v-9A1.5 1.5 0 014.5 3h9A1.5 1.5 0 0115 4.5V5"/>'),
+  clipboard:  I('<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9.5 4h5"/><path d="M9 11h6M9 15h4"/>'),
+  image:      I('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M4.5 17.5l5-5 3.5 3.5 3-3 3.5 3.5"/>'),
+  x:          I('<path d="M6 6l12 12M18 6L6 18"/>'),
+  trash:      I('<path d="M4.5 7h15"/><path d="M9.5 7V4.5h5V7"/><path d="M6.5 7l1 13.5h9l1-13.5"/><path d="M10 11v6M14 11v6"/>'),
+  sun:        I('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/>'),
+  moon:       I('<path d="M20.5 13.5A8.5 8.5 0 1110.5 3.5a7 7 0 0010 10z"/>'),
+  auto:       I('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/><path d="M12 8a4 4 0 010 8z" fill="currentColor" stroke="none"/>'),
+  sliders:    I('<path d="M4 7.5h16M4 16.5h16"/><circle cx="9.5" cy="7.5" r="2.2"/><circle cx="15" cy="16.5" r="2.2"/>'),
+  info:       I('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.7v.2"/>'),
+  phone:      I('<path d="M5 4h4l1.6 4.7-2.4 1.8a13 13 0 005.3 5.3l1.8-2.4L20 15v4a1.6 1.6 0 01-1.7 1.6A17 17 0 013.4 5.7 1.6 1.6 0 015 4z"/>'),
+  external:   I('<path d="M14 4h6v6"/><path d="M20 4L11 13"/><path d="M19 14.5v4a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014 18.5v-12A1.5 1.5 0 015.5 5H10"/>'),
+  scan:       I('<circle cx="11" cy="11" r="7"/><path d="M16.2 16.2L21 21"/>'),
+  history:    I('<path d="M12 7v5l3.4 2"/><path d="M3.5 12a8.5 8.5 0 108.5-8.5A8.4 8.4 0 004.6 8.1"/><path d="M3.5 3.8V8h4.2"/>'),
+  monitor:    I('<rect x="3" y="4.5" width="18" height="12.5" rx="2"/><path d="M9.5 20.5h5M12 17v3.5"/>'),
+  phoneDev:   I('<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.3h3"/>'),
+  ext:        I('<rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M12 8.2v7.6M8.2 12h7.6"/>'),
+  bell:       I('<path d="M6 16v-5.2a6 6 0 1112 0V16l1.6 2.6H4.4L6 16z"/><path d="M10 21a2.1 2.1 0 004 0"/>'),
+  chevD:      I('<path d="M6 9.5l6 6 6-6"/>'),
+  chat:       I('<path d="M20 12a8 8 0 01-8 8H4l2-3a8 8 0 1114-5z"/><path d="M8.5 12h.2M12 12h.2M15.5 12h.2"/>'),
+  lock:       I('<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 018 0v3"/>'),
+  speaker:    I('<path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M15.5 9.7a3.4 3.4 0 010 4.6M18 7.3a7 7 0 010 9.4"/>'),
+  stop:       I('<rect x="6" y="6" width="12" height="12" rx="2.5"/>'),
+  play:       I('<path d="M8 5.5v13l10.5-6.5z"/>'),
+  user:       I('<circle cx="12" cy="8" r="3.6"/><path d="M4.8 20.2a7.2 7.2 0 0114.4 0"/>'),
+  flask:      I('<path d="M9.5 3h5M10.5 3v5.5L5.2 18.6A1.5 1.5 0 006.5 21h11a1.5 1.5 0 001.3-2.4L13.5 8.5V3"/><path d="M7.8 14.5h8.4"/>'),
+  emptyArt:   '<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M50 18l26 11v19c0 17.5-11 29-26 34-15-5-26-16.5-26-34V29l26-11z"/><path d="M39 47l8 8 15-16"/><circle cx="80" cy="78" r="16"/><path d="M91.5 89.5L104 102"/><path d="M74 72l3 6-4 3 6 3"/></svg>'
+};
+function injectIcons(root) {
+  (root || document).querySelectorAll('[data-icon]').forEach(el => {
+    const svg = ICONS[el.dataset.icon];
+    if (svg) el.innerHTML = svg;
+  });
+}
+
+/* ---- i18n + settings appliers ------------------------------------ */
+function applyI18n() {
+  $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  $$('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  /* On-device / server status chip — text follows API_BASE */
+  const pv = $('#privTxt');
+  if (pv) pv.textContent = t(API_BASE ? 'priv_srv' : 'priv_on');
+}
+function updateSeg(sel, val) {
+  $$(sel + ' button').forEach(b => b.classList.toggle('on', b.dataset.val === val));
+}
+function applyTheme() {
+  const resolved = state.theme === 'auto' ? (mqDark.matches ? 'dark' : 'light') : state.theme;
+  document.documentElement.dataset.theme = resolved;
+  $('#metaTheme').setAttribute('content', resolved === 'dark' ? '#000000' : '#ffffff');
+  updateSeg('#segTheme', state.theme);
+}
+function applyTextSize() {
+  document.documentElement.dataset.ts = state.ts;
+  updateSeg('#segTs', state.ts);
+}
+function applyRm() {
+  const on = state.rm === null ? mqRM.matches : state.rm;
+  document.documentElement.dataset.rm = on ? '1' : '0';
+  const sw = $('#swRm');
+  if (sw) sw.checked = on;
+}
+function applyLang() {
+  document.documentElement.lang = state.lang === 'hi' ? 'hi' : 'en';
+  updateSeg('#segLang', state.lang);
+  applyI18n();
+  renderExamples();
+  renderHistory();
+  renderProtect();
+  rerenderResult();
+  if ($('#demoOv') && $('#demoOv').classList.contains('show')) demoGo(demoIdx);
+}
+
+/* ---- Check screen -------------------------------------------------- */
+function renderExamples() {
+  $('#exChips').innerHTML = EXAMPLES.map((x, i) =>
+    '<button class="chip" type="button" data-ex="' + i + '">' + esc(x.label[state.lang] || x.label.en) + '</button>'
+  ).join('');
+}
+function renderLoading() {
+  const el = document.createElement('div');
+  el.className = 'card load-card';
+  el.innerHTML =
+    '<div class="sk-bar" style="width:92%"></div>' +
+    '<div class="sk-bar" style="width:68%"></div>' +
+    '<div class="sk-bar" style="width:84%"></div>' +
+    '<div class="sk-bar" style="width:44%"></div>' +
+    '<div class="load-status"><span class="spin"></span>' +
+    '<span class="load-label" aria-live="polite">' + esc(t('loading1')) + '</span></div>';
+  const label = el.querySelector('.load-label');
+  const seq = ['loading1', 'loading2', 'loading3'];
+  let i = 0;
+  const iv = setInterval(() => { i = (i + 1) % seq.length; label.textContent = t(seq[i]); }, 380);
+  el._stop = () => clearInterval(iv);
+  return el;
+}
+
+/* Highlight risky words in the original message (inverted marker style). */
+function highlightHtml(text, hls) {
+  const base = esc(text);
+  const alts = Array.from(new Set((hls || []).map(h => String(h).trim())))
+    .filter(h => h.length >= 3 && h.length <= 60 && !/[<>&"']/.test(h))
+    .sort((a, b) => b.length - a.length)
+    .slice(0, 10);
+  if (!alts.length) return base;
+  try {
+    const re = new RegExp('\\b(?:' + alts.map(escRe).join('|') + ')\\b', 'gi');
+    return base.replace(re, w => '<mark class="hl">' + w + '</mark>');
+  } catch (e) { return base; }
+}
+/* Visual domain diff: shared prefix normal, differing tail marked. */
+function diffHtml(shown, ref, cls) {
+  const s = String(shown), r = String(ref);
+  let i = 0;
+  while (i < s.length && i < r.length && s[i] === r[i]) i++;
+  return esc(s.slice(0, i)) + (i < s.length ? '<span class="' + cls + '">' + esc(s.slice(i)) + '</span>' : '');
+}
+
+/* ---- Result view ---------------------------------------------------- */
+function buildResultNode(r, text) {
+  const MAP = {
+    safe:       { cls: 'v-safe',       icon: 'checkCircle', label: t('v_safe'), sev: 1, sent: t('sent_safe') },
+    suspicious: { cls: 'v-suspicious', icon: 'halfRing',    label: t('v_susp'), sev: 2, sent: t('sent_susp') },
+    scam:       { cls: 'v-scam',       icon: 'octaX',       label: t('v_scam'), sev: 3, sent: t('sent_scam') }
+  };
+  const V = MAP[r.verdict] || MAP.safe;
+  const L = state.lang;
+  const pickTxt = o => (L === 'hi' ? (o && (o.text_hi || o.text_en)) : (o && (o.text_en || o.text_hi))) || '';
+  const el = document.createElement('div');
+  el.className = 'result';
+  el.setAttribute('role', 'article');
+
+  let html = '';
+  /* Verdict block — shape-coded, never color-only */
+  html += '<div class="verdict ' + V.cls + '"><span class="v-ic" data-icon="' + V.icon + '"></span>' +
+    '<div class="v-body"><div class="v-label">' + esc(V.label) + '</div>' +
+    '<div class="sev" aria-hidden="true"><i></i><i></i><i></i></div>' +
+    '<div class="v-sub">' + esc(t('sev_fmt', V.sev)) + '</div></div></div>';
+  html += '<p class="v-sentence">' + esc(V.sent) + '</p>';
+
+  /* Gauge + reasons */
+  html += '<div class="res-grid">' +
+    '<div class="card gauge-card"><div class="gauge-wrap">' +
+    '<svg viewBox="0 0 120 120" aria-hidden="true"><circle class="g-trk" cx="60" cy="60" r="52"/><circle class="g-val" cx="60" cy="60" r="52"/></svg>' +
+    '<div class="g-center"><div class="g-num" data-count>0</div><div class="g-den">/ 100</div></div></div>' +
+    '<div class="g-lb">' + esc(t('score_label')) + '</div><div class="g-v">' + esc(V.label) + '</div></div>' +
+    '<div class="card why-card"><h3>' + esc(t('why_title')) + '</h3><ul class="stagger">' +
+    (r.reasons || []).map((x, i) =>
+      '<li style="--i:' + i + '"><span data-icon="' + esc(x.icon || 'info') + '"></span>' +
+      '<span class="wr">' + esc(pickTxt(x)) + '</span></li>').join('') +
+    '</ul></div></div>';
+
+  /* Links with mini verdicts + lookalike comparison */
+  if (r.links && r.links.length) {
+    html += '<div class="card res-card"><h3>' + esc(t('links_title')) + '</h3>' +
+      r.links.map(l => {
+        const vbc = l.verdict === 'scam' ? 'scam' : l.verdict === 'suspicious' ? 'suspicious' : 'safe';
+        const vlbl = { scam: t('v_scam'), suspicious: t('v_susp'), safe: t('v_safe') }[l.verdict] || '';
+        let row = '<div class="link-row"><div class="link-head">' +
+          '<span class="vb ' + vbc + '">' + esc(vlbl) + '</span>' +
+          '<span class="dom">' + esc(l.url) + '</span></div>';
+        const reason = l.reason ? (typeof l.reason === 'string' ? l.reason : pickTxt(l.reason)) : '';
+        if (reason) row += '<p class="link-why">' + esc(reason) + '</p>';
+        if (l.lookalike_of) {
+          const host = urlHost(l.url);
+          row += '<div class="vs">' +
+            '<div><span class="vs-l">' + esc(t('vs_msg')) + '</span><span class="dom">' + diffHtml(host, l.lookalike_of, 'd') + '</span></div>' +
+            '<div><span class="vs-l">' + esc(t('vs_real')) + '</span><span class="dom">' + diffHtml(l.lookalike_of, host, 'u') + '</span></div>' +
+            '</div>';
+        }
+        return row + '</div>';
+      }).join('') + '</div>';
+  }
+
+  /* Original message with inline highlights */
+  if (r.highlights && r.highlights.length) {
+    html += '<div class="card res-card"><h3>' + esc(t('msg_title')) + '</h3>' +
+      '<blockquote class="orig">' + highlightHtml(text, r.highlights) + '</blockquote></div>';
+  }
+
+  /* What to do now */
+  html += '<div class="card res-card"><h3>' + esc(t('advice_title')) + '</h3><div class="steps stagger">' +
+    (r.advice || []).map((a, i) =>
+      '<div class="step" style="--i:' + i + '"><span class="n">' + (i + 1) + '</span>' +
+      '<span class="s-txt">' + esc(pickTxt(a)) + '</span></div>').join('') +
+    '</div></div>';
+
+  /* Actions — native share (or copy + WhatsApp fallback), read aloud,
+     report, again */
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  html += '<div class="res-actions">';
+  html += canShare
+    ? '<button class="btn btn-tonal" type="button" data-act="share"><span data-icon="chat"></span><span>' + esc(t('share_t')) + '</span></button>'
+    : '<button class="btn btn-tonal" type="button" data-act="copy"><span data-icon="copy"></span><span>' + esc(t('act_copy')) + '</span></button>' +
+      '<button class="btn btn-outline" type="button" data-act="wa"><span data-icon="chat"></span><span>' + esc(t('share_wa')) + '</span></button>';
+  html += '<button class="btn btn-outline" type="button" data-act="speak" aria-pressed="false">' +
+    '<span class="ic-a" data-icon="speaker"></span><span class="ic-b" data-icon="stop"></span>' +
+    '<span class="sp-lb">' + esc(t('read_t')) + '</span></button>';
+  html += '<button class="btn btn-filled" type="button" data-act="report"><span data-icon="external"></span><span>' + esc(t('act_report')) + '</span></button>';
+  html += '<button class="btn btn-text" type="button" data-act="again"><span>' + esc(t('act_again')) + '</span></button>';
+  html += '</div>';
+
+  el.innerHTML = html;
+  injectIcons(el);
+  return el;
+}
+
+function countUp(el, to, ms) {
+  const t0 = performance.now();
+  const step = now => {
+    const p = Math.min(1, (now - t0) / ms);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(to * e);
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function runResultFx(node, r) {
+  const val = node.querySelector('.g-val');
+  const num = node.querySelector('[data-count]');
+  const C = 2 * Math.PI * 52;
+  if (val) {
+    const target = C * (1 - Math.max(0, Math.min(100, r.score)) / 100);
+    requestAnimationFrame(() => requestAnimationFrame(() => { val.style.strokeDashoffset = target; }));
+  }
+  if (num) {
+    if (rmActive()) num.textContent = r.score;
+    else countUp(num, r.score, 900);
+  }
+}
+/* Modal sheet on mobile, inline panel on desktop. */
+function presentResult(result, text) {
+  stopSpeak();
+  state.lastResult = result;
+  state.lastText = text;
+  const node = buildResultNode(result, text);
+  if (mqDesk.matches) {
+    state.resultLoc = 'inline';
+    $('#slotResult').replaceChildren();
+    $('#inlineResult').replaceChildren(node);
+    requestAnimationFrame(() => runResultFx(node, result));
+    $('#inlineResult').scrollIntoView({ behavior: rmActive() ? 'auto' : 'smooth', block: 'start' });
+  } else {
+    state.resultLoc = 'sheet';
+    $('#inlineResult').replaceChildren();
+    $('#slotResult').replaceChildren(node);
+    openSheet($('#sheetResult'));
+    requestAnimationFrame(() => runResultFx(node, result));
+  }
+}
+function clearResult(focus) {
+  stopSpeak();
+  state.lastResult = null;
+  state.lastText = '';
+  state.resultLoc = null;
+  $('#inlineResult').replaceChildren();
+  $('#slotResult').replaceChildren();
+  if ($('#sheetResult').classList.contains('open')) closeSheet($('#sheetResult'));
+  if (focus) {
+    const ta = $('#msgInput');
+    ta.value = '';
+    $('#fieldMsg').classList.remove('has-value');
+    $('#main').scrollTo({ top: 0, behavior: rmActive() ? 'auto' : 'smooth' });
+    setTimeout(() => ta.focus(), 300);
+  }
+}
+function rerenderResult() {
+  if (!state.lastResult) return;
+  const inlineHas = $('#inlineResult').children.length > 0;
+  const sheetOpen = $('#sheetResult').classList.contains('open');
+  if (inlineHas || sheetOpen) presentResult(state.lastResult, state.lastText);
+}
+
+/* ---- Check flow ------------------------------------------------------ */
+let checking = false;
+async function runCheck() {
+  if (checking) return;
+  const ta = $('#msgInput');
+  const text = ta.value.trim();
+  if (!text) {
+    const f = $('#fieldMsg');
+    f.classList.remove('nudge'); void f.offsetWidth; f.classList.add('nudge');
+    snack(t('err_empty'));
+    ta.focus();
+    return;
+  }
+  checking = true;
+  $('#btnCheck').disabled = true;
+  clearResult(false);
+  const load = renderLoading();
+  $('#loadSlot').replaceChildren(load);
+  try {
+    const result = await analyze(text);
+    if (load._stop) load._stop();
+    $('#loadSlot').replaceChildren();
+    presentResult(result, text);
+    addHistory(text, result);
+  } catch (err) {
+    if (load._stop) load._stop();
+    $('#loadSlot').replaceChildren();
+    snack(t('err_generic'));
+  }
+  $('#btnCheck').disabled = false;
+  checking = false;
+}
+function loadAndCheck(text) {
+  switchScreen('check');
+  $('#msgInput').value = text;
+  $('#fieldMsg').classList.add('has-value');
+  runCheck();
+}
+
+/* ---- Shareable warning text ------------------------------------------ */
+function buildWarning() {
+  const r = state.lastResult;
+  if (!r) return '';
+  const L = state.lang;
+  const vWord = { safe: t('v_safe'), suspicious: t('v_susp'), scam: t('v_scam') }[r.verdict];
+  const pick = o => (L === 'hi' ? (o.text_hi || o.text_en) : (o.text_en || o.text_hi));
+  const W = [];
+  W.push(L === 'hi'
+    ? 'चेतावनी (ScamShield): यह संदेश “' + vWord + '” पाया गया — जोखिम स्कोर ' + r.score + '/100।'
+    : 'WARNING (ScamShield): this message was checked and looks ' + vWord + ' — risk score ' + r.score + '/100.');
+  W.push(L === 'hi' ? 'क्यों:' : 'Why:');
+  (r.reasons || []).slice(0, 4).forEach(x => W.push('• ' + pick(x)));
+  W.push(L === 'hi' ? 'क्या करें:' : 'What to do:');
+  (r.advice || []).forEach((x, i) => W.push((i + 1) + '. ' + pick(x)));
+  W.push(L === 'hi' ? '— ScamShield से जाँचा गया' : '— Checked with ScamShield');
+  return W.join('\n');
+}
+async function copyText(txt) {
+  try { await navigator.clipboard.writeText(txt); return true; }
+  catch (e) {
+    try {
+      const x = document.createElement('textarea');
+      x.value = txt;
+      x.style.cssText = 'position:fixed;top:-999px;opacity:0';
+      document.body.appendChild(x);
+      x.select();
+      const ok = document.execCommand('copy');
+      x.remove();
+      return ok;
+    } catch (e2) { return false; }
+  }
+}
+async function pasteFromClipboard() {
+  try {
+    const txt = await navigator.clipboard.readText();
+    if (!txt || !txt.trim()) throw new Error('empty');
+    $('#msgInput').value = txt.trim().slice(0, 4000);
+    $('#fieldMsg').classList.add('has-value');
+    snack(t('pasted'));
+  } catch (e) { snack(t('paste_fail')); }
+}
+function onFileChosen(e) {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  const img = $('#thumbImg');
+  if (img.src && img.src.indexOf('blob:') === 0) URL.revokeObjectURL(img.src);
+  img.src = URL.createObjectURL(f);
+  $('#thumbName').textContent = f.name;
+  $('#thumbRow').hidden = false;   /* [hidden] CSS fix keeps this working */
+  snack(t('soon'));
+}
+
+/* ---- Read aloud (speechSynthesis, en-IN / hi-IN) --------------------
+   Reads the verdict sentence + the advice steps. Toggle button gets a
+   stop state; speech is cancelled on any result change.               */
+let speaking = false;
+function ttsText() {
+  const r = state.lastResult;
+  if (!r) return '';
+  const L = state.lang;
+  const pick = o => (L === 'hi' ? (o && (o.text_hi || o.text_en)) : (o && (o.text_en || o.text_hi))) || '';
+  const parts = [t('sent_' + r.verdict)];
+  (r.advice || []).forEach(a => { const s = pick(a); if (s) parts.push(s); });
+  return parts.join(' ');
+}
+function ttsVoice() {
+  try {
+    const want = state.lang === 'hi' ? 'hi-IN' : 'en-IN';
+    const vs = window.speechSynthesis.getVoices();
+    return vs.find(v => v.lang === want) ||
+           vs.find(v => (v.lang || '').indexOf(want.split('-')[0]) === 0) || null;
+  } catch (e) { return null; }
+}
+function updateSpeakBtns() {
+  $$('[data-act="speak"]').forEach(b => {
+    b.classList.toggle('speaking', speaking);
+    b.setAttribute('aria-pressed', speaking ? 'true' : 'false');
+    const lb = b.querySelector('.sp-lb');
+    if (lb) lb.textContent = t(speaking ? 'read_stop' : 'read_t');
+  });
+}
+function stopSpeak() {
+  if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+  if (speaking) { speaking = false; updateSpeakBtns(); }
+}
+function speakToggle() {
+  if (!('speechSynthesis' in window)) { snack(t('read_no')); return; }
+  if (speaking) { stopSpeak(); return; }
+  const txt = ttsText().replace(/\s+/g, ' ').trim();
+  if (!txt) return;
+  const u = new SpeechSynthesisUtterance(txt);
+  const v = ttsVoice();
+  if (v) { u.voice = v; u.lang = v.lang; }
+  else u.lang = state.lang === 'hi' ? 'hi-IN' : 'en-IN';
+  u.rate = 0.97;
+  u.onend = () => { speaking = false; updateSpeakBtns(); };
+  u.onerror = () => { speaking = false; updateSpeakBtns(); };
+  try {
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+    speaking = true;
+    updateSpeakBtns();
+  } catch (e) { snack(t('read_no')); }
+}
+
+/* ---- Demo story — full-screen 3-step stepper ------------------------- */
+let demoIdx = 0;
+function buildDemoDots() {
+  const box = $('#demoDots');
+  if (!box || box.children.length) return;
+  for (let i = 0; i < 3; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = '<i></i>';
+    b.addEventListener('click', () => demoGo(i));
+    box.appendChild(b);
+  }
+}
+function demoGo(n, dirBack) {
+  demoIdx = Math.max(0, Math.min(2, n));
+  $$('#demoOv .demo-step').forEach(s => {
+    const cur = Number(s.dataset.step) === demoIdx;
+    s.classList.toggle('cur', cur);
+    s.classList.toggle('fromL', !!dirBack);
+  });
+  $('#demoBack').disabled = demoIdx === 0;
+  const next = $('#demoNext');
+  const last = demoIdx === 2;
+  next.dataset.i18n = last ? 'demo_try' : 'demo_next'; /* survives applyLang */
+  next.textContent = t(next.dataset.i18n);
+  $$('#demoDots button').forEach((b, i) => {
+    b.classList.toggle('on', i === demoIdx);
+    b.setAttribute('aria-label', t('demo_step', i + 1));
+  });
+}
+function openDemo() {
+  $('#demoBubble').textContent = DEMO_SMS;
+  demoGo(0);
+  $('#demoOv').classList.add('show');
+  setTimeout(() => $('#demoClose').focus(), 260);
+}
+function hideDemo() { $('#demoOv').classList.remove('show'); }
+
+/* ---- Test lab — measured accuracy for judges ------------------------- */
+function runLab() {
+  const out = $('#labOut');
+  if (typeof runSelfTests !== 'function') {
+    out.innerHTML = '<div class="lab-row"><span class="vb suspicious">!</span><span>' + esc(t('err_generic')) + '</span></div>';
+    return;
+  }
+  out.innerHTML = '<div class="load-status" style="padding:12px 0"><span class="spin"></span><span>' + esc(t('lab_run')) + '…</span></div>';
+  /* let the spinner paint, then run the synchronous suite */
+  setTimeout(() => {
+    const r = runSelfTests();
+    let html = '<div class="lab-stats">' +
+      '<div class="lab-stat"><div class="num">' + r.total + '</div><div class="lb">' + esc(t('lab_total')) + '</div></div>' +
+      '<div class="lab-stat"><div class="num">' + r.passed + '</div><div class="lb">' + esc(t('lab_pass')) + '</div></div>' +
+      '<div class="lab-stat"><div class="num">' + r.accuracy + '%</div><div class="lb">' + esc(t('lab_acc')) + '</div></div>' +
+      '</div>';
+    if (r.failures && r.failures.length) {
+      html += '<h4 class="lab-fail-head">' + esc(t('lab_fail')) + '</h4>';
+      html += r.failures.map(f =>
+        '<div class="lab-row"><span class="vb suspicious">FAIL</span>' +
+        '<span><strong>' + esc(f.label) + '</strong>' +
+        esc(f.expected + ' → ' + f.got + (typeof f.score === 'number' ? ' · ' + f.score + '/100' : '')) +
+        '</span></div>').join('');
+    } else {
+      html += '<div class="lab-ok"><span data-icon="checkCircle"></span><span>' + esc(t('lab_none')) + '</span></div>';
+    }
+    out.innerHTML = html;
+    injectIcons(out);
+  }, 60);
+}
+
+/* ---- History --------------------------------------------------------- */
+const FILTERS = [['all', 'filter_all'], ['scam', 'filter_scam'], ['suspicious', 'filter_susp'], ['safe', 'filter_safe']];
+function addHistory(text, result) {
+  state.history.unshift({
+    id: 'h' + Date.now() + Math.floor(Math.random() * 1e4),
+    ts: Date.now(), verdict: result.verdict, score: result.score, text, result
+  });
+  if (state.history.length > 100) state.history.length = 100;
+  saveState();
+  renderHistory();
+}
+function relTime(ts) {
+  const d = Date.now() - ts, m = Math.floor(d / 60000);
+  if (m < 1) return t('just_now');
+  if (m < 60) return t('m_ago', m);
+  const h = Math.floor(m / 60);
+  if (h < 24) return t('h_ago', h);
+  const dd = Math.floor(h / 24);
+  if (dd < 7) return t('d_ago', dd);
+  return new Date(ts).toLocaleDateString(state.lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short' });
+}
+function renderHistory() {
+  const h = state.history;
+  const scams = h.filter(x => x.verdict === 'scam').length;
+  const safes = h.filter(x => x.verdict === 'safe').length;
+  $('#histStats').innerHTML =
+    [['' + h.length, t('stat_total')], ['' + scams, t('stat_scam')], ['' + safes, t('stat_safe')]]
+    .map(s => '<div class="stat"><div class="num">' + esc(s[0]) + '</div><div class="lb">' + esc(s[1]) + '</div></div>').join('');
+  $('#histFilters').innerHTML = FILTERS.map(f =>
+    '<button class="chip' + (state.histFilter === f[0] ? ' on' : '') + '" type="button" data-filter="' + f[0] + '">' + esc(t(f[1])) + '</button>').join('');
+  const list = h.filter(x => state.histFilter === 'all' || x.verdict === state.histFilter);
+  $('#histList').innerHTML = list.map(x => {
+    const vlbl = { scam: t('v_scam'), suspicious: t('v_susp'), safe: t('v_safe') }[x.verdict] || '';
+    return '<div class="hrow" role="button" tabindex="0" data-id="' + esc(x.id) + '" aria-label="' + esc(vlbl) + ': ' + esc(x.text.slice(0, 60)) + '">' +
+      '<span class="vb ' + x.verdict + '">' + esc(vlbl) + '</span>' +
+      '<span class="hmid"><span class="snip">' + esc(x.text.slice(0, 110)) + '</span>' +
+      '<span class="htime">' + esc(relTime(x.ts)) + ' · ' + x.score + '/100</span></span>' +
+      '<button class="iconbtn hdel" type="button" data-del="' + esc(x.id) + '" aria-label="' + esc(t('del_label')) + '"><span data-icon="trash"></span></button>' +
+      '</div>';
+  }).join('');
+  $('#histEmpty').hidden = list.length !== 0;
+  injectIcons($('#histList'));
+}
+function deleteHistory(id) {
+  const doRemove = () => {
+    state.history = state.history.filter(x => x.id !== id);
+    saveState(); renderHistory(); snack(t('removed'));
+  };
+  const row = $('#histList').querySelector('.hrow[data-id="' + id + '"]');
+  if (row && !rmActive()) { row.classList.add('removing'); setTimeout(doRemove, 230); }
+  else doRemove();
+}
+function openHistoryItem(id) {
+  const e = state.history.find(x => x.id === id);
+  if (!e) return;
+  switchScreen('check');
+  $('#msgInput').value = e.text;
+  $('#fieldMsg').classList.add('has-value');
+  presentResult(e.result, e.text);
+}
+
+/* ---- Protect --------------------------------------------------------- */
+const PROTECT_CARDS = [
+  { k: 'ext', icon: 'ext',      name: 'prot_ext', desc: 'prot_ext_d' },
+  { k: 'and', icon: 'phoneDev', name: 'prot_and', desc: 'prot_and_d' },
+  { k: 'dsk', icon: 'monitor',  name: 'prot_dsk', desc: 'prot_dsk_d' }
+];
+function renderProtect() {
+  $('#protList').innerHTML = PROTECT_CARDS.map(c => {
+    const on = !!state.toggles[c.k];
+    return '<div class="prot-card card">' +
+      '<div class="pc-ic" data-icon="' + c.icon + '"></div>' +
+      '<div class="pc-main"><h3>' + esc(t(c.name)) + '</h3><p class="pc-desc">' + esc(t(c.desc)) + '</p>' +
+      '<p class="pc-status' + (on ? ' on' : '') + '"><span class="dot"></span>' + esc(on ? t('on') : t('off')) + '</p></div>' +
+      '<label class="switch"><input type="checkbox" data-prot="' + c.k + '"' + (on ? ' checked' : '') +
+      ' aria-label="' + esc(t(c.name)) + '"><span class="trk"></span><span class="thb"></span></label>' +
+      '</div>';
+  }).join('');
+  injectIcons($('#protList'));
+}
+
+/* ---- Sheets, dialog, snackbar, simulations ---------------------------- */
+let sheetStack = [];
+function openSheet(el) {
+  const wasOpen = el.classList.contains('open');
+  el.classList.add('open');
+  $('#scrim').classList.add('show');
+  if (!wasOpen) {
+    sheetStack.push(el);
+    if (!mqDesk.matches) {
+      const f = el.querySelector('button');
+      if (f) setTimeout(() => f.focus(), 330);
+    }
+  }
+}
+function closeSheet(el) {
+  el.classList.remove('open');
+  sheetStack = sheetStack.filter(x => x !== el);
+  if (!sheetStack.length) $('#scrim').classList.remove('show');
+  if (el.id === 'sheetResult' && state.resultLoc === 'sheet') { state.resultLoc = null; stopSpeak(); }
+  /* Onboarding counts as seen however it is closed — show only once. */
+  if (el.id === 'sheetOnb' && !state.onboarded) { state.onboarded = true; saveState(); }
+}
+function enableSheetDrag() {
+  $$('.sheet').forEach(sheet => {
+    const handle = sheet.querySelector('[data-drag]');
+    if (!handle) return;
+    let startY = 0, dy = 0, dragging = false;
+    handle.addEventListener('pointerdown', e => {
+      if (mqDesk.matches) return;
+      dragging = true; startY = e.clientY; dy = 0;
+      sheet.style.transition = 'none';
+      try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    handle.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      dy = Math.max(0, e.clientY - startY);
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+    });
+    const end = () => {
+      if (!dragging) return;
+      dragging = false;
+      sheet.style.transition = '';
+      sheet.style.transform = '';
+      if (dy > 110) closeSheet(sheet);
+    };
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+  });
+}
+let snackTimer = null;
+function snack(msg) {
+  $('#snackTxt').textContent = msg;
+  const s = $('#snack');
+  s.classList.add('show');
+  clearTimeout(snackTimer);
+  snackTimer = setTimeout(() => s.classList.remove('show'), 2800);
+}
+let smsTimer = null, toastTimer = null;
+function showSmsBanner() {
+  $('#smsBody').textContent = SIM_SMS_TEXT;
+  $('#smsTime').textContent = new Date()
+    .toLocaleTimeString(state.lang === 'hi' ? 'hi-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' });
+  $('#smsBanner').classList.add('show');
+  clearTimeout(smsTimer);
+  smsTimer = setTimeout(hideSmsBanner, 6500);
+}
+function hideSmsBanner() { clearTimeout(smsTimer); $('#smsBanner').classList.remove('show'); }
+function showDeskToast() {
+  $('#deskToast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideDeskToast, 5500);
+}
+function hideDeskToast() { clearTimeout(toastTimer); $('#deskToast').classList.remove('show'); }
+function showScamOv() { $('#scamOv').classList.add('show'); $('#ovBack').focus(); }
+function hideScamOv() { $('#scamOv').classList.remove('show'); }
+
+/* ---- Navigation -------------------------------------------------------- */
+function switchScreen(name) {
+  if (TABS.indexOf(name) === -1) return;
+  const oldIdx = TABS.indexOf(state.screen), newIdx = TABS.indexOf(name);
+  const same = state.screen === name;
+  $('#wrap').style.setProperty('--ax', newIdx > oldIdx ? '1' : '-1');
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + name));
+  $$('.nav-item,.side-item').forEach(b => {
+    const on = b.dataset.tab === name;
+    b.classList.toggle('active', on);
+    if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  state.screen = name;
+  $('#fab').classList.toggle('hide', name === 'check');
+  $('#main').scrollTop = 0;
+  $('#topbar').classList.remove('scrolled');
+  if (!same && name === 'check') setTimeout(() => $('#msgInput').focus({ preventScroll: true }), 340);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANIMATIONS — ripple + entrance effects (transform/opacity only)
+   ══════════════════════════════════════════════════════════════════ */
+function enableRipple() {
+  document.addEventListener('pointerdown', e => {
+    const el = e.target.closest('.btn,.chip,.seg button,.side-item,.hrow');
+    if (!el || rmActive()) return;
+    const r = el.getBoundingClientRect();
+    const d = Math.max(r.width, r.height) * 1.15;
+    const s = document.createElement('span');
+    s.className = 'ripple';
+    s.style.cssText = 'width:' + d + 'px;height:' + d + 'px;left:' + (e.clientX - r.left - d / 2) + 'px;top:' + (e.clientY - r.top - d / 2) + 'px';
+    el.appendChild(s);
+    s.addEventListener('animationend', () => s.remove());
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   EVENT HANDLERS + INIT
+   ══════════════════════════════════════════════════════════════════ */
+function wireEvents() {
+  /* Check screen */
+  $('#msgInput').addEventListener('input', e => {
+    $('#fieldMsg').classList.toggle('has-value', e.target.value.length > 0);
+  });
+  $('#btnCheck').addEventListener('click', runCheck);
+  $('#btnPaste').addEventListener('click', pasteFromClipboard);
+  $('#btnUpload').addEventListener('click', () => $('#fileInput').click());
+  $('#fileInput').addEventListener('change', onFileChosen);
+  $('#thumbRemove').addEventListener('click', () => {
+    $('#thumbRow').hidden = true;
+    const img = $('#thumbImg');
+    if (img.src && img.src.indexOf('blob:') === 0) URL.revokeObjectURL(img.src);
+    img.removeAttribute('src');
+  });
+  $('#exChips').addEventListener('click', e => {
+    const b = e.target.closest('[data-ex]');
+    if (!b) return;
+    const ex = EXAMPLES[Number(b.dataset.ex)];
+    if (ex) loadAndCheck(ex.text);
+  });
+
+  /* Navigation */
+  $$('.nav-item,.side-item').forEach(b => b.addEventListener('click', () => switchScreen(b.dataset.tab)));
+  $('#fab').addEventListener('click', () => switchScreen('check'));
+  $('#emptyCta').addEventListener('click', () => switchScreen('check'));
+
+  /* History */
+  $('#histFilters').addEventListener('click', e => {
+    const b = e.target.closest('[data-filter]');
+    if (!b) return;
+    state.histFilter = b.dataset.filter;
+    renderHistory();
+  });
+  $('#histList').addEventListener('click', e => {
+    const del = e.target.closest('[data-del]');
+    if (del) { e.stopPropagation(); deleteHistory(del.dataset.del); return; }
+    const row = e.target.closest('.hrow');
+    if (row) openHistoryItem(row.dataset.id);
+  });
+  $('#histList').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const row = e.target.closest('.hrow');
+    if (!row) return;
+    e.preventDefault();
+    openHistoryItem(row.dataset.id);
+  });
+  $('#btnClear').addEventListener('click', () => $('#dlgClear').classList.add('show'));
+  $('#dlgCancel').addEventListener('click', () => $('#dlgClear').classList.remove('show'));
+  $('#dlgOk').addEventListener('click', () => {
+    state.history = [];
+    saveState();
+    renderHistory();
+    $('#dlgClear').classList.remove('show');
+    snack(t('cleared'));
+  });
+
+  /* Protect */
+  $('#protList').addEventListener('change', e => {
+    const c = e.target.closest('[data-prot]');
+    if (!c) return;
+    state.toggles[c.dataset.prot] = c.checked;
+    saveState();
+    renderProtect();
+  });
+  $('#simSms').addEventListener('click', showSmsBanner);
+  $('#simCopy').addEventListener('click', showDeskToast);
+  $('#simSite').addEventListener('click', showScamOv);
+  $('#smsDismiss').addEventListener('click', hideSmsBanner);
+  $('#smsCheck').addEventListener('click', () => { hideSmsBanner(); loadAndCheck(SIM_SMS_TEXT); });
+  $('#dtClose').addEventListener('click', hideDeskToast);
+  $('#dtCheck').addEventListener('click', () => { hideDeskToast(); loadAndCheck(SIM_COPY_TEXT); });
+  $('#ovBack').addEventListener('click', () => { hideScamOv(); snack(t('ov_back_msg')); });
+  $('#ovCont').addEventListener('click', () => { hideScamOv(); snack(t('ov_cont_msg')); });
+
+  /* Demo story */
+  $('#btnDemo').addEventListener('click', openDemo);
+  $('#demoClose').addEventListener('click', hideDemo);
+  $('#demoBack').addEventListener('click', () => demoGo(demoIdx - 1, true));
+  $('#demoNext').addEventListener('click', () => {
+    if (demoIdx === 2) { hideDemo(); loadAndCheck(DEMO_SMS); }
+    else demoGo(demoIdx + 1);
+  });
+
+  /* Settings */
+  $('#segLang').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    state.lang = b.dataset.val;
+    saveState();
+    applyLang();
+  });
+  $('#segTheme').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    state.theme = b.dataset.val;
+    saveState();
+    applyTheme();
+  });
+  $('#segTs').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    state.ts = b.dataset.val;
+    saveState();
+    applyTextSize();
+  });
+  $('#swRm').addEventListener('change', e => {
+    state.rm = e.target.checked;
+    saveState();
+    applyRm();
+  });
+  mqDark.addEventListener('change', () => { if (state.theme === 'auto') applyTheme(); });
+
+  /* Sheets + dialogs */
+  $('#btnHowSide').addEventListener('click', () => openSheet($('#sheetHow')));
+  $('#btnHowTop').addEventListener('click', () => openSheet($('#sheetHow')));
+  $('#btnHowSet').addEventListener('click', () => openSheet($('#sheetHow')));
+  $('#howClose').addEventListener('click', () => closeSheet($('#sheetHow')));
+  $('#howClose2').addEventListener('click', () => closeSheet($('#sheetHow')));
+
+  /* Test lab */
+  $('#btnLab').addEventListener('click', () => { openSheet($('#sheetLab')); runLab(); });
+  $('#labRun').addEventListener('click', runLab);
+  $('#labClose').addEventListener('click', () => closeSheet($('#sheetLab')));
+
+  /* First-launch onboarding */
+  $('#onbGo').addEventListener('click', () => closeSheet($('#sheetOnb')));
+  $('#onbSkip').addEventListener('click', () => closeSheet($('#sheetOnb')));
+  $('#resClose').addEventListener('click', () => closeSheet($('#sheetResult')));
+  $('#scrim').addEventListener('click', () => {
+    if (sheetStack.length) closeSheet(sheetStack[sheetStack.length - 1]);
+  });
+
+  /* Result actions (delegate — result is re-rendered often) */
+  document.addEventListener('click', async e => {
+    const el = e.target.closest('[data-act]');
+    if (!el) return;
+    const act = el.dataset.act;
+    if (act === 'copy') {
+      const ok = await copyText(buildWarning());
+      snack(ok ? t('copied') : t('err_generic'));
+    } else if (act === 'share') {
+      /* navigator.share available — one-tap share */
+      try { await navigator.share({ title: 'ScamShield', text: buildWarning() }); snack(t('share_done')); }
+      catch (err) { if (err && err.name !== 'AbortError') snack(t('err_generic')); }
+    } else if (act === 'wa') {
+      /* no navigator.share — copy the warning AND offer a wa.me link */
+      const ok = await copyText(buildWarning());
+      try { window.open('https://wa.me/?text=' + encodeURIComponent(buildWarning()), '_blank', 'noopener'); } catch (err) {}
+      snack(ok ? t('share_open') : t('err_generic'));
+    } else if (act === 'speak') {
+      speakToggle();
+    } else if (act === 'report') {
+      try { window.open('https://cybercrime.gov.in', '_blank', 'noopener'); } catch (err) {}
+      snack(t('reporting'));
+    } else if (act === 'again') {
+      clearResult(true);
+    }
+  });
+
+  /* Keyboard shortcuts */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if ($('#scamOv').classList.contains('show')) { hideScamOv(); return; }
+      if ($('#demoOv').classList.contains('show')) { hideDemo(); return; }
+      if ($('#dlgClear').classList.contains('show')) { $('#dlgClear').classList.remove('show'); return; }
+      if (sheetStack.length) { closeSheet(sheetStack[sheetStack.length - 1]); return; }
+      return;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); runCheck(); return; }
+    const ae = document.activeElement;
+    const typing = ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT' || ae.isContentEditable);
+    if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && /^[1-4]$/.test(e.key)) {
+      switchScreen(TABS[Number(e.key) - 1]);
+    }
+  });
+
+  /* Large-title collapse on scroll */
+  let scrollTick = false;
+  $('#main').addEventListener('scroll', () => {
+    if (scrollTick) return;
+    scrollTick = true;
+    requestAnimationFrame(() => {
+      $('#topbar').classList.toggle('scrolled', $('#main').scrollTop > 70);
+      scrollTick = false;
+    });
+  }, { passive: true });
+
+  /* Layout breakpoint: move an open result sheet into the inline slot */
+  mqDesk.addEventListener('change', () => {
+    if (state.lastResult && !mqDesk.matches) return;
+    if (state.lastResult && mqDesk.matches && $('#sheetResult').classList.contains('open')) {
+      closeSheet($('#sheetResult'));
+      presentResult(state.lastResult, state.lastText);
+    }
+  });
+}
+
+/* ---- Init --------------------------------------------------------------- */
+function init() {
+  injectIcons(document);
+  applyTheme();
+  applyTextSize();
+  applyRm();
+  applyLang();          /* also renders examples, history, protect */
+  enableSheetDrag();
+  enableRipple();
+  wireEvents();
+  switchScreen('check');
+  $('#smsBody').textContent = SIM_SMS_TEXT;
+  buildDemoDots();
+  /* Warm the speech voice list (they load asynchronously in Chrome). */
+  if ('speechSynthesis' in window) {
+    try { window.speechSynthesis.getVoices(); } catch (e) {}
+  }
+  /* First launch only — 3-card onboarding, shown once. */
+  if (!state.onboarded) setTimeout(() => openSheet($('#sheetOnb')), 450);
+}
+init();
+</script>
+</body>
+</html>
