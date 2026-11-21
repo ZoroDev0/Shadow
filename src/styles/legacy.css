@@ -528,7 +528,7 @@ mark.hl{background:var(--hl-bg);color:var(--hl-fg);border-radius:5px;
 .demo-head{display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:2px 2px 14px;flex:none}
 .demo-head h2{font:800 1.25rem var(--font-display);letter-spacing:-.02em}
-.demo-scroll{overflow-y:auto;min-height:0}
+.demo-scroll{overflow-y:auto;min-height:0;padding:2px 4px 8px}
 .demo-card{background:var(--surface);border:1px solid var(--border);
   border-radius:var(--r-xl);padding:22px;box-shadow:var(--shadow-2);
   overflow:hidden}
@@ -580,8 +580,8 @@ mark.hl{background:var(--hl-bg);color:var(--hl-fg);border-radius:5px;
 .demo-dots button.on i{background:var(--text);transform:scale(1.35)}
 .demo-dots button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
 .demo-foot{display:flex;gap:10px;padding-top:14px;flex:none}
-.demo-foot .btn{flex:1;white-space:nowrap;min-width:0}
-.demo-foot .btn:last-child{overflow:hidden;text-overflow:ellipsis}
+.demo-foot #demoBack{flex:0 0 auto;min-width:44px}
+.demo-foot #demoNext{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rot-l{transform:rotate(90deg)}
 
 /* ════════════════════════ TEST LAB ════════════════════════ */
