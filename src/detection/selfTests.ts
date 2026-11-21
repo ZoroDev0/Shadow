@@ -180,7 +180,9 @@ export const CASES:SelfTestCase[] = [
     { id: 'R30', label: 'A message whose only link is a bare public IP is flagged', expect: 'suspicious',
       text: 'Pay the delivery fee at http://45.33.12.9/pay now.' },
     { id: 'R31', label: 'Degenerate link fragments (email, scheme only) do not produce links', expect: 'safe',
-      text: 'Email ops@intranet or open http:// then ask the front desk.' }
+      text: 'Email ops@intranet or open http:// then ask the front desk.' },
+    { id: 'R32', label: 'YES Bank .in domain is the real bank, not a lookalike of yes.bank.in', expect: 'safe',
+      text: 'Your YES Bank statement is ready. Download it securely from https://www.yesbank.in/estatement' }
   ];
 export function runSelfTests(){const rows:any[]=[];const failures:any[]=[];let passed=0;for(const c of CASES){let got:any="error",sc=-1,err="";try{const r=detectLocal(c.text);got=r.verdict;sc=r.score}catch(e:any){err=e?.message||String(e)}const ok=got===c.expect;if(ok)passed++;else failures.push({case:c.id,label:c.label,expected:c.expect,got,score:sc,error:err});rows.push({case:c.id,expect:c.expect,got,score:sc,result:ok?"PASS":"FAIL",note:ok?"":(err||c.label)})}const total=CASES.length;const accuracy=Math.round(passed/total*1000)/10;const summary={total,passed,accuracy,failures};if(typeof console!=="undefined"){try{console.table(rows)}catch{}console.log(`[Shadow] self-tests: ${passed}/${total} passed (${accuracy}%)`)}return summary}
 if(typeof window!=="undefined")(window as any).runSelfTests=runSelfTests;else(globalThis as any).runSelfTests=runSelfTests;

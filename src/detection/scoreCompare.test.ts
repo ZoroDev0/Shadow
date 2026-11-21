@@ -23,7 +23,8 @@ const KNOWN_DIFFERENCES = [
   // .bank.in domain (R22), reads jio.com inside ajio.com as an embedded
   // official domain (R23), prefix-matches sbi onto SBI Life (R24), and throws
   // on a no-dot host where the shipped engine returns a safe result (R28).
-  "R22", "R23", "R24", "R28",
+  // Phase 13b: the frozen engine still flags the real yesbank.in as a yes.bank.in lookalike (R32).
+  "R22", "R23", "R24", "R28", "R32",
   "S19", "S27", "X10",
 ];
 
