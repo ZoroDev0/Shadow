@@ -9,7 +9,8 @@
     "build:ext": "node scripts/build-ext.mjs",
     "test": "vitest run",
     "preview": "vite preview",
-    "build:android-engine": "node scripts/build-android-engine.mjs"
+    "build:android-engine": "node scripts/build-android-engine.mjs",
+    "sync:android": "npm run build && npm run build:android-engine && cap sync android"
   },
   "dependencies": {
     "@capacitor/android": "8.6.2",

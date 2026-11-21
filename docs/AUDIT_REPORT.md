@@ -6,7 +6,7 @@ Audit date: 2026-11-21
 > **Phase 12 update (2026-11-22):** the three real-site false positives in §I8
 > are fixed; the guard list grew to 140 sites. Current counts are **86**
 > self-tests (54 scam / 8 suspicious / 24 safe), **101** golden parity entries,
-> **53** vitest tests and **12** backend tests.
+> **57** vitest tests and **12** backend tests.
 > The 74 / 89 figures used throughout sections A–H are the Phase 5–7 snapshot
 > this report was written against, not the current state.
 
@@ -496,7 +496,7 @@ changes the web app, the Python backend and the extension together.
 | --- | --- |
 | Detector self-tests (`src/detection/selfTests.ts`) | **86** — 54 scam, 8 suspicious, 24 safe |
 | Golden parity (`backend/golden.json`) | **101** = 86 self-tests + 15 extra cases |
-| Vitest | **53** = 15 engine/UI tests + 38 extension tests |
+| Vitest | **57** = 19 engine/UI/native tests + 38 extension tests |
 | Backend pytest | **12** |
 
 `backend/test_parity.py` now asserts that `golden.json` holds exactly 101 entries

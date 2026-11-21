@@ -47,7 +47,7 @@ Run against the built `extension/dist` loaded unpacked in Playwright's Chromium
 ## Browser Extension — Automated URL-policy fuzz
 
 - [x] **VERIFIED**: `npx tsx scripts/fuzz-ext-policy.ts` exercises 273 unique odd URLs (malformed, unicode/punycode hosts, `userinfo@host`, IPv6 literals, ports, `data:`/`javascript:`/`blob:`/`file:` schemes, 8000-character inputs, path-and-query text that only looks like a host) plus the 140 guarded legitimate sites: 0 throws, 0 blocks of a private/internal address, 0 blocks of a legitimate site, and 19 blocks that are all genuine lookalikes or bare public IPs.
-- [x] **VERIFIED**: 86 self-tests (54 scam / 8 suspicious / 24 safe), 101 golden entries evaluated by both TypeScript and Python, 53 vitest tests, 12 backend tests.
+- [x] **VERIFIED**: 86 self-tests (54 scam / 8 suspicious / 24 safe), 101 golden entries evaluated by both TypeScript and Python, 57 vitest tests, 12 backend tests.
 - [x] **VERIFIED**: `npx tsx scripts/fuzz-engine.ts` sends 340 adversarial inputs (empty, whitespace, 4,000-character runs of one character, emoji only, RTL, zero-width, null bytes, mixed Devanagari/Latin, 3,000-character URLs, 500-label hosts, unbalanced brackets, `userinfo@host`, percent blobs) through the TypeScript engine and the Python mirror: 0 throws, identical verdict and score on all 340. Slowest call 9.07 ms (TS) and 8.22 ms (Python), both under the 100 ms budget.
 - [x] **FIXED**: the Python mirror took 220 ms on a 4,000-digit run because the urgency rule used a bare `\d+` that backtracked at every digit, and the URL extractor scanned an unbounded label. Both are now bounded (`\d{1,4}`, `[\w-]{0,62}`) in `rules.json` and in the URL regexes of both engines; slowest Python call is now 8.22 ms, guarded by a vitest timing test.
 - [x] **FIXED**: `hdfc.bank.in`, `ajio.com` and `sbilife.co.in` are no longer flagged (Phase 12; label-boundary check plus the official-domain list). Their lookalikes — `hdfc.bank.in.evil.com`, `ajio.com.evil.xyz`, `sbilife-kyc.top` — still block.
@@ -72,3 +72,23 @@ Run against the built `extension/dist` loaded unpacked in Playwright's Chromium
 - [ ] **PWA Add-to-Home-Screen Prompt**: Confirm physical browser displays "Install App" or "Add to Home Screen" banner and launches in standalone display mode with correct splash background.
 - [ ] **Physical Airplane Mode**: Turn off device Wi-Fi/cellular on phone and confirm on-device scanning operates without degraded functionality.
 - [ ] **Virtual On-Screen Keyboard**: Confirm mobile soft keyboard does not obscure the Check button or input when active on small screens (e.g. iPhone SE / 360px Android).
+
+## Android app — a real phone is required (NOT run here)
+
+Automated on this machine and green: `npm test` (57 tests, including all 101
+golden entries inside real QuickJS), `cd android && ./gradlew testDebugUnitTest`
+(12 JVM tests) and `./gradlew assembleDebug` (7.6 MB universal debug APK).
+The instrumented golden test (`connectedDebugAndroidTest`) needs a device and was
+**not** run, so every box below is open.
+
+- [ ] `adb install -r android/app/build/outputs/apk/debug/app-debug.apk` and the app opens the same UI as the web build.
+- [ ] PROTECT → the Android card shows *Notification access is off* and the button opens the system notification-access list.
+- [ ] Grant access; returning to the app shows *Notification access is on* (onResume re-check).
+- [ ] `adb shell cmd notification post -S bigtext -t "SBI" "scamtest" "Your account is blocked. Update KYC now: http://sbi-kyc-update.xyz"` → alert "Possible scam message", no message body in the alert.
+- [ ] Tapping the alert opens the app on the result; HISTORY shows `Notification · com.android.shell` with digits masked.
+- [ ] A genuine OTP (`4821 is your OTP for HDFC Bank card ending 1234...`) posts nothing.
+- [ ] The Hindi scam sample is flagged scam.
+- [ ] Revoking access turns the card off and stops scans.
+- [ ] Sideloaded Android 13+: the restricted-settings instruction is reachable (App info → three-dot menu → Allow restricted settings).
+- [ ] App info → Permissions lists **no** SMS permission.
+- [ ] HISTORY clear removes stored scans.

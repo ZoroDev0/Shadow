@@ -92,13 +92,13 @@ Allowlist and settings live in `chrome.storage.local`. “Proceed anyway” live
 ## Tests
 
 ```bash
-npm test                                   # 53 tests, includes extension/tests/*.test.ts
+npm test                                   # 57 tests, includes extension/tests/*.test.ts
 npm run build:ext                          # then the dist/ manifest checks run too
 npx tsx scripts/fuzz-ext-policy.ts         # URL-policy fuzz: 273 URLs
 cd backend && python -m pytest -q          # 12 tests, 101-entry engine parity
 ```
 
-The extension suite (38 of the 53 tests) covers the navigation guard (SCAM
+The extension suite (38 of the 57 tests) covers the navigation guard (SCAM
 redirected, BE CAREFUL not redirected), allowlisted/official/internal/local
 URLs, the global switch, the session “Proceed anyway”, context-menu results, API
 failure → local fallback, the manifest, and a false-positive guard over 140
