@@ -1,6 +1,6 @@
 {
-  "name": "ScamShield — Is that message a scam?",
-  "short_name": "ScamShield",
+  "name": "Shadow — Is that message a scam?",
+  "short_name": "Shadow",
   "description": "Paste a suspicious SMS, WhatsApp message or link and get a plain-language verdict on this device.",
   "start_url": "/",
   "scope": "/",

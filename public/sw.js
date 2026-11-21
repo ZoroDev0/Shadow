@@ -1,4 +1,4 @@
-/* ScamShield app-shell service worker.
+/* Shadow app-shell service worker.
    Caches only the built shell: the HTML entry, the manifest and same-origin
    hashed assets. It never touches POST requests, never caches /analyze or any
    /api/* response, and never caches cross-origin requests. */

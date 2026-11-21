@@ -1,10 +1,11 @@
 import { analyze as analyzeShared } from './detection/analyze';
+import { urlHost } from './detection/engine';
 
 "use strict";
 /* ══════════════════════════════════════════════════════════════════
    CONFIG
    ══════════════════════════════════════════════════════════════════ */
-const APP_NAME = 'ScamShield';
+const APP_NAME = 'Shadow';
 const APP_VERSION = '1.0';
 const STORAGE_KEY = 'scamshield.v1';
 /* Set to your backend origin (e.g. "https://api.example.com") to send
@@ -115,11 +116,11 @@ const I18N = {
   on:              { en: 'Active · demo', hi: 'सक्रिय · डेमो' },
   off:             { en: 'Off', hi: 'बंद' },
   sim_title:       { en: 'See it in action', hi: 'खुद देखें' },
-  sim_sub:         { en: 'This is how ScamShield would warn you in real life.', hi: 'असली ज़िंदगी में ScamShield ऐसे ही चेतावनी देता है।' },
+  sim_sub:         { en: 'This is how Shadow would warn you in real life.', hi: 'असली ज़िंदगी में Shadow ऐसे ही चेतावनी देता है।' },
   sim_sms:         { en: 'Simulate incoming SMS', hi: 'SMS नोटिफिकेशन देखें' },
   sim_copy:        { en: 'Simulate copied text', hi: 'कॉपी किया टेक्स्ट देखें' },
   sim_site:        { en: 'Simulate scam website', hi: 'घोटाला वेबसाइट देखें' },
-  sms_warn:        { en: 'ScamShield: SCAM — fake SBI link. Do not tap.', hi: 'ScamShield: घोटाला — फर्ज़ी SBI लिंक। न दबाएँ।' },
+  sms_warn:        { en: 'Shadow: SCAM — fake SBI link. Do not tap.', hi: 'Shadow: घोटाला — फर्ज़ी SBI लिंक। न दबाएँ।' },
   sms_check:       { en: 'Check', hi: 'जाँचें' },
   sms_dismiss:     { en: 'Dismiss', hi: 'हटाएँ' },
   toast_copy_t:    { en: 'Warning: the text you just copied looks like a scam', hi: 'चेतावनी: आपने जो टेक्स्ट copy किया है वह घोटाला जैसा लगता है' },
@@ -143,7 +144,7 @@ const I18N = {
   set_rm:          { en: 'Reduce motion', hi: 'कम एनिमेशन' },
   set_rm_d:        { en: 'Turn off animations for a calmer experience.', hi: 'शांत अनुभव के लिए एनिमेशन बंद कर देता है।' },
   open:            { en: 'Open', hi: 'खोलें' },
-  how_title:       { en: 'How ScamShield works', hi: 'ScamShield कैसे काम करता है' },
+  how_title:       { en: 'How Shadow works', hi: 'Shadow कैसे काम करता है' },
   how_l1t:         { en: '1 · Reading the message', hi: '1 · संदेश पढ़ना' },
   how_l1d:         { en: 'This rule-based detector looks for panic words, threats, and requests for OTP, PIN, KYC or Aadhaar. It is not an ML SMS classifier.', hi: 'यह rule-based डिटेक्टर घबराहट भरे शब्द, धमकियाँ और OTP, PIN, KYC या आधार मांगने वाली बातें ढूँढता है। यह ML SMS क्लासिफ़ायर नहीं है।' },
   how_l2t:         { en: '2 · Checking the links', hi: '2 · लिंक जाँचना' },
@@ -154,7 +155,7 @@ const I18N = {
   close:           { en: 'Close', hi: 'बंद करें' },
   about_title:     { en: 'About', hi: 'ऐप के बारे में' },
   about_v:         { en: 'Version 1.0 · demo build', hi: 'संस्करण 1.0 · डेमो' },
-  about_d:         { en: 'ScamShield helps ordinary people spot digital fraud in India — no security knowledge needed.', hi: 'ScamShield आम लोगों को डिजिटल ठगी पहचानने में मदद करता है — कोई तकनीकी ज्ञान ज़रूरी नहीं।' },
+  about_d:         { en: 'Shadow helps ordinary people spot digital fraud in India — no security knowledge needed.', hi: 'Shadow आम लोगों को डिजिटल ठगी पहचानने में मदद करता है — कोई तकनीकी ज्ञान ज़रूरी नहीं।' },
   about_disc:      { en: 'Best-effort guidance. When in doubt, call your bank on the number printed on your card, or the national helpline 1930.', hi: 'यह सलाह best-effort है। शक हो तो अपने कार्ड पर छपे नंबर पर बैंक को कॉल करें या राष्ट्रीय हेल्पलाइन 1930 पर।' },
   helpline_t:      { en: 'National Cyber Crime Helpline', hi: 'राष्ट्रीय साइबर अपराध हेल्पलाइन' },
   /* — Sidebar (shorter label, keeps the button on one line) — */
@@ -165,16 +166,20 @@ const I18N = {
   demo_back:       { en: 'Back', hi: 'पीछे' },
   demo_time:       { en: 'now', hi: 'अभी' },
   demo_try:        { en: 'Check Priya’s message yourself', hi: 'प्रिया का संदेश खुद जाँचें' },
-  demo_step:       { en: 'Step {n} of 3', hi: 'चरण: 3 में से {n}' },
+  demo_done:       { en: 'Done', hi: 'पूरा हुआ' },
+  demo_step:       { en: 'Step {n} of 4', hi: 'चरण: 4 में से {n}' },
+  d4_t:            { en: 'Now you try', hi: 'अब आप आज़माएँ' },
+  d4_b:            { en: 'Paste any message or link below, then press Check now to see what Shadow finds.', hi: 'नीचे कोई भी संदेश या लिंक पेस्ट करें, फिर “अभी जाँचें” दबाकर नतीजा देखें।' },
+  d4_use:          { en: 'Use Priya’s SMS', hi: 'प्रिया का SMS इस्तेमाल करें' },
   d1_t:            { en: 'Meet Priya', hi: 'प्रिया से मिलिए' },
   d1_b:            { en: 'Priya is a 58-year-old school teacher in Mumbai. She uses her phone for WhatsApp, UPI and family photos — she is not a technical person. She is exactly the kind of person scammers hunt for.', hi: 'प्रिया मुंबई की 58 साल की स्कूल टीचर हैं। वह फ़ोन को WhatsApp, UPI और पारिवारिक फ़ोटो के लिए इस्तेमाल करती हैं — तकनीकी जानकारी नहीं रखतीं। ठग ऐसे ही लोगों को ढूँढते हैं।' },
   d1_t1:           { en: 'School teacher', hi: 'स्कूल टीचर' },
   d1_t2:           { en: 'Uses WhatsApp daily', hi: 'रोज़ WhatsApp इस्तेमाल' },
   d2_t:            { en: 'The attack', hi: 'हमला' },
   d2_b:            { en: 'One evening, this SMS lands on her phone. It looks official, it frightens her, and it gives her only a few minutes to act.', hi: 'एक शाम उनके फ़ोन पर यह SMS आता है। यह आधिकारिक दिखता है, डराता है, और कुछ ही मिनट में काम करने को कहता है।' },
-  d3_t:            { en: 'Without vs With ScamShield', hi: 'बिना बनाम ScamShield के साथ' },
-  d3_wo:           { en: 'Without ScamShield', hi: 'बिना ScamShield' },
-  d3_w:            { en: 'With ScamShield', hi: 'ScamShield के साथ' },
+  d3_t:            { en: 'Without vs With Shadow', hi: 'बिना बनाम Shadow के साथ' },
+  d3_wo:           { en: 'Without Shadow', hi: 'बिना Shadow' },
+  d3_w:            { en: 'With Shadow', hi: 'Shadow के साथ' },
   d3_s1:           { en: 'In panic, she taps the link', hi: 'घबराहट में वह लिंक खोल देती हैं' },
   d3_s2:           { en: 'The site looks exactly like SBI’s', hi: 'वेबसाइट बिल्कुल SBI जैसी दिखती है' },
   d3_s3:           { en: 'She enters her login, then the OTP that follows', hi: 'वह अपना login भरती हैं, फिर आने वाला OTP' },
@@ -203,9 +208,9 @@ const I18N = {
   lab_note:        { en: 'The same results table is printed in the browser console (F12).', hi: 'यही नतीजे ब्राउज़र कंसोल (F12) में भी छपते हैं।' },
   /* — On-device / server status chip — */
   priv_on:         { en: 'On-device analysis: your message never leaves this phone', hi: 'ऑन-डिवाइस जाँच: आपका संदेश इस फ़ोन से बाहर नहीं जाता' },
-  priv_srv:        { en: 'Connected to ScamShield server', hi: 'ScamShield सर्वर से जुड़ा है' },
+  priv_srv:        { en: 'Connected to Shadow server', hi: 'Shadow सर्वर से जुड़ा है' },
   /* — First-launch onboarding — */
-  onb_t:           { en: 'Welcome to ScamShield', hi: 'ScamShield में आपका स्वागत है' },
+  onb_t:           { en: 'Welcome to Shadow', hi: 'Shadow में आपका स्वागत है' },
   onb_s1_t:        { en: 'Paste', hi: 'पेस्ट' },
   onb_s1_d:        { en: 'Copy any doubtful SMS or WhatsApp message into the big box.', hi: 'कोई भी शक वाला SMS या WhatsApp संदेश बड़े बॉक्स में कॉपी करें।' },
   onb_s2_t:        { en: 'Check', hi: 'जाँच' },
@@ -631,6 +636,7 @@ async function runCheck() {
   } catch (err) {
     if (load._stop) load._stop();
     $('#loadSlot').replaceChildren();
+    console.error('[Shadow] check failed', err);
     snack(t('err_generic'));
   }
   $('#btnCheck').disabled = false;
@@ -652,13 +658,13 @@ function buildWarning() {
   const pick = o => (L === 'hi' ? (o.text_hi || o.text_en) : (o.text_en || o.text_hi));
   const W = [];
   W.push(L === 'hi'
-    ? 'चेतावनी (ScamShield): यह संदेश “' + vWord + '” पाया गया — जोखिम स्कोर ' + r.score + '/100।'
-    : 'WARNING (ScamShield): this message was checked and looks ' + vWord + ' — risk score ' + r.score + '/100.');
+    ? 'चेतावनी (Shadow): यह संदेश “' + vWord + '” पाया गया — जोखिम स्कोर ' + r.score + '/100।'
+    : 'WARNING (Shadow): this message was checked and looks ' + vWord + ' — risk score ' + r.score + '/100.');
   W.push(L === 'hi' ? 'क्यों:' : 'Why:');
   (r.reasons || []).slice(0, 4).forEach(x => W.push('• ' + pick(x)));
   W.push(L === 'hi' ? 'क्या करें:' : 'What to do:');
   (r.advice || []).forEach((x, i) => W.push((i + 1) + '. ' + pick(x)));
-  W.push(L === 'hi' ? '— ScamShield से जाँचा गया' : '— Checked with ScamShield');
+  W.push(L === 'hi' ? '— Shadow से जाँचा गया' : '— Checked with Shadow');
   return W.join('\n');
 }
 async function copyText(txt) {
@@ -755,7 +761,8 @@ let demoIdx = 0;
 function buildDemoDots() {
   const box = $('#demoDots');
   if (!box || box.children.length) return;
-  for (let i = 0; i < 3; i++) {
+  buildDemoTry();
+  for (let i = 0; i < 4; i++) {
     const b = document.createElement('button');
     b.type = 'button';
     b.innerHTML = '<i></i>';
@@ -763,8 +770,77 @@ function buildDemoDots() {
     box.appendChild(b);
   }
 }
+/* Step 4 of the demo: a live checker (own textarea + result slot). */
+function buildDemoTry() {
+  if ($('#demoInput')) return;
+  const card = $('#demoOv .demo-card');
+  if (!card) return;
+  const s = document.createElement('section');
+  s.className = 'demo-step';
+  s.dataset.step = '3';
+  s.innerHTML =
+    '<h3 data-i18n="d4_t"></h3>' +
+    '<p class="d-body" data-i18n="d4_b"></p>' +
+    '<div class="field" id="demoField" style="margin-top:14px">' +
+      '<label for="demoInput" data-i18n="field_label"></label>' +
+      '<textarea id="demoInput" rows="4" maxlength="4000" spellcheck="false"></textarea>' +
+    '</div>' +
+    '<div class="btn-row">' +
+      '<button class="btn btn-filled" id="demoCheck" type="button"><span data-icon="scan"></span><span data-i18n="btn_check"></span></button>' +
+      '<button class="btn btn-tonal" id="demoPaste" type="button"><span data-icon="clipboard"></span><span data-i18n="btn_paste"></span></button>' +
+      '<button class="btn btn-outline" id="demoUse" type="button" data-i18n="d4_use"></button>' +
+    '</div>' +
+    '<div id="demoResult" aria-live="polite" style="margin-top:16px"></div>';
+  card.appendChild(s);
+  injectIcons(s);
+  applyI18n();
+  const inp = $('#demoInput');
+  inp.addEventListener('input', () => $('#demoField').classList.toggle('has-value', inp.value.length > 0));
+  $('#demoCheck').addEventListener('click', runDemoCheck);
+  $('#demoUse').addEventListener('click', () => {
+    inp.value = DEMO_SMS;
+    $('#demoField').classList.add('has-value');
+  });
+  $('#demoPaste').addEventListener('click', async () => {
+    try {
+      const txt = await navigator.clipboard.readText();
+      if (!txt || !txt.trim()) throw new Error('empty');
+      inp.value = txt.trim().slice(0, 4000);
+      $('#demoField').classList.add('has-value');
+      snack(t('pasted'));
+    } catch (e) { snack(t('paste_fail')); inp.focus(); }
+  });
+}
+async function runDemoCheck() {
+  const inp = $('#demoInput');
+  const text = inp.value.trim();
+  if (!text) { snack(t('err_empty')); inp.focus(); return; }
+  const btn = $('#demoCheck');
+  btn.disabled = true;
+  stopSpeak();
+  const slot = $('#demoResult');
+  const load = renderLoading();
+  slot.replaceChildren(load);
+  try {
+    const result = await analyze(text);
+    if (load._stop) load._stop();
+    state.lastResult = result;
+    state.lastText = text;
+    const node = buildResultNode(result, text);
+    slot.replaceChildren(node);
+    requestAnimationFrame(() => runResultFx(node, result));
+    addHistory(text, result);
+    slot.scrollIntoView({ behavior: rmActive() ? 'auto' : 'smooth', block: 'nearest' });
+  } catch (err) {
+    if (load._stop) load._stop();
+    slot.replaceChildren();
+    console.error('[Shadow] demo check failed', err);
+    snack(t('err_generic'));
+  }
+  btn.disabled = false;
+}
 function demoGo(n, dirBack) {
-  demoIdx = Math.max(0, Math.min(2, n));
+  demoIdx = Math.max(0, Math.min(3, n));
   $$('#demoOv .demo-step').forEach(s => {
     const cur = Number(s.dataset.step) === demoIdx;
     s.classList.toggle('cur', cur);
@@ -772,8 +848,7 @@ function demoGo(n, dirBack) {
   });
   $('#demoBack').disabled = demoIdx === 0;
   const next = $('#demoNext');
-  const last = demoIdx === 2;
-  next.dataset.i18n = last ? 'demo_try' : 'demo_next'; /* survives applyLang */
+  next.dataset.i18n = demoIdx === 3 ? 'demo_done' : demoIdx === 2 ? 'demo_try' : 'demo_next'; /* survives applyLang */
   next.textContent = t(next.dataset.i18n);
   $$('#demoDots button').forEach((b, i) => {
     b.classList.toggle('on', i === demoIdx);
@@ -782,6 +857,7 @@ function demoGo(n, dirBack) {
 }
 function openDemo() {
   $('#demoBubble').textContent = DEMO_SMS;
+  buildDemoTry();
   demoGo(0);
   $('#demoOv').classList.add('show');
   setTimeout(() => $('#demoClose').focus(), 260);
@@ -1095,7 +1171,7 @@ function wireEvents() {
   $('#demoClose').addEventListener('click', hideDemo);
   $('#demoBack').addEventListener('click', () => demoGo(demoIdx - 1, true));
   $('#demoNext').addEventListener('click', () => {
-    if (demoIdx === 2) { hideDemo(); loadAndCheck(DEMO_SMS); }
+    if (demoIdx === 3) hideDemo();
     else demoGo(demoIdx + 1);
   });
 
@@ -1158,7 +1234,7 @@ function wireEvents() {
       snack(ok ? t('copied') : t('err_generic'));
     } else if (act === 'share') {
       /* navigator.share available — one-tap share */
-      try { await navigator.share({ title: 'ScamShield', text: buildWarning() }); snack(t('share_done')); }
+      try { await navigator.share({ title: 'Shadow', text: buildWarning() }); snack(t('share_done')); }
       catch (err) { if (err && err.name !== 'AbortError') snack(t('err_generic')); }
     } else if (act === 'wa') {
       /* no navigator.share — copy the warning AND offer a wa.me link */
@@ -1184,7 +1260,11 @@ function wireEvents() {
       if (sheetStack.length) { closeSheet(sheetStack[sheetStack.length - 1]); return; }
       return;
     }
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); runCheck(); return; }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+          e.preventDefault();
+          if ($('#demoOv').classList.contains('show')) { if ($('#demoInput').offsetParent) runDemoCheck(); } else runCheck();
+          return;
+        }
     const ae = document.activeElement;
     const typing = ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT' || ae.isContentEditable);
     if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && /^[1-4]$/.test(e.key)) {

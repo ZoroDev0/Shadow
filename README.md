@@ -1,4 +1,4 @@
-# SHADOW / ScamShield — Autonomous Phishing & Scam Detection Platform
+# Shadow — Autonomous Phishing & Scam Detection Platform
 
 > **A student-built cybersecurity research initiative and scam detection application defending users against web deception, malicious URLs, and smishing attacks.**
 
@@ -15,15 +15,15 @@
 
 ## 1. Project Overview
 
-SHADOW / ScamShield is an end-to-end platform designed to protect users against modern web-based and message-based deception attacks, including credential harvesting, brand impersonation, zero-day phishing, and SMS/WhatsApp smishing scams.
+Shadow is an end-to-end platform designed to protect users against modern web-based and message-based deception attacks, including credential harvesting, brand impersonation, zero-day phishing, and SMS/WhatsApp smishing scams.
 
 The platform provides:
-1. **ScamShield Web Application**: Single-page, on-device scam detector for SMS, WhatsApp messages and URLs with an explainable rule engine and bilingual (English/Hindi) UI.
+1. **Shadow Web Application**: Single-page, on-device scam detector for SMS, WhatsApp messages and URLs with an explainable rule engine and bilingual (English/Hindi) UI.
 2. **Central Backend Detection Engine**: FastAPI service with a Python parity mirror of the rule engine, validated against the TypeScript implementation.
 
 ---
 
-## 2. ScamShield Web Application
+## 2. Shadow Web Application
 
 The interactive client detector is rule-based and runs on-device, with optional backend API support:
 
@@ -46,14 +46,14 @@ src/screens + src/components + src/state + src/i18n
 ### Quickstart
 
 ```bash
-npm install
+npm ci
 npm run dev
 npm test
 npm run build
 ```
 
 Set `VITE_API_BASE` to a backend origin to POST `{ "text": "..." }` to `${VITE_API_BASE}/analyze`.
-When unset or on API failure, ScamShield uses its on-device local detector with an 8-second timeout.
+When unset or on API failure, Shadow uses its on-device local detector with an 8-second timeout.
 
 ---
 
@@ -88,10 +88,10 @@ ML_ENABLED=false uvicorn app:app --host 0.0.0.0 --port 8000
 ├── backend/            # FastAPI central detection engine, parity tests & golden datasets
 ├── docs/               # System documentation, runbooks, QA procedures & evaluation reports
 ├── index.html          # Vite entrypoint
-├── index_9.html        # Original standalone single-page source of truth
+├── index_9.html        # Frozen standalone reference page (not built; read by the parity test)
 ├── public/             # Static web assets
 ├── scripts/            # Evaluation runners
-├── src/                # ScamShield React/TypeScript frontend (engines, state, i18n, screens)
+├── src/                # Shadow React/TypeScript frontend (engines, state, i18n, screens)
 └── package.json        # Frontend dependencies and test scripts
 ```
 
@@ -107,5 +107,5 @@ ML_ENABLED=false uvicorn app:app --host 0.0.0.0 --port 8000
 
 ## 6. License & Credits
 
-- ScamShield application code is released under the MIT License; see `LICENSE`.
+- Shadow application code is released under the MIT License; see `LICENSE`.
 - This repository ships only the application, backend, tests and documentation. Third-party research notebooks, datasets, figures and trained model binaries are not distributed here, and no model file is required: the backend runs rules-only with `ML_ENABLED=false` (the default).

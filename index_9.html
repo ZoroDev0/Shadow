@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <!--
   ═══════════════════════════════════════════════════════════════════════
-  ScamShield — paste a suspicious SMS / WhatsApp message / link,
+  Shadow — paste a suspicious SMS / WhatsApp message / link,
   get a plain-language verdict in seconds. Single file, zero setup.
   ─────────────────────────────────────────────────────────────────────
   NAME SUGGESTION: "Kavach" (कवच — Hindi/Sanskrit for "armor").
   One short word, understood across India, and the metaphor (an armor
   that shields you) matches the product exactly. Rebranding is a
-  search-and-replace of "ScamShield" in this file.
+  search-and-replace of "Shadow" in this file.
   ─────────────────────────────────────────────────────────────────────
   Sections in the <script>: CONFIG · I18N · STATE · DETECTION ·
   UI COMPONENTS · ANIMATIONS · EVENT HANDLERS
@@ -23,7 +23,7 @@
 <meta name="theme-color" id="metaTheme" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>ScamShield — Is that message a scam?</title>
+<title>Shadow — Is that message a scam?</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v5c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9V6l7-3z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -676,7 +676,7 @@ html[data-rm="1"] *,html[data-rm="1"] *::before,html[data-rm="1"] *::after{
 
 <!-- ══════════ SIDEBAR (desktop) ══════════ -->
 <aside class="sidebar" aria-label="Primary">
-  <div class="side-brand"><span data-icon="shield"></span><span>ScamShield</span></div>
+  <div class="side-brand"><span data-icon="shield"></span><span>Shadow</span></div>
   <nav class="side-nav" aria-label="Tabs">
     <button class="side-item active" data-tab="check" aria-current="page"><span data-icon="scan"></span><span data-i18n="nav_check"></span></button>
     <button class="side-item" data-tab="history"><span data-icon="history"></span><span data-i18n="nav_history"></span></button>
@@ -686,7 +686,7 @@ html[data-rm="1"] *,html[data-rm="1"] *::before,html[data-rm="1"] *::after{
   <div class="side-foot">
     <button class="btn btn-tonal btn-block" id="btnHowSide"><span data-icon="info"></span><span data-i18n="how_btn"></span></button>
     <p class="side-hint" data-i18n="hint_short"></p>
-    <p class="side-ver">ScamShield v1.0 · demo</p>
+    <p class="side-ver">Shadow v1.0 · demo</p>
   </div>
 </aside>
 
@@ -694,7 +694,7 @@ html[data-rm="1"] *,html[data-rm="1"] *::before,html[data-rm="1"] *::after{
 <main id="main">
   <header class="topbar" id="topbar">
     <span class="tb-mark" data-icon="shield"></span>
-    <span class="tb-title">ScamShield</span>
+    <span class="tb-title">Shadow</span>
     <span class="tb-spacer"></span>
     <button class="iconbtn" id="btnHowTop" data-i18n-aria="how_title" aria-label="How it works"><span data-icon="info"></span></button>
   </header>
@@ -705,7 +705,7 @@ html[data-rm="1"] *,html[data-rm="1"] *::before,html[data-rm="1"] *::after{
     <section class="screen active" id="screen-check" aria-label="Check a message">
       <div class="hero">
         <div class="hero-logo" data-icon="shield"></div>
-        <h1 class="hero-title">ScamShield</h1>
+        <h1 class="hero-title">Shadow</h1>
         <p class="hero-tag" data-i18n="tagline"></p>
         <div class="hero-cta">
           <button class="btn btn-outline" id="btnDemo" type="button"><span data-icon="play"></span><span data-i18n="demo_t"></span></button>
@@ -1024,7 +1024,7 @@ html[data-rm="1"] *,html[data-rm="1"] *::before,html[data-rm="1"] *::after{
 /* ══════════════════════════════════════════════════════════════════
    CONFIG
    ══════════════════════════════════════════════════════════════════ */
-const APP_NAME = 'ScamShield';
+const APP_NAME = 'Shadow';
 const APP_VERSION = '1.0';
 const STORAGE_KEY = 'scamshield.v1';
 /* Set to your backend origin (e.g. "https://api.example.com") to send
@@ -1135,11 +1135,11 @@ const I18N = {
   on:              { en: 'Active · demo', hi: 'सक्रिय · डेमो' },
   off:             { en: 'Off', hi: 'बंद' },
   sim_title:       { en: 'See it in action', hi: 'खुद देखें' },
-  sim_sub:         { en: 'This is how ScamShield would warn you in real life.', hi: 'असली ज़िंदगी में ScamShield ऐसे ही चेतावनी देता है।' },
+  sim_sub:         { en: 'This is how Shadow would warn you in real life.', hi: 'असली ज़िंदगी में Shadow ऐसे ही चेतावनी देता है।' },
   sim_sms:         { en: 'Simulate incoming SMS', hi: 'SMS नोटिफिकेशन देखें' },
   sim_copy:        { en: 'Simulate copied text', hi: 'कॉपी किया टेक्स्ट देखें' },
   sim_site:        { en: 'Simulate scam website', hi: 'घोटाला वेबसाइट देखें' },
-  sms_warn:        { en: 'ScamShield: SCAM — fake SBI link. Do not tap.', hi: 'ScamShield: घोटाला — फर्ज़ी SBI लिंक। न दबाएँ।' },
+  sms_warn:        { en: 'Shadow: SCAM — fake SBI link. Do not tap.', hi: 'Shadow: घोटाला — फर्ज़ी SBI लिंक। न दबाएँ।' },
   sms_check:       { en: 'Check', hi: 'जाँचें' },
   sms_dismiss:     { en: 'Dismiss', hi: 'हटाएँ' },
   toast_copy_t:    { en: 'Warning: the text you just copied looks like a scam', hi: 'चेतावनी: आपने जो टेक्स्ट copy किया है वह घोटाला जैसा लगता है' },
@@ -1163,7 +1163,7 @@ const I18N = {
   set_rm:          { en: 'Reduce motion', hi: 'कम एनिमेशन' },
   set_rm_d:        { en: 'Turn off animations for a calmer experience.', hi: 'शांत अनुभव के लिए एनिमेशन बंद कर देता है।' },
   open:            { en: 'Open', hi: 'खोलें' },
-  how_title:       { en: 'How ScamShield works', hi: 'ScamShield कैसे काम करता है' },
+  how_title:       { en: 'How Shadow works', hi: 'Shadow कैसे काम करता है' },
   how_l1t:         { en: '1 · Reading the message', hi: '1 · संदेश पढ़ना' },
   how_l1d:         { en: 'We look for panic words, threats, and requests for OTP, PIN, KYC or Aadhaar.', hi: 'हम घबराहट भरे शब्द, धमकियाँ और OTP, PIN, KYC या आधार मांगने वाली बातें ढूँढते हैं।' },
   how_l2t:         { en: '2 · Checking the links', hi: '2 · लिंक जाँचना' },
@@ -1174,7 +1174,7 @@ const I18N = {
   close:           { en: 'Close', hi: 'बंद करें' },
   about_title:     { en: 'About', hi: 'ऐप के बारे में' },
   about_v:         { en: 'Version 1.0 · demo build', hi: 'संस्करण 1.0 · डेमो' },
-  about_d:         { en: 'ScamShield helps ordinary people spot digital fraud in India — no security knowledge needed.', hi: 'ScamShield आम लोगों को डिजिटल ठगी पहचानने में मदद करता है — कोई तकनीकी ज्ञान ज़रूरी नहीं।' },
+  about_d:         { en: 'Shadow helps ordinary people spot digital fraud in India — no security knowledge needed.', hi: 'Shadow आम लोगों को डिजिटल ठगी पहचानने में मदद करता है — कोई तकनीकी ज्ञान ज़रूरी नहीं।' },
   about_disc:      { en: 'Best-effort guidance. When in doubt, call your bank on the number printed on your card, or the national helpline 1930.', hi: 'यह सलाह best-effort है। शक हो तो अपने कार्ड पर छपे नंबर पर बैंक को कॉल करें या राष्ट्रीय हेल्पलाइन 1930 पर।' },
   helpline_t:      { en: 'National Cyber Crime Helpline', hi: 'राष्ट्रीय साइबर अपराध हेल्पलाइन' },
   /* — Sidebar (shorter label, keeps the button on one line) — */
@@ -1192,9 +1192,9 @@ const I18N = {
   d1_t2:           { en: 'Uses WhatsApp daily', hi: 'रोज़ WhatsApp इस्तेमाल' },
   d2_t:            { en: 'The attack', hi: 'हमला' },
   d2_b:            { en: 'One evening, this SMS lands on her phone. It looks official, it frightens her, and it gives her only a few minutes to act.', hi: 'एक शाम उनके फ़ोन पर यह SMS आता है। यह आधिकारिक दिखता है, डराता है, और कुछ ही मिनट में काम करने को कहता है।' },
-  d3_t:            { en: 'Without vs With ScamShield', hi: 'बिना बनाम ScamShield के साथ' },
-  d3_wo:           { en: 'Without ScamShield', hi: 'बिना ScamShield' },
-  d3_w:            { en: 'With ScamShield', hi: 'ScamShield के साथ' },
+  d3_t:            { en: 'Without vs With Shadow', hi: 'बिना बनाम Shadow के साथ' },
+  d3_wo:           { en: 'Without Shadow', hi: 'बिना Shadow' },
+  d3_w:            { en: 'With Shadow', hi: 'Shadow के साथ' },
   d3_s1:           { en: 'In panic, she taps the link', hi: 'घबराहट में वह लिंक खोल देती हैं' },
   d3_s2:           { en: 'The site looks exactly like SBI’s', hi: 'वेबसाइट बिल्कुल SBI जैसी दिखती है' },
   d3_s3:           { en: 'She enters her login, then the OTP that follows', hi: 'वह अपना login भरती हैं, फिर आने वाला OTP' },
@@ -1223,9 +1223,9 @@ const I18N = {
   lab_note:        { en: 'The same results table is printed in the browser console (F12).', hi: 'यही नतीजे ब्राउज़र कंसोल (F12) में भी छपते हैं।' },
   /* — On-device / server status chip — */
   priv_on:         { en: 'On-device analysis: your message never leaves this phone', hi: 'ऑन-डिवाइस जाँच: आपका संदेश इस फ़ोन से बाहर नहीं जाता' },
-  priv_srv:        { en: 'Connected to ScamShield server', hi: 'ScamShield सर्वर से जुड़ा है' },
+  priv_srv:        { en: 'Connected to Shadow server', hi: 'Shadow सर्वर से जुड़ा है' },
   /* — First-launch onboarding — */
-  onb_t:           { en: 'Welcome to ScamShield', hi: 'ScamShield में आपका स्वागत है' },
+  onb_t:           { en: 'Welcome to Shadow', hi: 'Shadow में आपका स्वागत है' },
   onb_s1_t:        { en: 'Paste', hi: 'पेस्ट' },
   onb_s1_d:        { en: 'Copy any doubtful SMS or WhatsApp message into the big box.', hi: 'कोई भी शक वाला SMS या WhatsApp संदेश बड़े बॉक्स में कॉपी करें।' },
   onb_s2_t:        { en: 'Check', hi: 'जाँच' },
@@ -1858,8 +1858,8 @@ const ADVICE = {
       text_hi: 'इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।' },
     { text_en: 'Remember: banks and government offices never ask for OTP or PIN over calls or messages.',
       text_hi: 'याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।' },
-    { text_en: 'Share ScamShield with your family to keep them safe too.',
-      text_hi: 'अपने परिवार को भी सुरक्षित रखने के लिए ScamShield उनके साथ साझा करें।' }
+    { text_en: 'Share Shadow with your family to keep them safe too.',
+      text_hi: 'अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।' }
   ]
 };
 
@@ -2289,7 +2289,7 @@ async function analyze(input) {
         highlights: Array.isArray(data.highlights) ? data.highlights : []
       };
     } catch (err) {
-      console.warn('[ScamShield] API unavailable, using offline detector:', err.message);
+      console.warn('[Shadow] API unavailable, using offline detector:', err.message);
     }
   }
   await sleep(1000); /* demo scanning delay for the local detector */
@@ -2425,8 +2425,8 @@ function runSelfTests() {
   const summary = { total: total, passed: passed, accuracy: accuracy, failures: failures };
   if (typeof console !== 'undefined' && console.table) {
     try { console.table(rows); } catch (e) { /* non-browser env without table */ }
-    console.log('[ScamShield] self-tests: ' + passed + '/' + total + ' passed (' + accuracy + '%)');
-    if (failures.length) console.log('[ScamShield] failures:', JSON.stringify(failures, null, 2));
+    console.log('[Shadow] self-tests: ' + passed + '/' + total + ' passed (' + accuracy + '%)');
+    if (failures.length) console.log('[Shadow] failures:', JSON.stringify(failures, null, 2));
   }
   return summary;
 }
@@ -2777,13 +2777,13 @@ function buildWarning() {
   const pick = o => (L === 'hi' ? (o.text_hi || o.text_en) : (o.text_en || o.text_hi));
   const W = [];
   W.push(L === 'hi'
-    ? 'चेतावनी (ScamShield): यह संदेश “' + vWord + '” पाया गया — जोखिम स्कोर ' + r.score + '/100।'
-    : 'WARNING (ScamShield): this message was checked and looks ' + vWord + ' — risk score ' + r.score + '/100.');
+    ? 'चेतावनी (Shadow): यह संदेश “' + vWord + '” पाया गया — जोखिम स्कोर ' + r.score + '/100।'
+    : 'WARNING (Shadow): this message was checked and looks ' + vWord + ' — risk score ' + r.score + '/100.');
   W.push(L === 'hi' ? 'क्यों:' : 'Why:');
   (r.reasons || []).slice(0, 4).forEach(x => W.push('• ' + pick(x)));
   W.push(L === 'hi' ? 'क्या करें:' : 'What to do:');
   (r.advice || []).forEach((x, i) => W.push((i + 1) + '. ' + pick(x)));
-  W.push(L === 'hi' ? '— ScamShield से जाँचा गया' : '— Checked with ScamShield');
+  W.push(L === 'hi' ? '— Shadow से जाँचा गया' : '— Checked with Shadow');
   return W.join('\n');
 }
 async function copyText(txt) {
@@ -3283,7 +3283,7 @@ function wireEvents() {
       snack(ok ? t('copied') : t('err_generic'));
     } else if (act === 'share') {
       /* navigator.share available — one-tap share */
-      try { await navigator.share({ title: 'ScamShield', text: buildWarning() }); snack(t('share_done')); }
+      try { await navigator.share({ title: 'Shadow', text: buildWarning() }); snack(t('share_done')); }
       catch (err) { if (err && err.name !== 'AbortError') snack(t('err_generic')); }
     } else if (act === 'wa') {
       /* no navigator.share — copy the warning AND offer a wa.me link */

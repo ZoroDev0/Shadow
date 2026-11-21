@@ -414,7 +414,8 @@ mark.hl{background:var(--hl-bg);color:var(--hl-fg);border-radius:5px;
   transform:translateY(105%);transition:transform var(--d3) var(--ease-overshoot);
   max-height:88dvh;display:flex;flex-direction:column;
   padding-bottom:env(safe-area-inset-bottom)}
-.sheet.open{transform:translateY(0)}
+.sheet{visibility:hidden;pointer-events:none;transition:transform var(--d3) var(--ease-overshoot),visibility 0s linear var(--d3)}
+.sheet.open{transform:translateY(0);visibility:visible;pointer-events:auto;transition:transform var(--d3) var(--ease-overshoot),visibility 0s}
 .sheet-handle{padding:10px 0 6px;display:flex;justify-content:center;cursor:grab;
   touch-action:none;flex:none}
 .sheet-handle i{width:42px;height:5px;border-radius:3px;background:var(--surface-3)}
@@ -444,7 +445,7 @@ mark.hl{background:var(--hl-bg);color:var(--hl-fg);border-radius:5px;
 
 /* ════════════════════════ SNACKBAR / TOASTS / BANNER ════════════════════════ */
 .snackbar{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));
-  z-index:85;max-width:min(92vw,480px);background:var(--accent-fill);color:var(--accent-on);
+  z-index:120;max-width:min(92vw,480px);background:var(--accent-fill);color:var(--accent-on);
   padding:13px 20px;border-radius:var(--r-md);box-shadow:var(--shadow-3);
   font:600 .9rem var(--font-ui);text-align:center;opacity:0;
   transform:translate(-50%,16px);pointer-events:none;
@@ -614,8 +615,9 @@ mark.hl{background:var(--hl-bg);color:var(--hl-fg);border-radius:5px;
   .sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(620px,94vw);
     max-height:84vh;border-radius:var(--r-xl);
     transform:translate(-50%,-46%) scale(.95);opacity:0;
-    transition:transform var(--d3) var(--ease-overshoot),opacity var(--d2)}
-  .sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1}
+    transition:transform var(--d3) var(--ease-overshoot),opacity var(--d2),visibility 0s linear var(--d3)}
+  .sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1;
+    transition:transform var(--d3) var(--ease-overshoot),opacity var(--d2),visibility 0s}
   .sheet-handle{display:none}
   .sheet-title-row{padding-top:22px}
 }

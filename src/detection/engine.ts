@@ -533,8 +533,8 @@ const ADVICE = {
       text_hi: 'इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।' },
     { text_en: 'Remember: banks and government offices never ask for OTP or PIN over calls or messages.',
       text_hi: 'याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।' },
-    { text_en: 'Share ScamShield with your family to keep them safe too.',
-      text_hi: 'अपने परिवार को भी सुरक्षित रखने के लिए ScamShield उनके साथ साझा करें।' }
+    { text_en: 'Share Shadow with your family to keep them safe too.',
+      text_hi: 'अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।' }
   ]
 };
 
@@ -1070,7 +1070,7 @@ export async function analyze(input) {
         highlights: Array.isArray(data.highlights) ? data.highlights : []
       };
     } catch (err) {
-      console.warn('[ScamShield] API unavailable, using offline detector:', err.message);
+      console.warn('[Shadow] API unavailable, using offline detector:', err.message);
     }
   }
   await sleep(1000); /* demo scanning delay for the local detector */
