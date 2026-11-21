@@ -134,7 +134,7 @@ RE_OFFICIAL_REMINDER = rx("officialReminder")
 RE_REWARD_CALLBACK = rx("rewardCallback")
 
 TLD_SRC = "(?:com|in|net|org|xyz|top|click|info|io|app|gov|edu|tk|ml|ga|cf|gq|me|co|biz|live|shop|online|site|link|icu|sbs|cfd|rest|quest|ly|gy|to|cc|ms|gg|be|tv|sbi)"
-URL_RE = re.compile(r"(?:https?://|www\.)[^\s<>\"`]+|(?:[a-z0-9][\w-]*\.)+" + TLD_SRC + r"(?![\w-])(?:/[^\s<>\"`]*)?", re.I)
+URL_RE = re.compile(r"(?:https?://|www\.)[^\s<>\"`]+|(?:[a-z0-9][\w-]{0,62}\.)+" + TLD_SRC + r"(?![\w-])(?:/[^\s<>\"`]*)?", re.I)
 
 def normalize_text(raw_text: Any) -> str:
     text = unicodedata.normalize("NFKC", str(raw_text or "")).replace("\u200b", "").replace("\u200c", "").replace("\u200d", "").replace("\ufeff", "")
@@ -207,9 +207,16 @@ def find_lookalike(host: str) -> dict[str, Any] | None:
     for label in labels:
         if label.startswith("xn--"):
             return {"kind": "punycode", "real": None, "brand": label}
+    # The official domain must sit on label boundaries: a plain substring test
+    # reads jio.com inside the legitimate ajio.com as an ambush.
     for domain in REAL_DOMAINS:
-        if domain in host:
-            return {"kind": "embedded", "real": domain, "brand": domain}
+        at = host.find(domain)
+        while at > -1:
+            starts_label = at == 0 or host[at - 1] == "."
+            ends_label = at + len(domain) == len(host) or host[at + len(domain)] == "."
+            if starts_label and ends_label:
+                return {"kind": "embedded", "real": domain, "brand": domain}
+            at = host.find(domain, at + 1)
     for pass_index, pass_pairs in enumerate([None] + HOMOGLYPH_PASSES):
         for label in labels:
             if len(label) < 3:

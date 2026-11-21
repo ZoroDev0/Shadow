@@ -19,7 +19,7 @@
    - Clarify explicitly to judges that these are live demonstrations of future native client capabilities.
 6. **Test Lab (Verification Suite):**
    - Open Settings -> Test lab -> "Run tests".
-   - Show the 74 project-written cases (50 scam, 7 suspicious, 17 safe) all passing at 100% on-device.
+   - Show the 86 project-written cases (54 scam, 8 suspicious, 24 safe) all passing at 100% on-device.
 7. **Wrap-up & Offline Guarantee:**
    - Explain privacy architecture: with `VITE_API_BASE` unset, zero network requests leave the device. Show that the app continues to operate flawlessly even with airplane mode active.
 

@@ -4349,6 +4349,583 @@
     }
   },
   {
+    "id": "R22",
+    "label": "HDFC Bank .bank.in is the bank itself, not an hdfcbank.com copy",
+    "expect": "safe",
+    "text": "Your HDFC Bank statement is ready. Sign in at https://hdfc.bank.in/login to download it.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link points to the real official website hdfc.bank.in.",
+          "text_hi": "लिंक असली आधिकारिक वेबसाइट hdfc.bank.in पर जाता है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "Nothing here pressures you to act quickly.",
+          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://hdfc.bank.in/login",
+          "verdict": "safe",
+          "reason": {
+            "en": "The link points to the real official website hdfc.bank.in.",
+            "hi": "लिंक असली आधिकारिक वेबसाइट hdfc.bank.in पर जाता है।",
+            "text_en": "The link points to the real official website hdfc.bank.in.",
+            "text_hi": "लिंक असली आधिकारिक वेबसाइट hdfc.bank.in पर जाता है।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share Shadow with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": [
+        "hdfc"
+      ]
+    }
+  },
+  {
+    "id": "R23",
+    "label": "jio.com inside the legitimate ajio.com is not an embedded official domain",
+    "expect": "safe",
+    "text": "AJIO order shipped. Track it at https://www.ajio.com/orders or in the AJIO app.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link points to the real official website ajio.com.",
+          "text_hi": "लिंक असली आधिकारिक वेबसाइट ajio.com पर जाता है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "This is a routine delivery update about your own order.",
+          "text_hi": "यह आपके ही ऑर्डर की आम डिलीवरी सूचना है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://www.ajio.com/orders",
+          "verdict": "safe",
+          "reason": {
+            "en": "The link points to the real official website ajio.com.",
+            "hi": "लिंक असली आधिकारिक वेबसाइट ajio.com पर जाता है।",
+            "text_en": "The link points to the real official website ajio.com.",
+            "text_hi": "लिंक असली आधिकारिक वेबसाइट ajio.com पर जाता है।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share Shadow with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": []
+    }
+  },
+  {
+    "id": "R24",
+    "label": "SBI Life is a real SBI subsidiary, not an sbi.co.in lookalike",
+    "expect": "safe",
+    "text": "Your SBI Life policy renewal is due on 5 March. Pay at https://www.sbilife.co.in/renew.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link points to the real official website sbilife.co.in.",
+          "text_hi": "लिंक असली आधिकारिक वेबसाइट sbilife.co.in पर जाता है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "Nothing here pressures you to act quickly.",
+          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://www.sbilife.co.in/renew",
+          "verdict": "safe",
+          "reason": {
+            "en": "The link points to the real official website sbilife.co.in.",
+            "hi": "लिंक असली आधिकारिक वेबसाइट sbilife.co.in पर जाता है।",
+            "text_en": "The link points to the real official website sbilife.co.in.",
+            "text_hi": "लिंक असली आधिकारिक वेबसाइट sbilife.co.in पर जाता है।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share Shadow with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": [
+        "sbi"
+      ]
+    }
+  },
+  {
+    "id": "R25",
+    "label": "A lookalike wrapping the official .bank.in domain still blocks",
+    "expect": "scam",
+    "text": "HDFC Bank: your account will be blocked. Verify immediately at https://hdfc.bank.in.evil.com/login.",
+    "result": {
+      "verdict": "scam",
+      "score": 75,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The real website “hdfc.bank.in” is hidden inside a longer fake address — only the ending counts.",
+          "text_hi": "असली वेबसाइट “hdfc.bank.in” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।",
+          "rank": 0
+        },
+        {
+          "icon": "bank",
+          "text_en": "It speaks in the name of a bank or government body (“HDFC”) — scammers hide behind big names.",
+          "text_hi": "यह किसी बैंक या सरकारी विभाग (“HDFC”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
+          "rank": 3
+        },
+        {
+          "icon": "clock",
+          "text_en": "It creates panic with words like “blocked”, “immediately” so you act without thinking.",
+          "text_hi": "यह “blocked”, “immediately” जैसे शब्दों से घबराहट पैदा करता है ताकि आप बिना सोचे-समझे कोई कदम उठाएँ।",
+          "rank": 5
+        }
+      ],
+      "links": [
+        {
+          "url": "https://hdfc.bank.in.evil.com/login",
+          "verdict": "scam",
+          "reason": {
+            "en": "The real website “hdfc.bank.in” is hidden inside a longer fake address — only the ending counts.",
+            "hi": "असली वेबसाइट “hdfc.bank.in” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।",
+            "text_en": "The real website “hdfc.bank.in” is hidden inside a longer fake address — only the ending counts.",
+            "text_hi": "असली वेबसाइट “hdfc.bank.in” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।"
+          },
+          "lookalike_of": "hdfc.bank.in"
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "hdfc.bank.in.evil.com",
+        "hdfc",
+        "blocked",
+        "immediately"
+      ]
+    }
+  },
+  {
+    "id": "R26",
+    "label": "A lookalike wrapping the legitimate ajio.com still blocks",
+    "expect": "scam",
+    "text": "AJIO: your order is held. Pay Rs 199 clearance immediately at https://ajio.com.evil.xyz/pay or it will be cancelled.",
+    "result": {
+      "verdict": "scam",
+      "score": 71,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The real website “ajio.com” is hidden inside a longer fake address — only the ending counts.",
+          "text_hi": "असली वेबसाइट “ajio.com” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।",
+          "rank": 0
+        },
+        {
+          "icon": "clock",
+          "text_en": "It creates panic with words like “immediately” so you act without thinking.",
+          "text_hi": "यह “immediately” जैसे शब्दों से घबराहट पैदा करता है ताकि आप बिना सोचे-समझे कोई कदम उठाएँ।",
+          "rank": 5
+        }
+      ],
+      "links": [
+        {
+          "url": "https://ajio.com.evil.xyz/pay",
+          "verdict": "scam",
+          "reason": {
+            "en": "The real website “ajio.com” is hidden inside a longer fake address — only the ending counts.",
+            "hi": "असली वेबसाइट “ajio.com” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।",
+            "text_en": "The real website “ajio.com” is hidden inside a longer fake address — only the ending counts.",
+            "text_hi": "असली वेबसाइट “ajio.com” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।"
+          },
+          "lookalike_of": "ajio.com"
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "ajio.com.evil.xyz",
+        "immediately"
+      ]
+    }
+  },
+  {
+    "id": "R27",
+    "label": "The label boundary still catches an official domain as an inner subdomain",
+    "expect": "scam",
+    "text": "SBI: KYC pending. Update now at https://sbi.co.in.verify-kyc.top/otp or your account is blocked.",
+    "result": {
+      "verdict": "scam",
+      "score": 100,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The real website “sbi.co.in” is hidden inside a longer fake address — only the ending counts.",
+          "text_hi": "असली वेबसाइट “sbi.co.in” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।",
+          "rank": 0
+        },
+        {
+          "icon": "key",
+          "text_en": "The urgent KYC message and OTP request are combined even though the wording was obfuscated.",
+          "text_hi": "जल्दबाजी वाली KYC बात और OTP अनुरोध आपस में जुड़े हैं, भले शब्द असामान्य रूप से लिखे हों।",
+          "rank": 0
+        },
+        {
+          "icon": "link",
+          "text_en": "A toll, tax or benefit message is pushing payment through a link on a cheap throwaway domain. The official service never collects money there.",
+          "text_hi": "टोल, टैक्स या लाभ की बात कहकर सस्ते थ्रोअवे डोमेन के लिंक से भुगतान माँगा जा रहा है। असली सेवा वहाँ पैसा नहीं लेती।",
+          "rank": 0
+        },
+        {
+          "icon": "key",
+          "text_en": "It says your OTP/KYC/Aadhaar has “expired” or is “pending” and pushes you to act — a standard phishing opener.",
+          "text_hi": "यह कहता है कि आपका OTP/KYC/आधार “समाप्त” या “बाकी” है और जल्दी करने को दबाव बनाता है — फ़िशिंग की आम शुरुआत।",
+          "rank": 1
+        },
+        {
+          "icon": "bank",
+          "text_en": "It speaks in the name of a bank or government body (“SBI”) — scammers hide behind big names.",
+          "text_hi": "यह किसी बैंक या सरकारी विभाग (“SBI”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
+          "rank": 3
+        }
+      ],
+      "links": [
+        {
+          "url": "https://sbi.co.in.verify-kyc.top/otp",
+          "verdict": "scam",
+          "reason": {
+            "en": "The real website “sbi.co.in” is hidden inside a longer fake address — only the ending counts.",
+            "hi": "असली वेबसाइट “sbi.co.in” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।",
+            "text_en": "The real website “sbi.co.in” is hidden inside a longer fake address — only the ending counts.",
+            "text_hi": "असली वेबसाइट “sbi.co.in” लंबे फर्ज़ी पते के अंदर छिपी है — असली पहचान पते के अंतिम हिस्से से होती है।"
+          },
+          "lookalike_of": "sbi.co.in"
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "sbi.co.in.verify-kyc.top",
+        "KYC pending",
+        "otp or your account is blocked",
+        "sbi",
+        "blocked"
+      ]
+    }
+  },
+  {
+    "id": "R28",
+    "label": "No-dot hosts (localhost, router) stay safe instead of crashing",
+    "expect": "safe",
+    "text": "Open http://localhost:5173/admin and http://router/ before the demo.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "checkCircle",
+          "text_en": "No requests for money, OTP or personal details.",
+          "text_hi": "पैसे, OTP या निजी जानकारी की कोई मांग नहीं है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "No threatening or panic-creating language.",
+          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "Nothing here pressures you to act quickly.",
+          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+        }
+      ],
+      "links": [
+        {
+          "url": "http://localhost:5173/admin",
+          "verdict": "safe",
+          "reason": null,
+          "lookalike_of": null
+        },
+        {
+          "url": "http://router/",
+          "verdict": "safe",
+          "reason": null,
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share Shadow with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": []
+    }
+  },
+  {
+    "id": "R29",
+    "label": "A 180-character hostname is parsed without a crash",
+    "expect": "safe",
+    "text": "Check https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com/report before Friday.",
+    "result": {
+      "verdict": "safe",
+      "score": 4,
+      "reasons": [
+        {
+          "icon": "checkCircle",
+          "text_en": "No requests for money, OTP or personal details.",
+          "text_hi": "पैसे, OTP या निजी जानकारी की कोई मांग नहीं है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "No threatening or panic-creating language.",
+          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "Nothing here pressures you to act quickly.",
+          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com/report",
+          "verdict": "safe",
+          "reason": {
+            "en": "An ordinary website link. Nothing obviously wrong, but stay alert if the message felt scary.",
+            "hi": "सामान्य वेबसाइट लिंक। कुछ भी गलत नहीं दिखता — संदेश डरावना लगे तो सावधान रहें।",
+            "text_en": "An ordinary website link. Nothing obviously wrong, but stay alert if the message felt scary.",
+            "text_hi": "सामान्य वेबसाइट लिंक। कुछ भी गलत नहीं दिखता — संदेश डरावना लगे तो सावधान रहें।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share Shadow with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": []
+    }
+  },
+  {
+    "id": "R30",
+    "label": "A message whose only link is a bare public IP is flagged",
+    "expect": "suspicious",
+    "text": "Pay the delivery fee at http://45.33.12.9/pay now.",
+    "result": {
+      "verdict": "suspicious",
+      "score": 38,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link is just a raw number address (IP) — real banks never send these.",
+          "text_hi": "लिंक सिर्फ एक नंबर-पता (IP) है — असली बैंक कभी ऐसा पता नहीं भेजते।",
+          "rank": 0
+        }
+      ],
+      "links": [
+        {
+          "url": "http://45.33.12.9/pay",
+          "verdict": "scam",
+          "reason": {
+            "en": "The link is just a raw number address (IP) — real banks never send these.",
+            "hi": "लिंक सिर्फ एक नंबर-पता (IP) है — असली बैंक कभी ऐसा पता नहीं भेजते।",
+            "text_en": "The link is just a raw number address (IP) — real banks never send these.",
+            "text_hi": "लिंक सिर्फ एक नंबर-पता (IP) है — असली बैंक कभी ऐसा पता नहीं भेजते।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not act on the message yet — no clicks, no calls, no codes.",
+          "text_hi": "अभी इस संदेश पर कोई कदम न उठाएँ — न लिंक, न कॉल, न कोई कोड।"
+        },
+        {
+          "text_en": "Open your bank’s official app yourself, or call the number printed on your card.",
+          "text_hi": "बैंक का आधिकारिक ऐप खुद खोलें, या कार्ड पर छपे नंबर पर कॉल करें।"
+        },
+        {
+          "text_en": "If it turns out to be fake, report it at cybercrime.gov.in or call 1930.",
+          "text_hi": "फर्ज़ी निकले तो cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें।"
+        }
+      ],
+      "highlights": [
+        "45.33.12.9"
+      ]
+    }
+  },
+  {
+    "id": "R31",
+    "label": "Degenerate link fragments (email, scheme only) do not produce links",
+    "expect": "safe",
+    "text": "Email ops@intranet or open http:// then ask the front desk.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "checkCircle",
+          "text_en": "No requests for money, OTP or personal details.",
+          "text_hi": "पैसे, OTP या निजी जानकारी की कोई मांग नहीं है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "No threatening or panic-creating language.",
+          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "Nothing here pressures you to act quickly.",
+          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share Shadow with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": []
+    }
+  },
+  {
     "id": "X1",
     "label": "extra",
     "expect": "suspicious",

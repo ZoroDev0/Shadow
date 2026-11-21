@@ -115,13 +115,13 @@ const CAPS_OK = new Set(rules.capsOk);
 const RE_URG = new RegExp(
   '(\\bblock(?:ed|ing)?\\b|\\block(?:ed|ing)?\\b|\\bsuspend(?:ed)?\\b|' +
   'deactivat(?:e|ed|ion)|disconnec(?:t|ted|tion)|will\\s+be\\s+cut|cut\\s+off|' +
-  '\\bimmediately\\b|\\burgent(?:ly)?\\b|within\\s+\\d+\\s?(?:hours?|hrs?|days?|minutes?|mins?)|' +
+  '\\bimmediately\\b|\\burgent(?:ly)?\\b|within\\s+\\d{1,4}\\s?(?:hours?|hrs?|days?|minutes?|mins?)|' +
   'last\\s+warning|final\\s+(?:warning|notice)|\\btonight\\b|today\\s+itself|' +
-  'right\\s+now|act\\s+now|\\bexpires?\\s+(?:today|tonight|soon|immediately|now|in\\s+\\d+\\s*(?:hours?|hrs?|minutes?|mins?))\\b|\\bexpired\\b|expir(?:y|ation)|last\\s+day|\\bdeadline\\b|' +
+  'right\\s+now|act\\s+now|\\bexpires?\\s+(?:today|tonight|soon|immediately|now|in\\s+\\d{1,4}\\s*(?:hours?|hrs?|minutes?|mins?))\\b|\\bexpired\\b|expir(?:y|ation)|last\\s+day|\\bdeadline\\b|' +
   'turant|\\babhi\\b|jaldi|aaj\\s+raat|aaj\\s+hi|band\\s+ho\\s+ja(?:y|ye)?g|' +
-  'kat\\s+ja(?:y|ye)?g|aakhri|\\d+\\s?ghant[oe]|' +
+  'kat\\s+ja(?:y|ye)?g|aakhri|\\d{1,4}\\s?ghant[oe]|' +
   'तुरंत|तुरन्त|अभी|आज\\s+रात|आज\\s+ही|ब्लॉक|बंद|बन्द|कट\\s+जाएगा|कट\\s+जाएगी|कट\\s+जायेगा|कट\\s+जायेगी|' +
-  'निलंबित|समाप्त|अवरुद्ध|अंतिम|\\d+\\s?घंटे)', 'gi');
+  'निलंबित|समाप्त|अवरुद्ध|अंतिम|\\d{1,4}\\s?घंटे)', 'gi');
 
 /* Threats: arrest/legal action/case filed/SIM block/giraftar/kanooni
    karwai + गिरफ्तार/कानूनी कार्रवाई/जेल/वारंट … */
@@ -350,7 +350,7 @@ const RE_REWARD_CALLBACK = new RegExp(rules.regexes.rewardCallback, 'i');
 /* ── 4 · URL extraction & helpers ──────────────────────────────────── */
 const TLD_SRC = '(?:com|in|net|org|xyz|top|click|info|io|app|gov|edu|tk|ml|ga|cf|gq|me|co|biz|live|shop|online|site|link|icu|sbs|cfd|rest|quest|ly|gy|to|cc|ms|gg|be|tv|sbi)';
 const URL_RE = new RegExp(
-  '(?:https?://|www\\.)[^\\s<>"\u0060]+|(?:[a-z0-9][\\w-]*\\.)+' + TLD_SRC + '(?![\\w-])(?:/[^\\s<>"\u0060]*)?', 'gi');
+  '(?:https?://|www\\.)[^\\s<>"\u0060]+|(?:[a-z0-9][\\w-]{0,62}\\.)+' + TLD_SRC + '(?![\\w-])(?:/[^\\s<>"\u0060]*)?', 'gi');
 
 export function extractUrls(text) {
   const found = [];
@@ -402,9 +402,17 @@ export function findLookalike(host) {
   for (const l of labels) {
     if (l.indexOf('xn--') === 0) return { kind: 'punycode', real: null, brand: l };
   }
-  /* real domain embedded inside a longer address: sbi.co.in.verify-kyc.top */
+  /* Real domain embedded inside a longer address: sbi.co.in.verify-kyc.top.
+     The match must sit on label boundaries. A plain substring test reads
+     jio.com inside the legitimate ajio.com as an ambush. */
   for (const d of REAL_DOMAINS) {
-    if (host.indexOf(d) > -1) return { kind: 'embedded', real: d, brand: d };
+    let at = host.indexOf(d);
+    while (at > -1) {
+      const startsLabel = at === 0 || host.charAt(at - 1) === '.';
+      const endsLabel = at + d.length === host.length || host.charAt(at + d.length) === '.';
+      if (startsLabel && endsLabel) return { kind: 'embedded', real: d, brand: d };
+      at = host.indexOf(d, at + 1);
+    }
   }
   const passes = [null].concat(HOMOGLYPH_PASSES);
   for (const pass of passes) {

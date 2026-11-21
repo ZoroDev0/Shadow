@@ -22,9 +22,9 @@ All items below have been executed and verified in real headless Chromium agains
 - [x] **VERIFIED**: Desktop inline panel banner visibility tested across 920px, 1280px, 1440px, 1920px.
 - [x] **VERIFIED**: Protect screen simulations (SMS notification banner, clipboard watcher toast, dangerous site overlay).
 - [x] **VERIFIED**: History operations: records checks, filters by verdict, deletes single item, clear all dialog.
-- [x] **VERIFIED**: Test lab reports 76/76 project-written cases passing (100%).
-  - 74 original cases plus R20 (official Amazon.com / amazon.co.uk storefronts) and R21 (an Amazon lookalike is still rejected), added in Phase 10B.
-- [x] **VERIFIED**: Golden parity is 91 entries (76 self-tests plus 15 extras); TypeScript and Python agree on every verdict and score.
+- [x] **VERIFIED**: Test lab reports 86/86 project-written cases passing (100%).
+  - 76 cases through Phase 10B plus R22–R31 in Phase 12: the three real-site false positives stay safe, their lookalikes still block, and no-dot/degenerate/long hosts do not crash.
+- [x] **VERIFIED**: Golden parity is 101 entries (86 self-tests plus 15 extras); TypeScript and Python agree on every verdict and score.
 - [x] **VERIFIED**: Keyboard shortcuts: 1-4 tab switching, Ctrl/Cmd+Enter check, Esc sheet dismiss, Tab focus trapping in open modals.
 - [x] **VERIFIED**: Storage failure & fallback: app survives corrupted `scamshield.v1` in `localStorage`.
 - [x] **VERIFIED**: Zero external network or analysis calls during check when `VITE_API_BASE` is unset.
@@ -41,14 +41,17 @@ Run against the built `extension/dist` loaded unpacked in Playwright's Chromium
 - [x] **VERIFIED**: Popup: a genuine Swiggy delivery message renders `SAFE`.
 - [x] **VERIFIED**: Interstitial (`blocked.html`) shows the fake host, the real domain and both actions.
 - [x] **VERIFIED**: Navigation to `https://sbi-kyc-update.xyz/login` is redirected to `blocked.html` before the page loads.
-- [x] **VERIFIED**: Navigation to `https://www.hdfcbank.com/` is not redirected.
+- [x] **VERIFIED**: Navigation to `https://www.hdfcbank.com/`, `https://hdfc.bank.in/` and `https://www.ajio.com/` is not redirected (the last two are the Phase 12 regression checks).
 - [x] **VERIFIED**: “Proceed anyway” writes the domain to `chrome.storage.session` and the retry is allowed.
 
 ## Browser Extension — Automated URL-policy fuzz
 
-- [x] **VERIFIED**: `npx tsx scripts/fuzz-ext-policy.ts` exercises 217 unique odd URLs (malformed, unicode/punycode hosts, `userinfo@host`, IPv6 literals, ports, `data:`/`javascript:`/`blob:`/`file:` schemes, 8000-character inputs, path-and-query text that only looks like a host) plus the 84 guarded legitimate sites: 0 throws, 0 blocks of a private/internal address, 0 blocks of a legitimate site, and 19 blocks that are all genuine lookalikes or bare public IPs.
-- [x] **VERIFIED**: 76 self-tests (51 scam / 7 suspicious / 18 safe), 91 golden entries evaluated by both TypeScript and Python, 52 vitest tests, 12 backend tests.
-- [ ] **KNOWN GAP**: `hdfc.bank.in`, `ajio.com` and `sbilife.co.in` are real sites still flagged as lookalikes (see `docs/AUDIT_REPORT.md` §I8); do not present them as safe.
+- [x] **VERIFIED**: `npx tsx scripts/fuzz-ext-policy.ts` exercises 273 unique odd URLs (malformed, unicode/punycode hosts, `userinfo@host`, IPv6 literals, ports, `data:`/`javascript:`/`blob:`/`file:` schemes, 8000-character inputs, path-and-query text that only looks like a host) plus the 140 guarded legitimate sites: 0 throws, 0 blocks of a private/internal address, 0 blocks of a legitimate site, and 19 blocks that are all genuine lookalikes or bare public IPs.
+- [x] **VERIFIED**: 86 self-tests (54 scam / 8 suspicious / 24 safe), 101 golden entries evaluated by both TypeScript and Python, 53 vitest tests, 12 backend tests.
+- [x] **VERIFIED**: `npx tsx scripts/fuzz-engine.ts` sends 340 adversarial inputs (empty, whitespace, 4,000-character runs of one character, emoji only, RTL, zero-width, null bytes, mixed Devanagari/Latin, 3,000-character URLs, 500-label hosts, unbalanced brackets, `userinfo@host`, percent blobs) through the TypeScript engine and the Python mirror: 0 throws, identical verdict and score on all 340. Slowest call 9.07 ms (TS) and 8.22 ms (Python), both under the 100 ms budget.
+- [x] **FIXED**: the Python mirror took 220 ms on a 4,000-digit run because the urgency rule used a bare `\d+` that backtracked at every digit, and the URL extractor scanned an unbounded label. Both are now bounded (`\d{1,4}`, `[\w-]{0,62}`) in `rules.json` and in the URL regexes of both engines; slowest Python call is now 8.22 ms, guarded by a vitest timing test.
+- [x] **FIXED**: `hdfc.bank.in`, `ajio.com` and `sbilife.co.in` are no longer flagged (Phase 12; label-boundary check plus the official-domain list). Their lookalikes — `hdfc.bank.in.evil.com`, `ajio.com.evil.xyz`, `sbilife-kyc.top` — still block.
+- [ ] **KNOWN LIMITATIONS**: `icicibank.co.in`, `paytminsider.in`, `yono.sbi`, `incometaxindiaefiling.gov.in` (no DNS), `yesbank.in`, `amazonfresh.in` (DNS only, no web service) and `airtelthanks.in` (ownership unverified) still block. Do not present those as safe.
 
 ## Browser Extension — Human-only on a real Chrome/Edge/Brave profile
 

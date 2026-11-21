@@ -22,6 +22,29 @@ The platform provides:
 2. **Central Backend Detection Engine**: FastAPI service with a Python parity mirror of the rule engine, validated against the TypeScript implementation.
 3. **ScamShield Browser Extension (Chrome/Edge/Brave)**: Manifest V3 build of the same engine — checks pasted text, right-clicked text or links, and warns before a lookalike bank or government page opens. Available as an unpacked build; not published to any extension store.
 
+## 1a. Status and honest limits
+
+Verified on 2026-11-22 by running these commands on this machine:
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Frontend + engine tests | `npm ci && npm test` | 53 tests pass, including 86 project-written detector cases |
+| Web build | `npm run build` | succeeds |
+| Extension build | `npm run build:ext` | succeeds; loads unpacked in headless Chromium |
+| Backend parity | `cd backend && python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt && pytest -q` | 12 tests pass over 101 golden entries |
+| Extension URL fuzz | `npx tsx scripts/fuzz-ext-policy.ts` | 273 URLs: 0 throws, 0 private/internal blocks, 0 guarded-site blocks |
+| Two-engine input fuzz | `npx tsx scripts/fuzz-engine.ts` | 340 adversarial inputs: 0 throws, identical TS/Python verdict and score, slowest 9.07 ms |
+
+The 86 detector cases and 101 golden entries are **project-written cases, not independent accuracy**. The only held-out measurement is the one-shot Phase 7 run — **24/30 correct, five misses and one false positive** (`docs/eval_holdout_phase7.md`) — and it was written by the same agent that wrote the rules.
+
+- Detection is a **rule engine**: no model and no dataset in this repository.
+- The extension ships as an **unpacked build** only — no store listing, no signing, no auto-update.
+- The Protect screen on the web app is a **simulation**; only the extension performs real navigation checks.
+- Screenshot upload is a **file-selection and preview UI only** — no OCR.
+- The **Android app is not built**; there is no Android project in this repository.
+- The **PWA and the extension are not yet verified in a human browser session** (automated headless Chromium only).
+- The **independent human evaluation has not been run** (`docs/INDEPENDENT_EVAL.md`).
+
 ---
 
 ## 2. Shadow Web Application

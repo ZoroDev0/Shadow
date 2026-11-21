@@ -40,4 +40,17 @@ describe("Shadow project-written detector suite", () => {
     expect(r.links[0]?.reason).toBeNull();
     expect(() => detectLocal("a".repeat(4000))).not.toThrow();
   });
+
+  it("stays fast on long unbroken runs (no quadratic regex backtracking)", () => {
+    // The urgency rule once used a bare \d+ that backtracked over every digit of
+    // a 4000-digit run (220 ms in the Python mirror). Both engines now bound the
+    // run; this guards the TypeScript side against the pattern coming back.
+    const inputs = ["1".repeat(4000), "a".repeat(4000), "!".repeat(4000), "https://" + "a".repeat(3000)];
+    for (const text of inputs) {
+      const t0 = performance.now();
+      const r = detectLocal(text);
+      expect(r.verdict).toBeDefined();
+      expect(performance.now() - t0).toBeLessThan(250);
+    }
+  });
 });

@@ -79,14 +79,17 @@ ML_ENABLED=false uvicorn app:app --reload --port 8000
 - Any change to `src/detection/rules.json` affects the web app, the backend and
   the extension at once. Run `npm test` and backend `pytest` together.
 - False positives are the expensive failure. The guarded list lives in
-  `extension/tests/legitSites.data.ts` (84 sites, shared with the fuzz). Only
+  `extension/tests/legitSites.data.ts` (140 sites, shared with the fuzz). Only
   widen a rule in `selfTests.ts` + `backend/golden.json` when a real bug is
   proven, and mirror it in `backend/app.py`.
-- Run `npx tsx scripts/fuzz-ext-policy.ts` (217 odd URLs) after touching
+- Run `npx tsx scripts/fuzz-ext-policy.ts` (273 odd URLs) after touching
   `extension/src/policy.ts`; it fails on a throw, on any private/internal block,
   on any guarded-site block, and on a lookalike that stops being blocked.
-- Current counts: 76 self-tests (51/7/18), 91 golden entries, 52 vitest tests,
-  12 backend tests. Keep them green.
+- Current counts: 86 self-tests (54/8/24), 101 golden entries, 53 vitest tests,
+  12 backend tests, 140 guarded sites. Keep them green.
+- The label-boundary rule is load-bearing: `findLookalike` only treats an
+  official domain as embedded when it starts and ends on a label of the host.
+  A plain substring test re-introduces `ajio.com` → `jio.com`.
 
 ## Not done / not claimed
 

@@ -19,6 +19,11 @@ const KNOWN_DIFFERENCES = [
   // R20: official Amazon.com / amazon.co.uk storefronts recognised as genuine;
   // the frozen reference engine still labels them Amazon.in lookalikes.
   "R20",
+  // Phase 12 intended fixes: the frozen engine still blocks the bank's own
+  // .bank.in domain (R22), reads jio.com inside ajio.com as an embedded
+  // official domain (R23), prefix-matches sbi onto SBI Life (R24), and throws
+  // on a no-dot host where the shipped engine returns a safe result (R28).
+  "R22", "R23", "R24", "R28",
   "S19", "S27", "X10",
 ];
 
@@ -46,7 +51,16 @@ describe("legacy reference engine vs modular engine", () => {
     }
     const differences: string[] = [];
     for (const [id, text] of cases) {
-      const oldResult = oldDetect(text);
+      let oldResult: any;
+      try {
+        oldResult = oldDetect(text);
+      } catch {
+        /* The frozen reference engine still has the BUG-01 crash on links
+           without dots; the shipped engine handles them, so this is an
+           intended difference rather than a harness failure. */
+        differences.push(id);
+        continue;
+      }
       const newResult = detectLocal(text);
       if (oldResult.verdict !== newResult.verdict || oldResult.score !== newResult.score) {
         differences.push(id);

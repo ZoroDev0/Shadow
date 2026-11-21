@@ -92,24 +92,27 @@ Allowlist and settings live in `chrome.storage.local`. “Proceed anyway” live
 ## Tests
 
 ```bash
-npm test                                   # 52 tests, includes extension/tests/*.test.ts
+npm test                                   # 53 tests, includes extension/tests/*.test.ts
 npm run build:ext                          # then the dist/ manifest checks run too
-npx tsx scripts/fuzz-ext-policy.ts         # URL-policy fuzz: 217 odd URLs
-cd backend && python -m pytest -q          # 12 tests, 91-entry engine parity
+npx tsx scripts/fuzz-ext-policy.ts         # URL-policy fuzz: 273 URLs
+cd backend && python -m pytest -q          # 12 tests, 101-entry engine parity
 ```
 
-The extension suite (38 of the 52 tests) covers the navigation guard (SCAM
+The extension suite (38 of the 53 tests) covers the navigation guard (SCAM
 redirected, BE CAREFUL not redirected), allowlisted/official/internal/local
 URLs, the global switch, the session “Proceed anyway”, context-menu results, API
-failure → local fallback, the manifest, and a false-positive guard over 84
-popular legitimate sites. The fuzz run reuses that same 84-site list among 217
+failure → local fallback, the manifest, and a false-positive guard over 140
+popular legitimate sites. The fuzz run reuses that same 140-site list among 273
 malformed, unicode, punycode, userinfo, IPv6, port and scheme URLs, and fails
 if the policy throws, blocks a private/internal address, blocks a guarded site,
 or stops blocking lookalikes.
 
-Known gap: `hdfc.bank.in`, `ajio.com` and `sbilife.co.in` are currently flagged
-as lookalikes. They are recorded in `docs/AUDIT_REPORT.md` §I8 and are **not**
-fixed here; a direct visit to those three can be blocked.
+Fixed in Phase 12: `hdfc.bank.in`, `ajio.com` and `sbilife.co.in` were once
+flagged as lookalikes. The embedded-domain check now needs a label boundary and
+the banks' own `.bank.in` and subsidiary domains are in `realDomains`, so those
+three load normally while `hdfc.bank.in.evil.com`, `ajio.com.evil.xyz` and
+`sbilife-kyc.top` still block. Seven dead or unverifiable domains are listed as
+known limitations in `docs/AUDIT_REPORT.md` §I8.
 
 ## Limits — read this before trusting it
 

@@ -160,7 +160,27 @@ export const CASES:SelfTestCase[] = [
     { id: 'R20', label: 'Global Amazon storefronts are official, not Amazon.in lookalikes', expect: 'safe',
       text: 'Your Amazon order has shipped. Track it at https://www.amazon.com/orders or amazon.co.uk/orders' },
     { id: 'R21', label: 'Widening the official list still rejects an Amazon lookalike domain', expect: 'scam',
-      text: 'Amazon order on hold. Verify your payment at amazon-billing.com/pay' }
+      text: 'Amazon order on hold. Verify your payment at amazon-billing.com/pay' },
+    { id: 'R22', label: 'HDFC Bank .bank.in is the bank itself, not an hdfcbank.com copy', expect: 'safe',
+      text: 'Your HDFC Bank statement is ready. Sign in at https://hdfc.bank.in/login to download it.' },
+    { id: 'R23', label: 'jio.com inside the legitimate ajio.com is not an embedded official domain', expect: 'safe',
+      text: 'AJIO order shipped. Track it at https://www.ajio.com/orders or in the AJIO app.' },
+    { id: 'R24', label: 'SBI Life is a real SBI subsidiary, not an sbi.co.in lookalike', expect: 'safe',
+      text: 'Your SBI Life policy renewal is due on 5 March. Pay at https://www.sbilife.co.in/renew.' },
+    { id: 'R25', label: 'A lookalike wrapping the official .bank.in domain still blocks', expect: 'scam',
+      text: 'HDFC Bank: your account will be blocked. Verify immediately at https://hdfc.bank.in.evil.com/login.' },
+    { id: 'R26', label: 'A lookalike wrapping the legitimate ajio.com still blocks', expect: 'scam',
+      text: 'AJIO: your order is held. Pay Rs 199 clearance immediately at https://ajio.com.evil.xyz/pay or it will be cancelled.' },
+    { id: 'R27', label: 'The label boundary still catches an official domain as an inner subdomain', expect: 'scam',
+      text: 'SBI: KYC pending. Update now at https://sbi.co.in.verify-kyc.top/otp or your account is blocked.' },
+    { id: 'R28', label: 'No-dot hosts (localhost, router) stay safe instead of crashing', expect: 'safe',
+      text: 'Open http://localhost:5173/admin and http://router/ before the demo.' },
+    { id: 'R29', label: 'A 180-character hostname is parsed without a crash', expect: 'safe',
+      text: 'Check https://' + 'a'.repeat(180) + '.com/report before Friday.' },
+    { id: 'R30', label: 'A message whose only link is a bare public IP is flagged', expect: 'suspicious',
+      text: 'Pay the delivery fee at http://45.33.12.9/pay now.' },
+    { id: 'R31', label: 'Degenerate link fragments (email, scheme only) do not produce links', expect: 'safe',
+      text: 'Email ops@intranet or open http:// then ask the front desk.' }
   ];
 export function runSelfTests(){const rows:any[]=[];const failures:any[]=[];let passed=0;for(const c of CASES){let got:any="error",sc=-1,err="";try{const r=detectLocal(c.text);got=r.verdict;sc=r.score}catch(e:any){err=e?.message||String(e)}const ok=got===c.expect;if(ok)passed++;else failures.push({case:c.id,label:c.label,expected:c.expect,got,score:sc,error:err});rows.push({case:c.id,expect:c.expect,got,score:sc,result:ok?"PASS":"FAIL",note:ok?"":(err||c.label)})}const total=CASES.length;const accuracy=Math.round(passed/total*1000)/10;const summary={total,passed,accuracy,failures};if(typeof console!=="undefined"){try{console.table(rows)}catch{}console.log(`[Shadow] self-tests: ${passed}/${total} passed (${accuracy}%)`)}return summary}
 if(typeof window!=="undefined")(window as any).runSelfTests=runSelfTests;else(globalThis as any).runSelfTests=runSelfTests;

@@ -3,8 +3,10 @@
 Audit date: 2026-11-21
 
 > **Phase 10B update (2026-11-22):** the browser extension now exists — see §I.
-> Current counts are **76** self-tests (51 scam / 7 suspicious / 18 safe),
-> **91** golden parity entries, **52** vitest tests and **12** backend tests.
+> **Phase 12 update (2026-11-22):** the three real-site false positives in §I8
+> are fixed; the guard list grew to 140 sites. Current counts are **86**
+> self-tests (54 scam / 8 suspicious / 24 safe), **101** golden parity entries,
+> **53** vitest tests and **12** backend tests.
 > The 74 / 89 figures used throughout sections A–H are the Phase 5–7 snapshot
 > this report was written against, not the current state.
 
@@ -13,7 +15,7 @@ Audit date: 2026-11-21
 1. Overall PRD completion: **68%**.
 2. Demo-readiness: **82%**; the core paste/check/result flow, examples, bilingual UI, history, and Test Lab are working and build/test-verified.
 3. Production-readiness: **35%**; no deployment, PWA, real SMS/notification integration, extension, security operations, or independent evaluation.
-4. Biggest strength: a real, explainable, on-device rule engine plus a Python parity mirror and 74 project-written self-test cases.
+4. Biggest strength: a real, explainable, on-device rule engine plus a Python parity mirror and 86 project-written self-test cases.
 5. Biggest gap: it does not read real SMS, notifications, screens, phone links, or clipboard continuously.
 6. Biggest false-security risk: Protect is explicitly UI simulation; the app does not activate device protections.
 7. Screenshot upload is real file selection plus preview UI only; there is no OCR or text analysis.
@@ -492,25 +494,28 @@ changes the web app, the Python backend and the extension together.
 
 | Suite | Count |
 | --- | --- |
-| Detector self-tests (`src/detection/selfTests.ts`) | **76** — 51 scam, 7 suspicious, 18 safe |
-| Golden parity (`backend/golden.json`) | **91** = 76 self-tests + 15 extra cases |
-| Vitest | **52** = 14 pre-existing engine/UI tests + 38 extension tests |
+| Detector self-tests (`src/detection/selfTests.ts`) | **86** — 54 scam, 8 suspicious, 24 safe |
+| Golden parity (`backend/golden.json`) | **101** = 86 self-tests + 15 extra cases |
+| Vitest | **53** = 15 engine/UI tests + 38 extension tests |
 | Backend pytest | **12** |
 
-`backend/test_parity.py` now asserts that `golden.json` holds exactly 91 entries
-with 91 unique ids and evaluates every one, so a truncated file cannot shrink
+`backend/test_parity.py` now asserts that `golden.json` holds exactly 101 entries
+with 101 unique ids and evaluates every one, so a truncated file cannot shrink
 the parity set silently. There is no Android project in this repository; the
-Python parity test is the only golden-engine consumer, and it uses all 91.
+Python parity test is the only golden-engine consumer, and it uses all 101.
 
 ### I6. False-positive guard
 
-84 popular legitimate sites (search, shopping, food, travel, banks, payments,
+140 popular legitimate sites (search, shopping, food, travel, banks, payments,
 government, utilities, news, education, reference, finance) are asserted never
 to be blocked: **0 blocked**. The same list is re-checked inside the fuzz run.
+It grew from 84 in Phase 12: every one of the 56 additions was a confirmed
+false positive before the label-boundary and official-domain fixes (the banks'
+`.bank.in` domains, SBI/sub-brand domains, `ajio.com`, Amazon storefronts).
 
 ### I7. URL-policy fuzz
 
-`npx tsx scripts/fuzz-ext-policy.ts` → **217 unique URLs**: 84 legit, 25
+`npx tsx scripts/fuzz-ext-policy.ts` → **273 unique URLs**: 140 legit, 25
 internal schemes, 24 private/loopback, 66 malformed/unicode/punycode/ports/long,
 8 path-or-query strings that only look like hosts, 10 real lookalikes.
 
@@ -518,24 +523,33 @@ Result: **0 throws**, **0 private/internal blocks**, **0 legitimate blocks**,
 19 blocks that are all genuine lookalike or bare-IP addresses. The run fails if
 the policy stops blocking lookalikes, so it cannot pass vacuously.
 
-### I8. False positives found, deliberately NOT fixed in this phase
+### I8. False positives — found in Phase 10B, FIXED in Phase 12
 
-The brief for this phase forbids engine/`rules.json` changes unless they block
-the golden test, so these are recorded, not patched:
-
-| Legitimate site | Blocked as a fake of | Cause |
+| Legitimate site | Was blocked as a fake of | Root cause |
 | --- | --- | --- |
-| `www.hdfc.bank.in` | `hdfcbank.com` | brand token `hdfc` (prefix mode) matches the `hdfc` label of the real `.bank.in` domain |
-| `www.ajio.com` | `jio.com` | the embedded-domain check is a substring test, and `jio.com` occurs inside `ajio.com` |
-| `www.sbilife.co.in` | `sbi.co.in` | brand token `sbi` (prefix mode) matches the `sbilife` label of SBI Life |
+| `www.hdfc.bank.in` | `hdfcbank.com` | `realDomains` had no `.bank.in` entries, so HDFC Bank's live domain was matched by the brand token |
+| `www.ajio.com` | `jio.com` | the embedded-domain check was a plain substring test, and `jio.com` occurs inside `ajio.com` |
+| `www.sbilife.co.in` | `sbi.co.in` | brand tokens in segment mode prefix-matched legitimate sibling names such as `sbilife` |
 
-Severity is highest for `hdfc.bank.in`: it is HDFC Bank's live domain — during
-browser testing `www.hdfcbank.com` redirected there, so a direct visit can be
-stopped. Recommended fix (next phase): add the three domains to
-`realDomains`, and require a label boundary in the embedded-domain check
-(`host === d || host.endsWith("." + d)`), then mirror in `backend/app.py` and
-add golden cases. Until then the extension's navigation guard can produce these
-three false positives, and the web app labels the same three links as fakes.
+Fix, in both engines: the embedded-official-domain check now requires a label
+boundary (the official domain must be the whole host or start and end a run of
+labels), and `realDomains` grew from 47 to 109 entries — the verified `.bank.in`
+domains of the banks already listed, SBI/HDFC/ICICI/Axis subsidiaries, and
+`ajio.com`. No TLD-wide rule was added: `.bank.in` is listed label by label
+from the RBI circular, not as a suffix rule.
+
+Sweep: 68 further real domains containing a brand token were run through the
+extension policy. All 9 required lookalikes (`sbi.co.in.evil.com`, `evil-sbi.xyz`,
+`hdfcbank-secure.com`, `hdfc-bank.xyz`, `hdfc.bank.in.evil.com`,
+`ajio.com.evil.xyz`, `sbilife-kyc.top`, `xn--sbi-kyc-9va.com`, a bare public IP)
+still block. 61 of the 68 sweep domains are now allowed. Seven still block and
+are recorded as known limitations, all because they are dead or unverifiable:
+`icicibank.co.in`, `paytminsider.in`, `yono.sbi` and
+`incometaxindiaefiling.gov.in` no longer resolve; `yesbank.in` and
+`amazonfresh.in` resolve but serve no HTTP/HTTPS response; `airtelthanks.in`
+answers but its ownership could not be verified, so it was not added as official
+(adding an unverified domain would be the worse error — it would whitelist a
+possible impostor).
 
 ### I9. Verified vs NOT VERIFIED
 
