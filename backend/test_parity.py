@@ -10,8 +10,17 @@ from app import detect_local
 GOLDEN = Path(__file__).with_name("golden.json")
 
 
+GOLDEN_ENTRY_COUNT = 91  # 76 project-written self-tests + 15 extra parity cases
+
+
 def test_all_golden_verdicts_and_scores():
     outputs = json.loads(GOLDEN.read_text(encoding="utf-8"))
+    # Every entry must be exercised: a truncated or partially written golden
+    # file must fail here rather than silently shrink the parity set.
+    assert len(outputs) == GOLDEN_ENTRY_COUNT, (
+        f"golden.json has {len(outputs)} entries, expected {GOLDEN_ENTRY_COUNT}"
+    )
+    assert len({item["id"] for item in outputs}) == GOLDEN_ENTRY_COUNT
     differences = []
     for item in outputs:
         got = detect_local(item["text"])

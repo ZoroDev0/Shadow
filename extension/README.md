@@ -92,16 +92,24 @@ Allowlist and settings live in `chrome.storage.local`. “Proceed anyway” live
 ## Tests
 
 ```bash
-npm test                                   # includes extension/tests/*.test.ts
+npm test                                   # 52 tests, includes extension/tests/*.test.ts
 npm run build:ext                          # then the dist/ manifest checks run too
-cd backend && python -m pytest -q          # engine parity, unchanged
+npx tsx scripts/fuzz-ext-policy.ts         # URL-policy fuzz: 217 odd URLs
+cd backend && python -m pytest -q          # 12 tests, 91-entry engine parity
 ```
 
-The extension suite covers the navigation guard (SCAM redirected, BE CAREFUL
-not redirected), allowlisted/official/internal/local URLs, the global switch,
-the session “Proceed anyway”, context-menu results, API failure → local
-fallback, the manifest, and a false-positive guard over 80+ popular legitimate
-sites.
+The extension suite (38 of the 52 tests) covers the navigation guard (SCAM
+redirected, BE CAREFUL not redirected), allowlisted/official/internal/local
+URLs, the global switch, the session “Proceed anyway”, context-menu results, API
+failure → local fallback, the manifest, and a false-positive guard over 84
+popular legitimate sites. The fuzz run reuses that same 84-site list among 217
+malformed, unicode, punycode, userinfo, IPv6, port and scheme URLs, and fails
+if the policy throws, blocks a private/internal address, blocks a guarded site,
+or stops blocking lookalikes.
+
+Known gap: `hdfc.bank.in`, `ajio.com` and `sbilife.co.in` are currently flagged
+as lookalikes. They are recorded in `docs/AUDIT_REPORT.md` §I8 and are **not**
+fixed here; a direct visit to those three can be blocked.
 
 ## Limits — read this before trusting it
 

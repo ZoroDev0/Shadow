@@ -45,7 +45,7 @@ const extEn = {
   ext_no_result: "Nothing checked yet. Paste a message above, or right-click text or a link on any page.",
   ext_perm_note:
     "Permissions: right-click menu, local storage and page navigation only. No page content is read, and no host permission is requested unless you set a server.",
-  ext_footer: "Unpacked build · v1.2.0",
+  ext_footer: "Unpacked build · v1.3.0",
   ext_badge_scam: "Scam link — blocked",
   ext_badge_susp: "Be careful with this link",
   ext_lang_aria: "Language",
@@ -104,7 +104,7 @@ const extHi = {
   ext_no_result: "अभी कुछ जाँचा नहीं गया। ऊपर संदेश पेस्ट करें, या किसी पेज पर टेक्स्ट या लिंक पर राइट-क्लिक करें।",
   ext_perm_note:
     "अनुमतियाँ: राइट-क्लिक मेन्यू, स्थानीय स्टोरेज और पेज नेविगेशन ही। पेज की सामग्री नहीं पढ़ी जाती, और सर्वर सेट किए बिना कोई होस्ट अनुमति नहीं मांगी जाती।",
-  ext_footer: "अनपैक्ड बिल्ड · v1.2.0",
+  ext_footer: "अनपैक्ड बिल्ड · v1.3.0",
   ext_badge_scam: "ठगी वाला लिंक — रोका गया",
   ext_badge_susp: "इस लिंक में सावधानी रखें",
   ext_lang_aria: "भाषा",

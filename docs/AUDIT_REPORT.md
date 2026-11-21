@@ -2,6 +2,12 @@
 
 Audit date: 2026-11-21
 
+> **Phase 10B update (2026-11-22):** the browser extension now exists — see §I.
+> Current counts are **76** self-tests (51 scam / 7 suspicious / 18 safe),
+> **91** golden parity entries, **52** vitest tests and **12** backend tests.
+> The 74 / 89 figures used throughout sections A–H are the Phase 5–7 snapshot
+> this report was written against, not the current state.
+
 ## Executive summary
 
 1. Overall PRD completion: **68%**.
@@ -413,7 +419,8 @@ This does **NOT** verify browser behavior. DevTools Network-tab verification is 
 
 **Nice to have — future**
 
-1. Browser extension implementation.
+1. ~~Browser extension implementation~~ — shipped in Phase 10B as an unpacked MV3 build
+   (see section I). Store publishing and Firefox/Safari ports remain open.
 2. Android SMS/NotificationListener app.
 3. Desktop native clipboard watcher.
 4. Community report moderation.
@@ -433,3 +440,113 @@ This does **NOT** verify browser behavior. DevTools Network-tab verification is 
 9. **Is the ML model 67-feature approximated as 20?** No. It was rejected. Only a separately licensed exact 20-feature model may be enabled.
 10. **Is this production ready?** No. It is a hackathon prototype with static and local test evidence, no independent evaluation or real platform integration.
 
+
+---
+
+## I. Phase 10B audit — browser extension
+
+Audited 2026-11-22 against commit `a3ec476` + the Phase 10B follow-up commit.
+Read-only audit of what shipped, not a claim of independent evaluation.
+
+### I1. What exists
+
+| Item | Finding |
+| --- | --- |
+| Location | `extension/` (MV3 source) → `extension/dist` (unpacked build) |
+| Build | `npm run build:ext` → esbuild bundles `src/detection` + pages, copies manifest, icons and CSS |
+| Tag | `v1.3.0-hackathon` |
+| Pages | `popup.html`, `options.html`, `blocked.html` + `background.js` service worker |
+| Sharing artifact | `extension/scamshield-extension.zip` |
+
+### I2. Permissions (verified from `extension/manifest.json`)
+
+- `permissions`: **exactly** `contextMenus`, `storage`, `webNavigation`.
+- No `host_permissions`, no `content_scripts`, no `tabs`, `scripting`, `activeTab`.
+- `optional_host_permissions`: `http://*/*`, `https://*/*` only, requested at
+  runtime for the configured server's exact origin. No `<all_urls>` string
+  anywhere in the manifest (asserted by `extension/tests/manifest.test.ts`).
+- CSP: `script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`.
+  No inline scripts, no remote code, no `eval`/`new Function` (build-time check
+  plus a test over the built bundles).
+
+### I3. Engine reuse (no copy-paste)
+
+`extension/src/policy.ts` and `detect.ts` import `analyzeLink`, `realDomainOf`,
+`urlHost`, `detectLocal` and `analyzeUrl` from `../../src/detection/engine`;
+labels come from `../../src/i18n`. A grep of `extension/src` for the rule
+tables (`REAL_DOMAINS`, `BRAND_TOKENS`, `BAD_TLDS`, the regex set) returns no
+code, only one comment. Adding a rule in `src/detection/rules.json` therefore
+changes the web app, the Python backend and the extension together.
+
+### I4. Repository hygiene
+
+- `extension/dist/**` and `extension/scamshield-extension.zip` are git-ignored;
+  `git ls-files` returns **0** tracked build outputs.
+- `package.json`: the only dependency change is `esbuild` pinned to the exact
+  version `0.28.2` in `devDependencies`, plus the `build:ext` script.
+- The build writes no timestamps and no hashed names, so two runs of the same
+  sources produce the same bytes.
+- `git remote -v` prints nothing.
+
+### I5. Test and parity counts (verified by running them)
+
+| Suite | Count |
+| --- | --- |
+| Detector self-tests (`src/detection/selfTests.ts`) | **76** — 51 scam, 7 suspicious, 18 safe |
+| Golden parity (`backend/golden.json`) | **91** = 76 self-tests + 15 extra cases |
+| Vitest | **52** = 14 pre-existing engine/UI tests + 38 extension tests |
+| Backend pytest | **12** |
+
+`backend/test_parity.py` now asserts that `golden.json` holds exactly 91 entries
+with 91 unique ids and evaluates every one, so a truncated file cannot shrink
+the parity set silently. There is no Android project in this repository; the
+Python parity test is the only golden-engine consumer, and it uses all 91.
+
+### I6. False-positive guard
+
+84 popular legitimate sites (search, shopping, food, travel, banks, payments,
+government, utilities, news, education, reference, finance) are asserted never
+to be blocked: **0 blocked**. The same list is re-checked inside the fuzz run.
+
+### I7. URL-policy fuzz
+
+`npx tsx scripts/fuzz-ext-policy.ts` → **217 unique URLs**: 84 legit, 25
+internal schemes, 24 private/loopback, 66 malformed/unicode/punycode/ports/long,
+8 path-or-query strings that only look like hosts, 10 real lookalikes.
+
+Result: **0 throws**, **0 private/internal blocks**, **0 legitimate blocks**,
+19 blocks that are all genuine lookalike or bare-IP addresses. The run fails if
+the policy stops blocking lookalikes, so it cannot pass vacuously.
+
+### I8. False positives found, deliberately NOT fixed in this phase
+
+The brief for this phase forbids engine/`rules.json` changes unless they block
+the golden test, so these are recorded, not patched:
+
+| Legitimate site | Blocked as a fake of | Cause |
+| --- | --- | --- |
+| `www.hdfc.bank.in` | `hdfcbank.com` | brand token `hdfc` (prefix mode) matches the `hdfc` label of the real `.bank.in` domain |
+| `www.ajio.com` | `jio.com` | the embedded-domain check is a substring test, and `jio.com` occurs inside `ajio.com` |
+| `www.sbilife.co.in` | `sbi.co.in` | brand token `sbi` (prefix mode) matches the `sbilife` label of SBI Life |
+
+Severity is highest for `hdfc.bank.in`: it is HDFC Bank's live domain — during
+browser testing `www.hdfcbank.com` redirected there, so a direct visit can be
+stopped. Recommended fix (next phase): add the three domains to
+`realDomains`, and require a label boundary in the embedded-domain check
+(`host === d || host.endsWith("." + d)`), then mirror in `backend/app.py` and
+add golden cases. Until then the extension's navigation guard can produce these
+three false positives, and the web app labels the same three links as fakes.
+
+### I9. Verified vs NOT VERIFIED
+
+**VERIFIED (automated):** the counts above; manifest shape and permissions;
+built bundles free of inline scripts and `eval`; navigation guard redirects a
+SCAM URL and leaves BE CAREFUL and official domains alone; allowlist, global
+switch and session "Proceed anyway"; API failure falls back to local; popup,
+options and interstitial render in EN and HI in headless Chromium loaded with
+`--load-extension`; the fuzz run above.
+
+**NOT VERIFIED:** loading in a human Chrome/Edge/Brave profile; store review;
+real screen-reader and OS contrast behaviour; Firefox and Safari (no port
+exists); detection accuracy in the wild. The web app's Protect-screen switches
+remain simulations — only the loaded extension performs real navigation checks.

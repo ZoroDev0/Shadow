@@ -44,6 +44,12 @@ Run against the built `extension/dist` loaded unpacked in Playwright's Chromium
 - [x] **VERIFIED**: Navigation to `https://www.hdfcbank.com/` is not redirected.
 - [x] **VERIFIED**: “Proceed anyway” writes the domain to `chrome.storage.session` and the retry is allowed.
 
+## Browser Extension — Automated URL-policy fuzz
+
+- [x] **VERIFIED**: `npx tsx scripts/fuzz-ext-policy.ts` exercises 217 unique odd URLs (malformed, unicode/punycode hosts, `userinfo@host`, IPv6 literals, ports, `data:`/`javascript:`/`blob:`/`file:` schemes, 8000-character inputs, path-and-query text that only looks like a host) plus the 84 guarded legitimate sites: 0 throws, 0 blocks of a private/internal address, 0 blocks of a legitimate site, and 19 blocks that are all genuine lookalikes or bare public IPs.
+- [x] **VERIFIED**: 76 self-tests (51 scam / 7 suspicious / 18 safe), 91 golden entries evaluated by both TypeScript and Python, 52 vitest tests, 12 backend tests.
+- [ ] **KNOWN GAP**: `hdfc.bank.in`, `ajio.com` and `sbilife.co.in` are real sites still flagged as lookalikes (see `docs/AUDIT_REPORT.md` §I8); do not present them as safe.
+
 ## Browser Extension — Human-only on a real Chrome/Edge/Brave profile
 
 - [ ] Load `extension/dist` via “Load unpacked” and confirm the toolbar icon appears without an error badge on `chrome://extensions`.

@@ -78,9 +78,15 @@ ML_ENABLED=false uvicorn app:app --reload --port 8000
   that set grows or if `<all_urls>` appears.
 - Any change to `src/detection/rules.json` affects the web app, the backend and
   the extension at once. Run `npm test` and backend `pytest` together.
-- False positives are the expensive failure. Add newly allowed legitimate sites
-  to `extension/tests/legitSites.test.ts`; only widen a rule in
-  `selfTests.ts` + `backend/golden.json` when a real bug is proven.
+- False positives are the expensive failure. The guarded list lives in
+  `extension/tests/legitSites.data.ts` (84 sites, shared with the fuzz). Only
+  widen a rule in `selfTests.ts` + `backend/golden.json` when a real bug is
+  proven, and mirror it in `backend/app.py`.
+- Run `npx tsx scripts/fuzz-ext-policy.ts` (217 odd URLs) after touching
+  `extension/src/policy.ts`; it fails on a throw, on any private/internal block,
+  on any guarded-site block, and on a lookalike that stops being blocked.
+- Current counts: 76 self-tests (51/7/18), 91 golden entries, 52 vitest tests,
+  12 backend tests. Keep them green.
 
 ## Not done / not claimed
 
@@ -89,3 +95,7 @@ ML_ENABLED=false uvicorn app:app --reload --port 8000
 - No Firefox or Safari build (no `manifest.firefox.json`; the port is unwritten).
 - The web app's Protect-screen switches remain demo simulations; installing
   this extension is a separate manual step.
+- Three real sites are still flagged as lookalikes: `hdfc.bank.in`,
+  `ajio.com`, `sbilife.co.in`. Cause and fix are written up in
+  `docs/AUDIT_REPORT.md` §I8; they were left alone because Phase 10B forbids
+  engine/`rules.json` changes that are not required by the golden parity test.
