@@ -1,20 +1,55 @@
+# Dependencies & Build
 node_modules/
 dist/
 .DS_Store
+Thumbs.db
 *.log
 *.tsbuildinfo
+
+# Python & Environment
+.venv/
+env/
+venv/
+ENV/
 backend/.venv/
+build/
+*.egg-info/
 __pycache__/
+*.py[cod]
+*$py.class
 .pytest_cache/
-backend/.env
-backend/models/
-*.model
-*.zip
-*.pdf
-models/
-data/
-*.joblib
-*.pkl
-*.lgb
-*.onnx
+.cache/
+matplotlib/
+
+# Environment Variables
 .env
+backend/.env
+
+# System, IDE & Jupyter
+.vscode/
+.idea/
+*.swp
+*.swo
+.ipynb_checkpoints/
+
+# Dataset files & Archives (Explicitly Excluded)
+data/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.parquet
+*.npy
+*.npz
+*.h5
+*.arff
+*.xlsx
+*.xls
+*.csv
+
+# Exceptions for small metadata CSVs in docs
+!docs/research/*.csv
+!ml-research/reports/*.csv
+!scripts/*.csv
