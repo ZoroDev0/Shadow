@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -64,7 +65,12 @@ BAD_TLDS = set(RULES["badTlds"])
 HOMOGLYPH_PASSES = RULES["homoglyphPasses"]
 CAPS_OK = set(RULES["capsOk"])
 
-def rx(name: str, flags: int = re.I) -> re.Pattern[str]:
+# JS \b is ASCII-only; re.ASCII reproduces that exactly so the shared rule
+# patterns behave identically in TS and Python (Devanagari is NOT a word char).
+RX_FLAGS = re.I | re.ASCII
+
+
+def rx(name: str, flags: int = RX_FLAGS) -> re.Pattern[str]:
     return re.compile(RULES["regexes"][name], flags)
 
 RE_URG = rx("urgency")
@@ -100,9 +106,30 @@ NEG_BEFORE_RE = re.compile(r"\b(?:never|do\s+not|don't|dont|won't|not|mat|nahi|k
 NEG_BETWEEN_RE = re.compile(r"कभी|मत|नहीं|न\s+कर|न\s+दें|\b(?:mat|nahi|kabhi)\b", re.I)
 RE_DELIVERY = rx("delivery")
 RE_NO_ACTION = rx("noAction")
+RE_UPI_PIN_NOUNFIRST = rx("upiPinNounFirst")
+RE_QR_COLLECT = rx("qrCollect")
+RE_PAID_TASK = rx("paidTask")
+RE_LIC_PAYMENT = rx("licPayment")
+RE_PUNYCODE_HOST = rx("punycodeHost")
+RE_OFFICIAL_REMINDER = rx("officialReminder")
+RE_REWARD_CALLBACK = rx("rewardCallback")
 
 TLD_SRC = "(?:com|in|net|org|xyz|top|click|info|io|app|gov|edu|tk|ml|ga|cf|gq|me|co|biz|live|shop|online|site|link|icu|sbs|cfd|rest|quest|ly|gy|to|cc|ms|gg|be|tv|sbi)"
 URL_RE = re.compile(r"(?:https?://|www\.)[^\s<>\"`]+|(?:[a-z0-9][\w-]*\.)+" + TLD_SRC + r"(?![\w-])(?:/[^\s<>\"`]*)?", re.I)
+
+def normalize_text(raw_text: Any) -> str:
+    text = unicodedata.normalize("NFKC", str(raw_text or "")).replace("\u200b", "").replace("\u200c", "").replace("\u200d", "").replace("\ufeff", "")
+    text = text.translate(str.maketrans("०१२३४५६७८९", "0123456789"))
+    # Collapse runs of single letters ("D I G I T A L") — must match the TS
+    # implementation exactly: every element is a ONE-letter word (\b[A-Za-z]\b).
+    text = re.sub(
+        r"(?:\b[A-Za-z]\b(?:[\s._\-*#@~!]+|[\U0001F300-\U0001FAFF])*){2,}[A-Za-z]\b",
+        lambda match: re.sub(r"[^A-Za-z]", "", match.group(0)),
+        text,
+    )
+    text = re.sub(r"([A-Za-z])[\U0001F300-\U0001FAFF]+(?=[A-Za-z])", r"\1", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    return text.strip()
 
 class AnalyzeRequest(BaseModel):
     text: str = Field(max_length=MAX_TEXT_LENGTH)
@@ -273,13 +300,18 @@ def collect_hits(pattern: re.Pattern[str], text: str, cap: int = 12) -> list[str
 
 def negated_before(text: str, index: int, span: int = 55) -> bool:
     window = text[max(0, index - span):index].lower()
-    return bool(NEG_BEFORE_RE.search(window))
+    clause_start = max([p for p in (window.rfind("."), window.rfind("!"), window.rfind("?"), window.rfind("\n"))])
+    clause = window[clause_start + 1:]
+    if re.search(r"\b(?:now|then|but|however|instead)\b", clause):
+        return False
+    return bool(NEG_BEFORE_RE.search(clause))
 
 def detect_local(raw_text: str) -> dict[str, Any]:
-    text = str(raw_text or "")[:4000]
+    text = normalize_text(raw_text)[:4000]
     low = text.lower()
     score = 0
     hard = False
+    official_context = False
     groups: set[str] = set()
     risk_reasons: list[dict[str, Any]] = []
     safe_reasons: list[dict[str, str]] = []
@@ -299,6 +331,7 @@ def detect_local(raw_text: str) -> dict[str, Any]:
     urls = extract_urls(text)
     risky_link = False
     saw_real_domain = False
+    punycode_link = any(RE_PUNYCODE_HOST.search(url_host(url)) for url in urls)
     for url in urls:
         link = analyze_link(url)
         score += link["pts"]
@@ -340,6 +373,16 @@ def detect_local(raw_text: str) -> dict[str, Any]:
         hard = True
         cred_fired = True
         highlights.append(match.group(0)[:40])
+    if RE_UPI_PIN_NOUNFIRST.search(text):
+        hard = True
+        score += 30
+        groups.add("credential")
+        add_risk(0, "key", "It asks for a UPI PIN in a payment/refund conversation — real apps receive PINs only inside the official app.", "यह भुगतान/रिफंड बातचीत में UPI PIN मांगता है — असली ऐप में PIN सिर्फ़ आधिकारिक ऐप के अंदर डाला जाता है।")
+    if not cred_fired and re.search(r"\b(?:kyc|aadhaar|aadhar)\b", low) and re.search(r"\botp\b", low) and RE_URG.search(text):
+        hard = True
+        score += 30
+        groups.add("credential")
+        add_risk(0, "key", "The urgent KYC message and OTP request are combined even though the wording was obfuscated.", "जल्दबाजी वाली KYC बात और OTP अनुरोध आपस में जुड़े हैं, भले शब्द असामान्य रूप से लिखे हों।")
     if cred_fired:
         score += 30
         groups.add("credential")
@@ -434,6 +477,11 @@ def detect_local(raw_text: str) -> dict[str, Any]:
         if risky_link or callback_fired or has_mobile:
             score += 8
         add_risk(6, "gift", "It offers a prize or reward that is too good to be true — because it is.", "यह ऐसा इनाम या लॉटरी का लालच देता है जो सच हो ही नहीं सकता।", reward_hits[:2])
+        if callback_fired or has_mobile:
+            hard = True
+            score += 30
+            groups.add("rewardCallback")
+            add_risk(0, "phone", "A prize or reward is combined with a private call/message number — that is a common prize-scam funnel.", "इनाम या लॉटरी के साथ निजी कॉल/मैसेज नंबर दिया गया है — यह इनाम-घोटाले का आम तरीका है।")
 
     job_hits = collect_hits(RE_JOB, text, 3)
     job_fired = bool(job_hits)
@@ -441,6 +489,28 @@ def detect_local(raw_text: str) -> dict[str, Any]:
         score += 22
         groups.add("job")
         add_risk(7, "gift", "It offers easy money — a part-time “liking videos” / “typing work” job. This is how task scams begin.", "यह आसान पैसे का लालच देता है — “वीडियो लाइक करने” / “टाइपिंग वर्क” वाली पार्ट-टाइम नौकरी। टास्क-घोटाला यहीं से शुरू होता है।", job_hits[:2])
+
+    if RE_PAID_TASK.search(text) and (has_mobile or contact_link):
+        hard = True
+        score += 30
+        groups.add("paidTask")
+        add_risk(0, "phone", "It demands a registration fee or deposit for a task or job and moves you to a private contact — that is a task-scam funnel.", "यह टास्क या नौकरी के नाम पर रजिस्ट्रेशन फीस/डिपॉज़िट मांगकर निजी संपर्क पर ले जाता है — यह टास्क-स्कैम का रास्ता है।")
+
+    if punycode_link:
+        hard = True
+        score += 30
+        groups.add("punycode")
+        add_risk(0, "link", "This link uses punycode or foreign-character tricks and should not be opened.", "यह लिंक punycode या विदेशी-अक्षर चाल का उपयोग करता है और इसे नहीं खोलना चाहिए।")
+    if RE_LIC_PAYMENT.search(low) and risky_link:
+        hard = True
+        score += 30
+        groups.add("licPayment")
+        add_risk(0, "link", "A lapsed insurer policy is being used to push payment through an unofficial link — treat it as a scam.", "बीमा पॉलिसी खत्म होने के बहाने गैर-आधिकारिक लिंक से भुगतान माँगा जा रहा है — इसे घोटाला मानें।")
+    if RE_REWARD_CALLBACK.search(text) and (callback_fired or has_mobile):
+        hard = True
+        score += 30
+        groups.add("rewardCallback")
+        add_risk(0, "phone", "A prize claim is being combined with a private callback number — that is a common prize-scam funnel.", "इनाम पाने के साथ निजी कॉल नंबर दिया गया है — यह इनाम-घोटाले का आम तरीका है।")
 
     if RE_REMOTE.search(low):
         hard = True
@@ -496,7 +566,7 @@ def detect_local(raw_text: str) -> dict[str, Any]:
 
     has_refund_word = bool(re.search(r"\b(?:refund|रिफंड)\b", low))
     has_pin_ask = cred_fired or bool(re.search(r"\bupi\s*pin\b|\benter\s+your\s+pin\b|pin\s+डाल", low))
-    has_collect = bool(re.search(r"\bcollect\s+(?:request|money)\b|scan\s+(?:the\s+|this\s+)?(?:qr|code)\s+(?:to\s+)?(?:receive|get)|कलेक्ट\s+रिक्वेस्ट", low))
+    has_collect = bool(RE_QR_COLLECT.search(low) or re.search(r"\bcollect\s+(?:request|money)\b|scan\s+(?:the\s+|this\s+)?(?:qr|code)\s+(?:to\s+)?(?:receive|get)|कलेक्ट\s+रिक्वेस्ट", low))
     if (has_refund_word and (has_pin_ask or has_collect)) or has_collect:
         score += 18
         groups.add("upiTrick")
@@ -542,9 +612,15 @@ def detect_local(raw_text: str) -> dict[str, Any]:
     if not cred_fired and OTP_TO_YOU_RE.search(text):
         add_safe("key", "This looks like a routine OTP or code sent TO you — nobody is asking you for one.", "यह आपको भेजा गया आम OTP या कोड लगता है — कोई आपसे मांग नहीं रहा।")
 
-    if len(groups) >= 2:
+    if not hard:
+        if saw_real_domain or RE_OFFICIAL_REMINDER.search(low):
+            score -= 25
+            official_context = True
+            add_safe("checkCircle", "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.", "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।")
+
+    if not official_context and len(groups) >= 2:
         score += 14 if len(groups) >= 3 else 8
-    if len(groups) >= 2:
+    if not official_context and len(groups) >= 2:
         score = max(score, 30)
     if hard:
         score = max(score, 70)
@@ -676,6 +752,7 @@ def extract_url_features(url: str) -> dict[str, float | int] | None:
     }
 
 def hard_signal_detected(text: str) -> bool:
+    text = normalize_text(text)[:4000]
     low = text.lower()
     cred_hard = False
     for match in RE_CRED_HARD.finditer(text):
@@ -699,10 +776,16 @@ def hard_signal_detected(text: str) -> bool:
     )
     return bool(
         cred_hard
+        or RE_UPI_PIN_NOUNFIRST.search(low)
+        or RE_QR_COLLECT.search(low)
+        or (RE_PAID_TASK.search(low) and (mobile_fired or bool(contact_link)))
         or RE_REMOTE.search(low)
         or RE_LOAN_APP.search(low)
         or RE_LOAN_APP2.search(low)
         or RE_SAFE_ACCT.search(low)
+        or any(RE_PUNYCODE_HOST.search(url_host(url)) for url in urls)
+        or (RE_LIC_PAYMENT.search(low) and bool(urls))
+        or (RE_REWARD_CALLBACK.search(low) and (mobile_fired or contact_link))
         or (RE_COURIER_FEE.search(low) and (bool(urls)))
         or (reward_fired and contact_link)
         or has_collect

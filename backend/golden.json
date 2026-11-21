@@ -2490,8 +2490,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [],
@@ -2530,8 +2530,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "No threatening or panic-creating language.",
-          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         },
         {
           "icon": "checkCircle",
@@ -2592,8 +2592,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [
@@ -2647,8 +2647,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [
@@ -2697,8 +2697,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "No threatening or panic-creating language.",
-          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         },
         {
           "icon": "checkCircle",
@@ -2892,8 +2892,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [],
@@ -2935,8 +2935,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [
@@ -3078,8 +3078,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [
@@ -3160,9 +3160,584 @@
     }
   },
   {
+    "id": "R01",
+    "label": "Letter-spaced SBI and KYC OTP obfuscation",
+    "expect": "scam",
+    "text": "S B I account urgent K Y C now O T P 1234",
+    "result": {
+      "verdict": "scam",
+      "score": 70,
+      "reasons": [
+        {
+          "icon": "key",
+          "text_en": "The urgent KYC message and OTP request are combined even though the wording was obfuscated.",
+          "text_hi": "जल्दबाजी वाली KYC बात और OTP अनुरोध आपस में जुड़े हैं, भले शब्द असामान्य रूप से लिखे हों।",
+          "rank": 0
+        },
+        {
+          "icon": "bank",
+          "text_en": "It speaks in the name of a bank or government body (“SBI”) — scammers hide behind big names.",
+          "text_hi": "यह किसी बैंक या सरकारी विभाग (“SBI”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
+          "rank": 3
+        },
+        {
+          "icon": "clock",
+          "text_en": "It creates panic with words like “urgent” so you act without thinking.",
+          "text_hi": "यह “urgent” जैसे शब्दों से घबराहट पैदा करता है ताकि आप बिना सोचे-समझे कोई कदम उठाएँ।",
+          "rank": 5
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "sbi",
+        "urgent"
+      ]
+    }
+  },
+  {
+    "id": "R02",
+    "label": "Devanagari digits and prize callback",
+    "expect": "scam",
+    "text": "इनाम मिला है। कॉल +९१ ९८७६५ ४३२१० पर संवाद करें।",
+    "result": {
+      "verdict": "scam",
+      "score": 82,
+      "reasons": [
+        {
+          "icon": "phone",
+          "text_en": "A prize or reward is combined with a private call/message number — that is a common prize-scam funnel.",
+          "text_hi": "इनाम या लॉटरी के साथ निजी कॉल/मैसेज नंबर दिया गया है — यह इनाम-घोटाले का आम तरीका है।",
+          "rank": 0
+        },
+        {
+          "icon": "gift",
+          "text_en": "It offers a prize or reward that is too good to be true — because it is.",
+          "text_hi": "यह ऐसा इनाम या लॉटरी का लालच देता है जो सच हो ही नहीं सकता।",
+          "rank": 6
+        },
+        {
+          "icon": "phone",
+          "text_en": "It pushes you to call or message an unknown number — real notices come through official channels, not private numbers.",
+          "text_hi": "यह आपसे किसी अनजान नंबर पर कॉल या मैसेज कराना चाहता है — असली सूचनाएँ आधिकारिक रास्ते से आती हैं, निजी नंबरों से नहीं।",
+          "rank": 9
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "+91 98765 43210",
+        "इनाम"
+      ]
+    }
+  },
+  {
+    "id": "R03",
+    "label": "Fully spaced CBI digital arrest wording",
+    "expect": "scam",
+    "text": "D I G I T A L A R R E S T: C B I will seize account; stay on the video call.",
+    "result": {
+      "verdict": "scam",
+      "score": 70,
+      "reasons": [
+        {
+          "icon": "siren",
+          "text_en": "This has the fingerprints of a “digital arrest” scam: a fake officer, a video call, secrecy and pressure. Police and agencies never work like this.",
+          "text_hi": "इसमें “डिजिटल अरेस्ट” घोटाले के सारे निशान हैं: नकली अफ़सर, वीडियो कॉल, गोपनीयता और दबाव। पुलिस या कोई भी एजेंसी कभी ऐसे काम नहीं करती।",
+          "rank": 0
+        },
+        {
+          "icon": "bank",
+          "text_en": "It speaks in the name of a bank or government body (“CBI”) — scammers hide behind big names.",
+          "text_hi": "यह किसी बैंक या सरकारी विभाग (“CBI”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
+          "rank": 3
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "cbi"
+      ]
+    }
+  },
+  {
+    "id": "R04",
+    "label": "Hinglish UPI PIN request",
+    "expect": "scam",
+    "text": "UPI PIN bhej do, refund paoge.",
+    "result": {
+      "verdict": "scam",
+      "score": 74,
+      "reasons": [
+        {
+          "icon": "key",
+          "text_en": "It asks for a UPI PIN in a payment/refund conversation — real apps receive PINs only inside the official app.",
+          "text_hi": "यह भुगतान/रिफंड बातचीत में UPI PIN मांगता है — असली ऐप में PIN सिर्फ़ आधिकारिक ऐप के अंदर डाला जाता है।",
+          "rank": 0
+        },
+        {
+          "icon": "key",
+          "text_en": "It offers a “refund” that needs your UPI PIN, a QR scan or a collect request — money coming IN never needs a PIN.",
+          "text_hi": "यह “रिफंड” देने के बहाने UPI PIN, QR स्कैन या कलेक्ट रिक्वेस्ट मांगता है — पैसे आने के लिए PIN कभी नहीं चाहिए।",
+          "rank": 1
+        },
+        {
+          "icon": "bank",
+          "text_en": "It speaks in the name of a bank or government body (“UPI”) — scammers hide behind big names.",
+          "text_hi": "यह किसी बैंक या सरकारी विभाग (“UPI”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
+          "rank": 3
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "upi"
+      ]
+    }
+  },
+  {
+    "id": "R05",
+    "label": "QR scan to receive refund",
+    "expect": "scam",
+    "text": "QR scan karo, Rs 9000 refund milega.",
+    "result": {
+      "verdict": "scam",
+      "score": 70,
+      "reasons": [
+        {
+          "icon": "key",
+          "text_en": "It offers a “refund” that needs your UPI PIN, a QR scan or a collect request — money coming IN never needs a PIN.",
+          "text_hi": "यह “रिफंड” देने के बहाने UPI PIN, QR स्कैन या कलेक्ट रिक्वेस्ट मांगता है — पैसे आने के लिए PIN कभी नहीं चाहिए।",
+          "rank": 1
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": []
+    }
+  },
+  {
+    "id": "R06",
+    "label": "Paid task registration fee + WhatsApp number",
+    "expect": "scam",
+    "text": "Pay Rs 999 registration fee for the paid task. WhatsApp 9876543210 now.",
+    "result": {
+      "verdict": "scam",
+      "score": 70,
+      "reasons": [
+        {
+          "icon": "phone",
+          "text_en": "It demands a registration fee or deposit for a task or job and moves you to a private contact — that is a task-scam funnel.",
+          "text_hi": "यह टास्क या नौकरी के नाम पर रजिस्ट्रेशन फीस/डिपॉज़िट मांगकर निजी संपर्क पर ले जाता है — यह टास्क-स्कैम का रास्ता है।",
+          "rank": 0
+        },
+        {
+          "icon": "phone",
+          "text_en": "It pushes you to call or message an unknown number — real notices come through official channels, not private numbers.",
+          "text_hi": "यह आपसे किसी अनजान नंबर पर कॉल या मैसेज कराना चाहता है — असली सूचनाएँ आधिकारिक रास्ते से आती हैं, निजी नंबरों से नहीं।",
+          "rank": 9
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "9876543210"
+      ]
+    }
+  },
+  {
+    "id": "R07",
+    "label": "Punycode brand host",
+    "expect": "scam",
+    "text": "Open sbi secure verification at http://xn--sbi-kyc.example/login.",
+    "result": {
+      "verdict": "scam",
+      "score": 100,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link uses foreign-character (punycode) tricks to imitate a real website.",
+          "text_hi": "लिंक विदेशी-अक्षर (punycode) की चाल से असली वेबसाइट की नकल करता है।",
+          "rank": 0
+        },
+        {
+          "icon": "link",
+          "text_en": "This link uses punycode or foreign-character tricks and should not be opened.",
+          "text_hi": "यह लिंक punycode या विदेशी-अक्षर चाल का उपयोग करता है और इसे नहीं खोलना चाहिए।",
+          "rank": 0
+        },
+        {
+          "icon": "bank",
+          "text_en": "It speaks in the name of a bank or government body (“SBI”) — scammers hide behind big names.",
+          "text_hi": "यह किसी बैंक या सरकारी विभाग (“SBI”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
+          "rank": 3
+        }
+      ],
+      "links": [
+        {
+          "url": "http://xn--sbi-kyc.example/login",
+          "verdict": "scam",
+          "reason": {
+            "en": "The link uses foreign-character (punycode) tricks to imitate a real website.",
+            "hi": "लिंक विदेशी-अक्षर (punycode) की चाल से असली वेबसाइट की नकल करता है।",
+            "text_en": "The link uses foreign-character (punycode) tricks to imitate a real website.",
+            "text_hi": "लिंक विदेशी-अक्षर (punycode) की चाल से असली वेबसाइट की नकल करता है।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "xn--sbi-kyc.example",
+        "sbi"
+      ]
+    }
+  },
+  {
+    "id": "R08",
+    "label": "LIC lapse plus top-domain premium payment",
+    "expect": "scam",
+    "text": "Your LIC policy has lapsed. Pay premium now at lic-policy-pay.top.",
+    "result": {
+      "verdict": "scam",
+      "score": 94,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "A lapsed insurer policy is being used to push payment through an unofficial link — treat it as a scam.",
+          "text_hi": "बीमा पॉलिसी खत्म होने के बहाने गैर-आधिकारिक लिंक से भुगतान माँगा जा रहा है — इसे घोटाला मानें।",
+          "rank": 0
+        },
+        {
+          "icon": "bank",
+          "text_en": "It speaks in the name of a bank or government body (“LIC”) — scammers hide behind big names.",
+          "text_hi": "यह किसी बैंक या सरकारी विभाग (“LIC”) के नाम से आया है — ठग बड़े नाम के पीछे छिपते हैं।",
+          "rank": 3
+        },
+        {
+          "icon": "link",
+          "text_en": "The link ends in “.top” — a cheap domain type that scammers often use.",
+          "text_hi": "लिंक का अंत “.top” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।",
+          "rank": 4
+        }
+      ],
+      "links": [
+        {
+          "url": "lic-policy-pay.top",
+          "verdict": "suspicious",
+          "reason": {
+            "en": "The link ends in “.top” — a cheap domain type that scammers often use.",
+            "hi": "लिंक का अंत “.top” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।",
+            "text_en": "The link ends in “.top” — a cheap domain type that scammers often use.",
+            "text_hi": "लिंक का अंत “.top” में है — ऐसे सस्ते डोमेन अक्सर ठग इस्तेमाल करते हैं।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "lic-policy-pay.top",
+        "lic"
+      ]
+    }
+  },
+  {
+    "id": "R09",
+    "label": "Official HDFC blocked reminder question",
+    "expect": "safe",
+    "text": "Your HDFC debit card is blocked? No, this is a reminder. Call 18001231234. HDFC Bank.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "checkCircle",
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "No threatening or panic-creating language.",
+          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "Nothing here pressures you to act quickly.",
+          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share ScamShield with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए ScamShield उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": [
+        "hdfc",
+        "blocked"
+      ]
+    }
+  },
+  {
+    "id": "R10",
+    "label": "Official SBI password reset guidance",
+    "expect": "safe",
+    "text": "Your SBI password expired. Reset via sbi.co.in. Do not share OTP.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link points to the real official website sbi.co.in.",
+          "text_hi": "लिंक असली आधिकारिक वेबसाइट sbi.co.in पर जाता है।"
+        },
+        {
+          "icon": "key",
+          "text_en": "It clearly tells you NOT to share the OTP or PIN — something only genuine senders say.",
+          "text_hi": "इसमें साफ़ कहा गया है कि OTP/PIN किसी से साझा न करें — यह असली भेजने वाले ही कहते हैं।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "It clearly reminds you to keep your OTP/PIN private — a sign of a genuine message.",
+          "text_hi": "यह याद दिलाता है कि OTP/PIN निजी रखें — असली संदेश की निशानी।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
+        }
+      ],
+      "links": [
+        {
+          "url": "sbi.co.in",
+          "verdict": "safe",
+          "reason": {
+            "en": "The link points to the real official website sbi.co.in.",
+            "hi": "लिंक असली आधिकारिक वेबसाइट sbi.co.in पर जाता है।",
+            "text_en": "The link points to the real official website sbi.co.in.",
+            "text_hi": "लिंक असली आधिकारिक वेबसाइट sbi.co.in पर जाता है।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share ScamShield with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए ScamShield उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": [
+        "password expired",
+        "sbi",
+        "expired"
+      ]
+    }
+  },
+  {
+    "id": "R11",
+    "label": "Negation is not allowed to suppress a real OTP ask",
+    "expect": "scam",
+    "text": "Never share your OTP. Now send me the OTP 4821 immediately.",
+    "result": {
+      "verdict": "scam",
+      "score": 70,
+      "reasons": [
+        {
+          "icon": "key",
+          "text_en": "It asks you to share an OTP, PIN, CVV or UPI PIN — no real bank, app or government office will ever ask for these.",
+          "text_hi": "यह आपसे OTP, PIN, CVV या UPI PIN मांगता है — कोई असली बैंक, ऐप या सरकारी दफ़्तर कभी नहीं मांगते।",
+          "rank": 0
+        },
+        {
+          "icon": "clock",
+          "text_en": "It creates panic with words like “immediately” so you act without thinking.",
+          "text_hi": "यह “immediately” जैसे शब्दों से घबराहट पैदा करता है ताकि आप बिना सोचे-समझे कोई कदम उठाएँ।",
+          "rank": 5
+        }
+      ],
+      "links": [],
+      "advice": [
+        {
+          "text_en": "Do not click the link or call any number in this message.",
+          "text_hi": "इस संदेश का लिंक न खोलें और इसमें दिए नंबर पर कॉल न करें।"
+        },
+        {
+          "text_en": "Never share OTP, PIN, CVV or KYC details — real banks never ask for them.",
+          "text_hi": "OTP, PIN, CVV या KYC की जानकारी किसी को न दें — असली बैंक कभी नहीं मांगते।"
+        },
+        {
+          "text_en": "Call your bank yourself on the number printed on your card or passbook.",
+          "text_hi": "अपने कार्ड या पासबुक पर छपे नंबर पर खुद बैंक को कॉल करें।"
+        },
+        {
+          "text_en": "Report it at cybercrime.gov.in or call 1930 (free, 24×7).",
+          "text_hi": "cybercrime.gov.in पर रिपोर्ट करें या 1930 पर कॉल करें (मुफ़्त, 24×7)।"
+        }
+      ],
+      "highlights": [
+        "send me the OTP",
+        "immediately"
+      ]
+    }
+  },
+  {
     "id": "X1",
     "label": "extra",
-    "expect": "safe",
+    "expect": "suspicious",
     "text": "SBI account blocked update",
     "result": {
       "verdict": "suspicious",
@@ -3212,7 +3787,7 @@
   {
     "id": "X2",
     "label": "extra",
-    "expect": "safe",
+    "expect": "scam",
     "text": "Your HDFC card will be blocked now. Click hdfc-secure.xyz",
     "result": {
       "verdict": "scam",
@@ -3296,8 +3871,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [],
@@ -3364,7 +3939,7 @@
   {
     "id": "X5",
     "label": "extra",
-    "expect": "safe",
+    "expect": "scam",
     "text": "You won a prize. Send Aadhaar and pay fee.",
     "result": {
       "verdict": "scam",
@@ -3443,8 +4018,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [
@@ -3480,7 +4055,7 @@
   {
     "id": "X7",
     "label": "extra",
-    "expect": "safe",
+    "expect": "scam",
     "text": "Install AnyDesk so we can refund your money.",
     "result": {
       "verdict": "scam",
@@ -3518,7 +4093,7 @@
   {
     "id": "X8",
     "label": "extra",
-    "expect": "safe",
+    "expect": "suspicious",
     "text": "Your Swiggy order is arriving tonight.",
     "result": {
       "verdict": "suspicious",
@@ -3605,7 +4180,7 @@
   {
     "id": "X10",
     "label": "extra",
-    "expect": "safe",
+    "expect": "scam",
     "text": "KYC update karo abhi at bank-kyc.top",
     "result": {
       "verdict": "scam",
@@ -3714,7 +4289,7 @@
   {
     "id": "X12",
     "label": "extra",
-    "expect": "safe",
+    "expect": "suspicious",
     "text": "Press 9 to speak to RBI officer.",
     "result": {
       "verdict": "suspicious",
@@ -3757,7 +4332,7 @@
   {
     "id": "X13",
     "label": "extra",
-    "expect": "safe",
+    "expect": "scam",
     "text": "We have your private video. Pay Rs 20,000 to this UPI id or we will send it to all contacts.",
     "result": {
       "verdict": "scam",
@@ -3816,8 +4391,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "No threatening or panic-creating language.",
-          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         },
         {
           "icon": "checkCircle",
@@ -3858,7 +4433,7 @@
   {
     "id": "X15",
     "label": "extra",
-    "expect": "safe",
+    "expect": "suspicious",
     "text": "Aapka PAN update karein at pan-check.info",
     "result": {
       "verdict": "suspicious",

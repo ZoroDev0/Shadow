@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { detectLocal } from "./engine";
 import { CASES } from "./selfTests";
 
-describe("ScamShield 48-case detector suite", () => {
+describe("ScamShield project-written detector suite", () => {
   it("passes every labelled case", () => {
     const failures = CASES.filter((c) => detectLocal(c.text).verdict !== c.expect);
     expect(failures.map((c) => c.id)).toEqual([]);

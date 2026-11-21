@@ -39,7 +39,14 @@
     "negShare": "(?:\\b(?:never|no\\s+one|nobody)\\b[^.!?\\n]{0,45}\\b(?:otp|pin|cvv|kyc|password|ask|share)\\b|\\b(?:do\\s+not|don'?t|dont)\\s+(?:share|ask|call)\\b|कभी\\s+नहीं|साझा\\s+मत|मत\\s+करें|न\\s+करें)",
     "delivery": "(?:out\\s+for\\s+delivery|will\\s+be\\s+delivered|your\\s+order|delivery\\s+partner|order\\s?#\\d|track\\s+your\\s+(?:order|package)|\\bshipped\\b|arriving\\s+(?:today|tomorrow)|आपका\\s+ऑर्डर|डिलीवरी)",
     "noAction": "(?:no\\s+action\\s+(?:is\\s+)?(?:required|needed)|ignore\\s+(?:this|if|when)|automated\\s+message|informational\\s+message|do\\s+not\\s+reply)",
-    "otpToYou": "(?:\\b(?:otp|code|password)\\b[^.!?\\n]{0,25}\\b\\d{4,8}\\b|\\b\\d{4,8}\\b[^.!?\\n]{0,25}\\b(?:otp|code)\\b)"
+    "otpToYou": "(?:\\b(?:otp|code|password)\\b[^.!?\\n]{0,25}\\b\\d{4,8}\\b|\\b\\d{4,8}\\b[^.!?\\n]{0,25}\\b(?:otp|code)\\b)",
+    "upiPinNounFirst": "(?:\\b(?:upi\\s*pin|pin)\\b|यूपीआई\\s*पिन|पिन)[^।.!?\\n]{0,30}(?:share|send|provide|give|type|enter|bhejo|bhej|batana|batao|साझा|भेजें|भेजो|दीजिए|बताएं|डाल)",
+    "qrCollect": "(?:\\bcollect\\s+(?:request|money)\\b|scan\\s+(?:the\\s+|this\\s+)?(?:qr|code)[^.!?\\n]{0,35}(?:receive|get|refund)|कलेक्ट\\s+रिक्वेस्ट|क्यूआर\\s*(?:स्कैन|कोड)|qr\\s*(?:scan|code))",
+    "paidTask": "(?:paid\\s+(?:registration|task)|registration\\s+(?:fee|payment|charge)|(?:task|work)[^.!?\\n]{0,30}(?:registration|fee|deposit)|रजिस्ट्रेशन\\s*(?:फीस|शुल्क)|पैसे[^।.!?\\n]{0,20}(?:रजिस्ट्रेशन|टास्क))",
+    "licPayment": "(?:\\blic\\b[^.!?\\n]{0,35}(?:lapsed?|cancelled|premium)|(?:lapsed?|cancelled|premium)[^.!?\\n]{0,35}\\blic\\b)[^.!?\\n]{0,60}(?:pay|payment|premium)",
+    "punycodeHost": "(?:^|[./])xn--",
+    "officialReminder": "(?:official\\s+(?:app|site|website|portal)|सखाल[^।.!?\\n]{0,20}|blocked\\?\\s*(?:no|nah|not)|no,?\\s*(?:this|it)\\s+(?:is|was)\\s+(?:only\\s+)?(?:a\\s+)?reminder|not\\s+done\\s+by\\s+you|never\\s+share|do\\s+not\\s+share|अगर\\s+आपने|आपने\\s+नहीं)",
+    "rewardCallback": "(?:\\b(?:lottery|lucky\\s+draw|winner|prize|kbc|jackpot|crorepati|इनाम|केबीसी|लॉटरी|जीते)\\b[^.!?\\n]{0,45}(?:call|whatsapp|message|कॉल|संपर्क)|(?:call|whatsapp|message|कॉल|संपर्क)[^.!?\\n]{0,45}(?:lottery|lucky\\s+draw|winner|prize|kbc|jackpot|crorepati|इनाम|केबीसी|लॉटरी|जीते))"
   },
   "regexFlags": "i"
 }

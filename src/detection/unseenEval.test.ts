@@ -13,27 +13,27 @@ describe("40 unseen evaluation messages", () => {
     }));
     writeFileSync(join(process.cwd(), "backend/eval/unseen_from_ts.json"), JSON.stringify(outputs, null, 2));
   });
-  it("exports 48-plus-unseen parity golden outputs", () => {
+  it("exports project-written plus 15-extra parity golden outputs", () => {
     const extra = [
-      "SBI account blocked update",
-      "Your HDFC card will be blocked now. Click hdfc-secure.xyz",
-      "OTP is 123456. Do not share it.",
-      "Dinner at 8 tomorrow?",
-      "You won a prize. Send Aadhaar and pay fee.",
-      "Pay at parivahan.gov.in for your challan.",
-      "Install AnyDesk so we can refund your money.",
-      "Your Swiggy order is arriving tonight.",
-      "WhatsApp +91 9876500000 and pay Rs 5000",
-      "KYC update karo abhi at bank-kyc.top",
-      "Your salary has arrived in your account.",
-      "Press 9 to speak to RBI officer.",
-      "We have your private video. Pay Rs 20,000 to this UPI id or we will send it to all contacts.",
-      "Track your Amazon package at amazon.in/track/123",
-      "Aapka PAN update karein at pan-check.info",
-    ].map((text, i) => ({
+      ["SBI account blocked update", "suspicious"],
+      ["Your HDFC card will be blocked now. Click hdfc-secure.xyz", "scam"],
+      ["OTP is 123456. Do not share it.", "safe"],
+      ["Dinner at 8 tomorrow?", "safe"],
+      ["You won a prize. Send Aadhaar and pay fee.", "scam"],
+      ["Pay at parivahan.gov.in for your challan.", "safe"],
+      ["Install AnyDesk so we can refund your money.", "scam"],
+      ["Your Swiggy order is arriving tonight.", "suspicious"],
+      ["WhatsApp +91 9876500000 and pay Rs 5000", "safe"],
+      ["KYC update karo abhi at bank-kyc.top", "scam"],
+      ["Your salary has arrived in your account.", "safe"],
+      ["Press 9 to speak to RBI officer.", "suspicious"],
+      ["We have your private video. Pay Rs 20,000 to this UPI id or we will send it to all contacts.", "scam"],
+      ["Track your Amazon package at amazon.in/track/123", "safe"],
+      ["Aapka PAN update karein at pan-check.info", "suspicious"],
+    ].map(([text, expect], i) => ({
       id: `X${i + 1}`,
       label: "extra",
-      expect: "safe",
+      expect,
       text,
     }));
     const originalAndFixed = CASES.map((item) => ({

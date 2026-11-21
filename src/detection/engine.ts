@@ -222,29 +222,29 @@ const RE_REMOTE = new RegExp(
   '(anydesk|any\\s+desk|teamviewer|team\\s+viewer|quicksupport|quick\\s+support|rustdesk|' +
   'remotepc|supremo|gotoassist|screen\\s+sharing\\s+app|' +
   'remote\\s+(?:access|control|support)\\s+(?:app|software|application)|' +
-  'रिमोट\\s+(?:एक्सेस|कंट्रोल|सपोर्ट))', 'gi');
+  'रिमोट\\s+(?:एक्सेस|कंट्रोल|सपोर्ट))', 'i');
 
 /* HARD · "safe account" / RBI-account money transfer (digital arrest). */
 const RE_SAFE_ACCT = new RegExp(
   '(\\b(?:transfer|move|deposit|shift)\\b[^.!?\\n]{0,60}\\b(?:safe\\s+(?:account|keeping|locker)|rbi\\s+account|reserve\\s+bank)\\b' +
   '|\\b(?:transfer|move|deposit|shift|send)\\b[^.!?\\n]{0,45}\\b(?:money|funds|amount)\\b[^.!?\\n]{0,45}\\bsafe\\s+(?:account|locker)\\b' +
-  '|सुरक्षित\\s+खाते?|सेफ\\s+खाते?)', 'gi');
+  '|सुरक्षित\\s+खाते?|सेफ\\s+खाते?)', 'i');
 
 /* HARD · digital arrest = named authority + coercion. */
 const RE_DA_AUTH = new RegExp(
   '(\\bcbi\\b|enforcement\\s+directorate|\\bed\\b|\\bed\\s+(?:officer|notice|office)|\\bpolice\\b|\\bcustoms\\b|narcotics|' +
   'cyber\\s+(?:cell|crime|police)|interpol|judicial|magistrate|digital\\s+arrest|\\brbi\\b|' +
-  'नाबार्ड|nabard|पुलिस|कस्टम्स|साइबर\\s+पुलिस|नारकोटिक्स)', 'gi');
+  'नाबार्ड|nabard|पुलिस|कस्टम्स|साइबर\\s+पुलिस|नारकोटिक्स)', 'i');
 const RE_DA_COERCE = new RegExp(
   '(video\\s?-?\\s?call|stay\\s+on\\s+(?:the\\s+)?call|do\\s+not\\s+(?:tell|disconnect|hang\\s?up)|' +
   'don\'?t\\s+(?:tell|disconnect|hang\\s?up)|safe\\s+(?:account|keeping)|transfer\\s+(?:money|funds)|' +
   'digital\\s+arrest|online\\s+(?:detention|arrest)|under\\s+arrest|under\\s+investigation|investigation|verification\\s+deposit|deposit\\s+required|' +
-  'वीडियो\\s+कॉल|डिजिटल\\s+अरेस्ट|ऑनलाइन\\s+अरेस्ट|किसी\\s+को\\s+न\\s+बताएं|कॉल\\s+पर\\s+रुके)', 'gi');
+  'वीडियो\\s+कॉल|डिजिटल\\s+अरेस्ट|ऑनलाइन\\s+अरेस्ट|किसी\\s+को\\s+न\\s+बताएं|कॉल\\s+पर\\s+रुके)', 'i');
 
 /* Courier/customs parcel fees are a common payment funnel. */
 const RE_COURIER_FEE = new RegExp(
   '(?:(?:courier|parcel|shipment|customs)[^.!?\\n]{0,80}(?:fee|duty|charge|payment|pay|held|seized)|' +
-  '(?:fee|duty|charge|payment|pay)[^.!?\\n]{0,80}(?:courier|parcel|shipment|customs))', 'gi');
+  '(?:fee|duty|charge|payment|pay)[^.!?\\n]{0,80}(?:courier|parcel|shipment|customs))', 'i');
 
 /* HARD · sextortion / blackmail: intimate media + payment demand.
    Bare "send" is deliberately NOT a demand — "send me your photos
@@ -253,10 +253,10 @@ const RE_SEX_MEDIA = new RegExp(
   '(private\\s+(?:video|clip|photo|pic|picture|camera)|' +
   'your\\s+(?:private\\s+)?(?:video|photos?|pics?|clips?)|nudes?|' +
   'nude\\s+(?:pics?|photos?|video|clips?)|compromising\\s+(?:video|photo|pic)|hidden\\s+camera|' +
-  'निजी\\s+(?:वीडियो|तस्वीर|फोटो|क्लिप)|हमारे\\s+पास[^।.!?\\n]{0,40}(?:वीडियो|तस्वीरें|तस्वीर|फोटो))', 'gi');
+  'निजी\\s+(?:वीडियो|तस्वीर|फोटो|क्लिप)|हमारे\\s+पास[^।.!?\\n]{0,40}(?:वीडियो|तस्वीरें|तस्वीर|फोटो))', 'i');
 const RE_SEX_DEMAND = new RegExp(
   '(\\bpay\\b|\\bmoney\\b|\\brs\\.?\\b|₹|\\bupi\\b|bitcoin|\\btransfer\\b|\\bdeposit\\b|blackmail|' +
-  'वरना|warna|पैसे|रुपये|देना\\s+होगा|सबको\\s+भेज)', 'gi');
+  'वरना|warna|पैसे|रुपये|देना\\s+होगा|सबको\\s+भेज)', 'i');
 
 /* "Press 9 to speak to an officer" — classic call-back trick. */
 const RE_PRESS = new RegExp('(press\\s*(?:\\d|one|two|nine|ek)\\b|दबाएं|दबाओ)', 'gi');
@@ -270,7 +270,7 @@ const RE_MOBILE = /(?:\+?91[\s-]?)?\b[6-9]\d{4}[\s-]?\d{5}\b/g;
 const RE_CONTACT_LINK = /(?:^|[./])(?:wa\.me|t\.me|telegram\.me|chat\.whatsapp\.com|api\.whatsapp\.com)(?:[./]|$)/gi;
 
 /* e-challan / चालान */
-const RE_CHALLAN = /(challan|चालान)/gi;
+const RE_CHALLAN = /(challan|चालान)/i;
 
 /* "bill pending", "payment due" pressure (soft, not a group). */
 const RE_PENDING_PAY = /(\b(?:bill|payment|challan|emi)\b[^.!?\n]{0,20}\b(?:pending|due|overdue)\b)/gi;
@@ -286,6 +286,26 @@ const NEG_BETWEEN_RE = /कभी|मत|नहीं|न\s+कर|न\s+दे�
 /* Genuine-message markers */
 const RE_DELIVERY = /(out\s+for\s+delivery|will\s+be\s+delivered|your\s+order|delivery\s+partner|order\s?#\d|track\s+your\s+(?:order|package)|\bshipped\b|arriving\s+(?:today|tomorrow)|आपका\s+ऑर्डर|डिलीवरी)/i;
 const RE_NO_ACTION = /(no\s+action\s+(?:is\s+)?(?:required|needed)|ignore\s+(?:this|if|when)|automated\s+message|informational\s+message|do\s+not\s+reply)/i;
+
+export function normalizeText(rawText) {
+  let text = String(rawText || '').normalize('NFKC');
+  text = text.replace(/[\u200B-\u200D\uFEFF]/g, '');
+  text = text.replace(/[०-९]/g, function (d) { return String(d.charCodeAt(0) - 0x0966); });
+  text = text.replace(/(?:\b[A-Za-z]\b(?:[\s._\-*#@~!]+|[\u{1F300}-\u{1FAFF}])*){2,}[A-Za-z]\b/gu,
+    function (match) { return match.replace(/[^A-Za-z]/gu, ''); });
+  text = text.replace(/([A-Za-z])[\u{1F300}-\u{1FAFF}]+(?=[A-Za-z])/gu, '$1');
+  return text.replace(/[ \t]+/g, ' ').trim();
+}
+
+/* These are only used with .test()/collectHits — keep them non-global so
+   lastIndex can never leak between calls (order-dependent verdicts). */
+const RE_UPI_PIN_NOUNFIRST = new RegExp(rules.regexes.upiPinNounFirst, 'i');
+const RE_QR_COLLECT = new RegExp(rules.regexes.qrCollect, 'i');
+const RE_PAID_TASK = new RegExp(rules.regexes.paidTask, 'i');
+const RE_LIC_PAYMENT = new RegExp(rules.regexes.licPayment, 'i');
+const RE_PUNYCODE_HOST = new RegExp(rules.regexes.punycodeHost, 'i');
+const RE_OFFICIAL_REMINDER = new RegExp(rules.regexes.officialReminder, 'i');
+const RE_REWARD_CALLBACK = new RegExp(rules.regexes.rewardCallback, 'i');
 
 /* ── 4 · URL extraction & helpers ──────────────────────────────────── */
 const TLD_SRC = '(?:com|in|net|org|xyz|top|click|info|io|app|gov|edu|tk|ml|ga|cf|gq|me|co|biz|live|shop|online|site|link|icu|sbs|cfd|rest|quest|ly|gy|to|cc|ms|gg|be|tv|sbi)';
@@ -491,15 +511,19 @@ function collectHits(re, text, cap) {
 }
 function negatedBefore(text, idx, span) {
   const win = text.slice(Math.max(0, idx - (span || 55)), idx).toLowerCase();
-  return NEG_BEFORE_RE.test(win);
+  const clauseStart = Math.max(win.lastIndexOf('.'), win.lastIndexOf('!'), win.lastIndexOf('?'), win.lastIndexOf('\n'));
+  const clause = win.slice(clauseStart + 1);
+  if (/\b(?:now|then|but|however|instead)\b/.test(clause)) return false;
+  return NEG_BEFORE_RE.test(clause);
 }
 
 /* ── 8 · Local rule-based detector (the offline brain) ─────────────── */
 export function detectLocal(rawText) {
-  const text = String(rawText || '').slice(0, 4000);
+  const text = normalizeText(rawText).slice(0, 4000);
   const low = text.toLowerCase();
   let score = 0;
   let hard = false;                       /* any HARD category fired */
+  let officialContext = false;
   const groups = new Set();               /* distinct signal groups */
   const riskReasons = [];                 /* {icon,text_en,text_hi,rank} */
   const safeReasons = [];
@@ -539,6 +563,10 @@ export function detectLocal(rawText) {
     }
   }
   if (riskyLink) groups.add('riskyLink');
+  const punycodeLink = urls.some(function (url) {
+    RE_PUNYCODE_HOST.lastIndex = 0;
+    return RE_PUNYCODE_HOST.test(urlHost(url));
+  });
   /* bare link with no message around it */
   if (urls.length && text.replace(/\s+/g, ' ').trim().length <= urls[0].length + 12) {
     score += 10;
@@ -570,6 +598,20 @@ export function detectLocal(rawText) {
     }
     hard = true; credFired = true;
     highlights.push(String(m[0]).slice(0, 40));
+  }
+  RE_UPI_PIN_NOUNFIRST.lastIndex = 0;
+  if (RE_UPI_PIN_NOUNFIRST.test(text)) {
+    hard = true;
+    score += 30; groups.add('credential');
+    addRisk(0, 'key', 'It asks for a UPI PIN in a payment/refund conversation — real apps receive PINs only inside the official app.',
+      'यह भुगतान/रिफंड बातचीत में UPI PIN मांगता है — असली ऐप में PIN सिर्फ़ आधिकारिक ऐप के अंदर डाला जाता है।');
+  }
+  RE_URG.lastIndex = 0;
+  if (!credFired && /\b(?:kyc|aadhaar|aadhar)\b/i.test(text) && /\botp\b/i.test(text) && RE_URG.test(text)) {
+    hard = true;
+    score += 30; groups.add('credential');
+    addRisk(0, 'key', 'The urgent KYC message and OTP request are combined even though the wording was obfuscated.',
+      'जल्दबाजी वाली KYC बात और OTP अनुरोध आपस में जुड़े हैं, भले शब्द असामान्य रूप से लिखे हों।');
   }
   if (credFired) {
     score += 30; groups.add('credential');
@@ -691,6 +733,11 @@ export function detectLocal(rawText) {
     addRisk(6, 'gift', 'It offers a prize or reward that is too good to be true — because it is.',
       'यह ऐसा इनाम या लॉटरी का लालच देता है जो सच हो ही नहीं सकता।',
       rewardHits.slice(0, 2));
+    if (callbackFired || hasMobile) {
+      hard = true; score += 30; groups.add('rewardCallback');
+      addRisk(0, 'phone', 'A prize or reward is combined with a private call/message number — that is a common prize-scam funnel.',
+        'इनाम या लॉटरी के साथ निजी कॉल/मैसेज नंबर दिया गया है — यह इनाम-घोटाले का आम तरीका है।');
+    }
   }
 
   /* ---------- 8 · Job / task bait ---------- */
@@ -702,8 +749,31 @@ export function detectLocal(rawText) {
       'यह आसान पैसे का लालच देता है — “वीडियो लाइक करने” / “टाइपिंग वर्क” वाली पार्ट-टाइम नौकरी। टास्क-घोटाला यहीं से शुरू होता है।',
       jobHits.slice(0, 2));
   }
+  RE_PAID_TASK.lastIndex = 0;
+  if (RE_PAID_TASK.test(text) && (hasMobile || contactLink)) {
+    hard = true; score += 30; groups.add('paidTask');
+    addRisk(0, 'phone', 'It demands a registration fee or deposit for a task or job and moves you to a private contact — that is a task-scam funnel.',
+      'यह टास्क या नौकरी के नाम पर रजिस्ट्रेशन फीस/डिपॉज़िट मांगकर निजी संपर्क पर ले जाता है — यह टास्क-स्कैम का रास्ता है।');
+  }
 
   /* ---------- 9 · HARD scam categories ---------- */
+  if (punycodeLink) {
+    hard = true; score += 30; groups.add('punycode');
+    addRisk(0, 'link', 'This link uses punycode or foreign-character tricks and should not be opened.',
+      'यह लिंक punycode या विदेशी-अक्षर चाल का उपयोग करता है और इसे नहीं खोलना चाहिए।');
+  }
+  RE_LIC_PAYMENT.lastIndex = 0;
+  if (RE_LIC_PAYMENT.test(low) && riskyLink) {
+    hard = true; score += 30; groups.add('licPayment');
+    addRisk(0, 'link', 'A lapsed insurer policy is being used to push payment through an unofficial link — treat it as a scam.',
+      'बीमा पॉलिसी खत्म होने के बहाने गैर-आधिकारिक लिंक से भुगतान माँगा जा रहा है — इसे घोटाला मानें।');
+  }
+  RE_REWARD_CALLBACK.lastIndex = 0;
+  if (RE_REWARD_CALLBACK.test(text) && (callbackFired || hasMobile)) {
+    hard = true; score += 30; groups.add('rewardCallback');
+    addRisk(0, 'phone', 'A prize claim is being combined with a private callback number — that is a common prize-scam funnel.',
+      'इनाम पाने के साथ निजी कॉल नंबर दिया गया है — यह इनाम-घोटाले का आम तरीका है।');
+  }
   /* 9a · remote-control app */
   if (RE_REMOTE.test(low)) {
     hard = true; score += 30; groups.add('remote');
@@ -774,7 +844,8 @@ export function detectLocal(rawText) {
   /* ---------- 10 · UPI refund / collect-request trick ---------- */
   const hasRefundWord = /\b(?:refund|रिफंड)\b/i.test(low);
   const hasPinAsk = credFired || /\bupi\s*pin\b|\benter\s+your\s+pin\b|pin\s+डाल/i.test(low);
-  const hasCollect = /\bcollect\s+(?:request|money)\b|scan\s+(?:the\s+|this\s+)?(?:qr|code)\s+(?:to\s+)?(?:receive|get)|कलेक्ट\s+रिक्वेस्ट/i.test(low);
+  RE_QR_COLLECT.lastIndex = 0;
+  const hasCollect = RE_QR_COLLECT.test(low) || /\bcollect\s+(?:request|money)\b|scan\s+(?:the\s+|this\s+)?(?:qr|code)\s+(?:to\s+)?(?:receive|get)|कलेक्ट\s+रिक्वेस्ट/i.test(low);
   if ((hasRefundWord && (hasPinAsk || hasCollect)) || hasCollect) {
     score += 18; groups.add('upiTrick');
     if (hasCollect && !credFired) { hard = true; score += 30; groups.add('collectRequest'); }
@@ -841,13 +912,22 @@ export function detectLocal(rawText) {
     addSafe('key', 'This looks like a routine OTP or code sent TO you — nobody is asking you for one.',
       'यह आपको भेजा गया आम OTP या कोड लगता है — कोई आपसे मांग नहीं रहा।');
   }
+  if (!hard) {
+    RE_OFFICIAL_REMINDER.lastIndex = 0;
+    if (sawRealDomain || RE_OFFICIAL_REMINDER.test(low)) {
+      score -= 25;
+      officialContext = true;
+      addSafe('checkCircle', 'It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.',
+        'इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।');
+    }
+  }
 
   /* ---------- 16 · Combination logic & floors ---------- */
   /* ≥2 distinct groups  → +8   and score floored at 30 (suspicious)
      ≥3 distinct groups  → +14  (instead of +8)
      any HARD category   → score floored at 70 (scam)                */
-  if (groups.size >= 2) score += groups.size >= 3 ? 14 : 8;
-  if (groups.size >= 2) score = Math.max(score, 30);
+  if (!officialContext && groups.size >= 2) score += groups.size >= 3 ? 14 : 8;
+  if (!officialContext && groups.size >= 2) score = Math.max(score, 30);
   if (hard) score = Math.max(score, 70);
   score = Math.max(3, Math.min(100, Math.round(score)));
 

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "nfkc_fullwidth",
+    "input": "ＯＴＰ　４８２１ कोड",
+    "expected": "OTP 4821 कोड"
+  },
+  {
+    "name": "zero_width",
+    "input": "SB​I K‌YC‍ update",
+    "expected": "SBI KYC update"
+  },
+  {
+    "name": "letter_spaced",
+    "input": "D I G I T A L  A R R E S T now",
+    "expected": "DIGITALARREST now"
+  },
+  {
+    "name": "devanagari_digits",
+    "input": "कॉल +९१ ९८७६५ ४३२१० पर करें",
+    "expected": "कॉल +91 98765 43210 पर करें"
+  },
+  {
+    "name": "emoji_between_letters",
+    "input": "O😀T😀P share karo",
+    "expected": "OTP share karo"
+  },
+  {
+    "name": "combined",
+    "input": "Ｓ Ｂ Ｉ  खाता  ००७ बंद",
+    "expected": "SBI खाता 007 बंद"
+  }
+]

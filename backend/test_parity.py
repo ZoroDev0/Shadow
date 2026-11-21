@@ -95,3 +95,12 @@ def test_analyze_request_size_limit():
     client = TestClient(backend.app)
     response = client.post("/analyze", content=b"{" + b"x" * 65_000 + b"}", headers={"Content-Type": "application/json"})
     assert response.status_code == 413
+
+
+def test_normalisation_matches_shared_fixtures():
+    """The TS engine asserts the identical fixture file in
+    src/detection/normalize.test.ts — this is the parity contract."""
+    fixtures_path = Path(__file__).resolve().parents[1] / "src" / "detection" / "normalizeFixtures.json"
+    fixtures = json.loads(fixtures_path.read_text(encoding="utf-8"))
+    for fixture in fixtures:
+        assert backend.normalize_text(fixture["input"]) == fixture["expected"], fixture["name"]

@@ -8,7 +8,7 @@
 4. Switch the interface to Hindi, then switch text size to Extra large.
 5. Check the real bank OTP example and show that it stays SAFE.
 6. Open Protect and run one SMS simulation. Clearly describe it as a simulation.
-7. Open Test lab and run tests; report 55/55 project-written cases (self-written, not independent).
+7. Open Test lab and run tests; report the 66 project-written cases (43 scam, 7 suspicious, 16 safe). Label them project-written, not independent accuracy.
 8. Close honestly: rule-based, not ML; optional URL ML OFF; no desktop SMS access.
 
 ## Likely judge questions
@@ -43,4 +43,4 @@ Add a licensed India-specific URL dataset, evaluate and retrain only if it adds 
 
 If live Wi-Fi fails, keep `VITE_API_BASE` empty and use only the local detector and
 preloaded examples. If browser automation is unavailable, use the recorded demo and
-Test lab 55/55 result.
+Test lab 66 project-written result.

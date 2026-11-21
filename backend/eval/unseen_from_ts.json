@@ -305,12 +305,18 @@
     "text": "Aapka SBI reward coupon mil gaya. claim karne ke liye card PIN bhej do: sbi-cashback.xyz",
     "ts": {
       "verdict": "scam",
-      "score": 82,
+      "score": 100,
       "reasons": [
         {
           "icon": "link",
           "text_en": "The link “sbi-cashback.xyz” is a fake copy of the real website “sbi.co.in”.",
           "text_hi": "लिंक “sbi-cashback.xyz” असली वेबसाइट “sbi.co.in” की नकल है।",
+          "rank": 0
+        },
+        {
+          "icon": "key",
+          "text_en": "It asks for a UPI PIN in a payment/refund conversation — real apps receive PINs only inside the official app.",
+          "text_hi": "यह भुगतान/रिफंड बातचीत में UPI PIN मांगता है — असली ऐप में PIN सिर्फ़ आधिकारिक ऐप के अंदर डाला जाता है।",
           "rank": 0
         },
         {
@@ -902,8 +908,14 @@
     "text": "Amazon job from home, Rs 1500 daily. Liking videos. Pay 500 registration fee on 9876500022.",
     "ts": {
       "verdict": "scam",
-      "score": 78,
+      "score": 100,
       "reasons": [
+        {
+          "icon": "phone",
+          "text_en": "It demands a registration fee or deposit for a task or job and moves you to a private contact — that is a task-scam funnel.",
+          "text_hi": "यह टास्क या नौकरी के नाम पर रजिस्ट्रेशन फीस/डिपॉज़िट मांगकर निजी संपर्क पर ले जाता है — यह टास्क-स्कैम का रास्ता है।",
+          "rank": 0
+        },
         {
           "icon": "phone",
           "text_en": "It funnels you to a personal WhatsApp/Telegram number — exactly how “task scam” gangs recruit victims.",
@@ -1167,12 +1179,12 @@
     "text": "ICICI Bank: Rs 250 debited from account XX1201. If not done by you, call 1800 123 1234.",
     "ts": {
       "verdict": "safe",
-      "score": 12,
+      "score": 3,
       "reasons": [
         {
           "icon": "checkCircle",
-          "text_en": "No requests for money, OTP or personal details.",
-          "text_hi": "पैसे, OTP या निजी जानकारी की कोई मांग नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         },
         {
           "icon": "checkCircle",
@@ -1225,8 +1237,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [],
@@ -1348,8 +1360,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "No threatening or panic-creating language.",
-          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         },
         {
           "icon": "checkCircle",
@@ -1452,8 +1464,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [
@@ -1548,8 +1560,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "Nothing here pressures you to act quickly.",
-          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [
@@ -1597,8 +1609,8 @@
         },
         {
           "icon": "checkCircle",
-          "text_en": "No threatening or panic-creating language.",
-          "text_hi": "न धमकी है, न घबराहट पैदा करने वाली भाषा।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         },
         {
           "icon": "checkCircle",
@@ -1648,8 +1660,8 @@
       "reasons": [
         {
           "icon": "checkCircle",
-          "text_en": "No requests for money, OTP or personal details.",
-          "text_hi": "पैसे, OTP या निजी जानकारी की कोई मांग नहीं है।"
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         },
         {
           "icon": "checkCircle",
@@ -1875,6 +1887,11 @@
           "icon": "checkCircle",
           "text_en": "It explicitly says no action or no reply is needed — scam messages never do that.",
           "text_hi": "इसमें साफ़ कहा गया है कि कुछ करने या जवाब देने की ज़रूरत नहीं — घोटाले वाले संदेश ऐसा कभी नहीं कहते।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
         }
       ],
       "links": [

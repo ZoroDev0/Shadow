@@ -4,7 +4,7 @@ This list cannot be marked browser-verified by static tooling.
 
 ## Static checks covered
 
-- [S] 55 project-written detector cases
+- [S] 66 project-written detector cases
 - [S] 70 TS/Python golden verdict-score parity cases
 - [S] Backend 5000-character cap and 64 KB request guard
 - [S] Production frontend build
@@ -27,7 +27,7 @@ This list cannot be marked browser-verified by static tooling.
 - [ ] 1920px desktop result banner is fully visible
 - [ ] Protect SMS, copy and website simulations behave visibly
 - [ ] History filter, delete and clear confirmation work
-- [ ] Test lab reports 55/55 project-written cases
+- [ ] Test lab reports 66 project-written cases (43 scam, 7 suspicious, 16 safe), not independent accuracy
 - [ ] Read aloud starts and stops
 - [ ] Share and WhatsApp actions open or copy correctly
 - [ ] Airplane mode: on-device examples still work

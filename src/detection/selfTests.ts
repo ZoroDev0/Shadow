@@ -116,7 +116,31 @@ export const CASES:SelfTestCase[] = [
     { id: 'G13', label: 'Income-tax refund processed + real site', expect: 'safe',
       text: 'Income Tax Refund: your refund of Rs 12,430 has been processed. Check the status at incometax.gov.in. No action is required.' },
     { id: 'G14', label: 'Jio plan-expiry recharge reminder (must stay safe)', expect: 'safe',
-      text: 'Jio: Your plan expires on 25 Nov. Recharge via the MyJio app to continue.' }
+      text: 'Jio: Your plan expires on 25 Nov. Recharge via the MyJio app to continue.' },
+
+    /* ── GENERAL REGRESSION CASES (audit-gap and guard coverage) ─── */
+    { id: 'R01', label: 'Letter-spaced SBI and KYC OTP obfuscation', expect: 'scam',
+      text: 'S B I account urgent K Y C now O T P 1234' },
+    { id: 'R02', label: 'Devanagari digits and prize callback', expect: 'scam',
+      text: 'इनाम मिला है। कॉल +९१ ९८७६५ ४३२१० पर संवाद करें।' },
+    { id: 'R03', label: 'Fully spaced CBI digital arrest wording', expect: 'scam',
+      text: 'D I G I T A L A R R E S T: C B I will seize account; stay on the video call.' },
+    { id: 'R04', label: 'Hinglish UPI PIN request', expect: 'scam',
+      text: 'UPI PIN bhej do, refund paoge.' },
+    { id: 'R05', label: 'QR scan to receive refund', expect: 'scam',
+      text: 'QR scan karo, Rs 9000 refund milega.' },
+    { id: 'R06', label: 'Paid task registration fee + WhatsApp number', expect: 'scam',
+      text: 'Pay Rs 999 registration fee for the paid task. WhatsApp 9876543210 now.' },
+    { id: 'R07', label: 'Punycode brand host', expect: 'scam',
+      text: 'Open sbi secure verification at http://xn--sbi-kyc.example/login.' },
+    { id: 'R08', label: 'LIC lapse plus top-domain premium payment', expect: 'scam',
+      text: 'Your LIC policy has lapsed. Pay premium now at lic-policy-pay.top.' },
+    { id: 'R09', label: 'Official HDFC blocked reminder question', expect: 'safe',
+      text: 'Your HDFC debit card is blocked? No, this is a reminder. Call 18001231234. HDFC Bank.' },
+    { id: 'R10', label: 'Official SBI password reset guidance', expect: 'safe',
+      text: 'Your SBI password expired. Reset via sbi.co.in. Do not share OTP.' },
+    { id: 'R11', label: 'Negation is not allowed to suppress a real OTP ask', expect: 'scam',
+      text: 'Never share your OTP. Now send me the OTP 4821 immediately.' }
   ];
 export function runSelfTests(){const rows:any[]=[];const failures:any[]=[];let passed=0;for(const c of CASES){let got:any="error",sc=-1,err="";try{const r=detectLocal(c.text);got=r.verdict;sc=r.score}catch(e:any){err=e?.message||String(e)}const ok=got===c.expect;if(ok)passed++;else failures.push({case:c.id,label:c.label,expected:c.expect,got,score:sc,error:err});rows.push({case:c.id,expect:c.expect,got,score:sc,result:ok?"PASS":"FAIL",note:ok?"":(err||c.label)})}const total=CASES.length;const accuracy=Math.round(passed/total*1000)/10;const summary={total,passed,accuracy,failures};if(typeof console!=="undefined"){try{console.table(rows)}catch{}console.log(`[ScamShield] self-tests: ${passed}/${total} passed (${accuracy}%)`)}return summary}
 if(typeof window!=="undefined")(window as any).runSelfTests=runSelfTests;else(globalThis as any).runSelfTests=runSelfTests;
