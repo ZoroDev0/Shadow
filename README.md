@@ -82,3 +82,12 @@ curl -X POST https://YOUR-BACKEND.example.com/analyze \
   -H 'Content-Type: application/json' \
   -d '{"text":"Your SBI account is blocked. KYC update now: http://sbi-kyc-update.xyz"}'
 ```
+
+## Credits and notice
+
+The multimodal ML research and model training in the teammate's Shadow repository were
+created by the teammate/repo owner. No teammate model or dataset is included in this
+repository. ML remains OFF by default and is optional.
+
+The licence for any future use or redistribution of the teammate's ML artifacts is
+pending written confirmation from the owner.
