@@ -32,6 +32,8 @@ npm run build
 Set `VITE_API_BASE` to a backend origin to POST `{ "text": "..." }` to `${VITE_API_BASE}/analyze`.
 When unset or on API failure, ScamShield uses its on-device local detector with an 8-second timeout.
 
+This project is licensed under the MIT License; see `LICENSE`.
+
 ## Current status
 
 - The detector is rule-based; it is not an ML SMS classifier.
