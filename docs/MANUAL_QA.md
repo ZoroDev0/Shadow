@@ -1,0 +1,36 @@
+# Manual browser QA checklist
+
+This list cannot be marked browser-verified by static tooling.
+
+## Static checks covered
+
+- [S] 55 project-written detector cases
+- [S] 70 TS/Python golden verdict-score parity cases
+- [S] Backend 5000-character cap and 64 KB request guard
+- [S] Production frontend build
+- [S] Monochrome CSS token audit
+
+## Human-only checks
+
+- [ ] Onboarding appears on first launch and only once
+- [ ] Fake SBI KYC example verdict = SCAM
+- [ ] Electricity cut-off example verdict = SCAM
+- [ ] Customs digital-arrest example verdict = SCAM
+- [ ] Real bank OTP example verdict = SAFE
+- [ ] Swiggy delivery example verdict = SAFE
+- [ ] EN/Hindi works on Check, History, Protect, Settings and sheets
+- [ ] Light, Dark and Auto themes work
+- [ ] Extra-large text has no clipped text or wrapping action buttons
+- [ ] Reduced motion removes/shortens animation
+- [ ] 920px desktop result banner is fully visible
+- [ ] 1280px desktop result banner is fully visible
+- [ ] 1920px desktop result banner is fully visible
+- [ ] Protect SMS, copy and website simulations behave visibly
+- [ ] History filter, delete and clear confirmation work
+- [ ] Test lab reports 55/55 project-written cases
+- [ ] Read aloud starts and stops
+- [ ] Share and WhatsApp actions open or copy correctly
+- [ ] Airplane mode: on-device examples still work
+- [ ] Backend stopped with `VITE_API_BASE` set: clean fallback, no visible error
+- [ ] DevTools Network with `VITE_API_BASE` empty: no analysis text leaves the device
+- [ ] No coloured pixels or accent images appear in light/dark

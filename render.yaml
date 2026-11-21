@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: scamshield-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app:app --app-dir backend --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ML_ENABLED
+        value: false
+      - key: ALLOWED_ORIGINS
+        value: https://YOUR-FRONTEND.vercel.app
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "30"
+      - key: MAX_REQUEST_BYTES
+        value: "64000"
+      - key: MAX_TEXT_LENGTH
+        value: "5000"
