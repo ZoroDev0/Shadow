@@ -4,10 +4,39 @@
 
    Run: npx tsx scripts/fuzz-engine.ts */
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { detectLocal } from "../src/detection/engine";
+
+function resolvePython(): string {
+  const candidates: string[] = [];
+  if (process.env.PYTHON) candidates.push(process.env.PYTHON);
+  const venvPy = join(process.cwd(), "backend", ".venv", "bin", "python");
+  candidates.push(venvPy);
+  candidates.push("python3");
+
+  for (const py of candidates) {
+    if (py.includes("/") && !existsSync(py)) continue;
+    try {
+      execFileSync(py, ["-c", "import fastapi"], { stdio: "ignore" });
+      return py;
+    } catch {
+      // not runnable or fastapi missing
+    }
+  }
+
+  console.error(
+    "Error: Could not find a python executable with 'fastapi' installed.\n" +
+    "To fix this, create the virtualenv and install backend requirements:\n" +
+    "  cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt\n" +
+    "Or point the PYTHON environment variable to a python binary with fastapi installed:\n" +
+    "  PYTHON=/path/to/python npx tsx scripts/fuzz-engine.ts"
+  );
+  process.exit(1);
+}
+
+const pyBinary = resolvePython();
 
 const BUDGET_MS = 100;
 
@@ -106,7 +135,7 @@ for text in cases:
 json.dump(out, sys.stdout)
 `;
 const py = JSON.parse(
-  execFileSync("python3", ["-c", pyDriver, file], { maxBuffer: 64 * 1024 * 1024 }).toString()
+  execFileSync(pyBinary, ["-c", pyDriver, file], { maxBuffer: 64 * 1024 * 1024 }).toString()
 ) as { verdict: string; score: number; ms: number }[];
 
 let mismatches = 0;

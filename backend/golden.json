@@ -4981,6 +4981,61 @@
     }
   },
   {
+    "id": "R33",
+    "label": "YES Bank .bank.in domain is the real bank, not a lookalike",
+    "expect": "safe",
+    "text": "Your YES Bank statement is ready. Sign in at https://yes.bank.in/login to download it.",
+    "result": {
+      "verdict": "safe",
+      "score": 3,
+      "reasons": [
+        {
+          "icon": "link",
+          "text_en": "The link points to the real official website yes.bank.in.",
+          "text_hi": "लिंक असली आधिकारिक वेबसाइट yes.bank.in पर जाता है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "It has official-domain or genuine-reminder context and does not contain an unsafe hard signal.",
+          "text_hi": "इसमें आधिकारिक डोमेन या असली-संदेश का संदर्भ है और कोई सीधे खतरनाक हार्ड संकेत नहीं है।"
+        },
+        {
+          "icon": "checkCircle",
+          "text_en": "Nothing here pressures you to act quickly.",
+          "text_hi": "इसमें कहीं भी जल्दी करने का दबाव नहीं है।"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://yes.bank.in/login",
+          "verdict": "safe",
+          "reason": {
+            "en": "The link points to the real official website yes.bank.in.",
+            "hi": "लिंक असली आधिकारिक वेबसाइट yes.bank.in पर जाता है।",
+            "text_en": "The link points to the real official website yes.bank.in.",
+            "text_hi": "लिंक असली आधिकारिक वेबसाइट yes.bank.in पर जाता है।"
+          },
+          "lookalike_of": null
+        }
+      ],
+      "advice": [
+        {
+          "text_en": "No action needed for this message.",
+          "text_hi": "इस संदेश के लिए कुछ करने की ज़रूरत नहीं है।"
+        },
+        {
+          "text_en": "Remember: banks and government offices never ask for OTP or PIN over calls or messages.",
+          "text_hi": "याद रखें: बैंक या सरकारी दफ़्तर कभी कॉल या संदेश में OTP या PIN नहीं मांगते।"
+        },
+        {
+          "text_en": "Share Shadow with your family to keep them safe too.",
+          "text_hi": "अपने परिवार को भी सुरक्षित रखने के लिए Shadow उनके साथ साझा करें।"
+        }
+      ],
+      "highlights": []
+    }
+  },
+  {
     "id": "X1",
     "label": "extra",
     "expect": "suspicious",

@@ -9,6 +9,7 @@ import {
   openListenerSettings,
   requestPostNotifications,
   setScanning,
+  shouldPromptPostNotifications,
 } from "./scamShield";
 
 describe("native ScamShield wrapper on the web", () => {
@@ -36,5 +37,62 @@ describe("native ScamShield wrapper on the web", () => {
     expect(typeof off).toBe("function");
     off();
     expect(called).toBe(0);
+  });
+
+  describe("shouldPromptPostNotifications guard logic", () => {
+    it("first resume asks when enabled and missing permission on Android 13+", () => {
+      expect(
+        shouldPromptPostNotifications(
+          { supported: true, enabled: true, sdk: 33, postNotifications: false },
+          false
+        )
+      ).toBe(true);
+    });
+
+    it("second resume does not ask", () => {
+      expect(
+        shouldPromptPostNotifications(
+          { supported: true, enabled: true, sdk: 33, postNotifications: false },
+          true
+        )
+      ).toBe(false);
+    });
+
+    it("denied-twice does not ask again (already prompted in session)", () => {
+      // After user denial or repeated resumes, alreadyPromptedInSession is true
+      expect(
+        shouldPromptPostNotifications(
+          { supported: true, enabled: true, sdk: 33, postNotifications: false },
+          true
+        )
+      ).toBe(false);
+    });
+
+    it("web does nothing (unsupported or disabled)", () => {
+      expect(
+        shouldPromptPostNotifications(
+          { supported: false, enabled: false, sdk: 0, postNotifications: false },
+          false
+        )
+      ).toBe(false);
+      expect(
+        shouldPromptPostNotifications(
+          { supported: true, enabled: false, sdk: 33, postNotifications: false },
+          false
+        )
+      ).toBe(false);
+      expect(
+        shouldPromptPostNotifications(
+          { supported: true, enabled: true, sdk: 32, postNotifications: false },
+          false
+        )
+      ).toBe(false);
+      expect(
+        shouldPromptPostNotifications(
+          { supported: true, enabled: true, sdk: 33, postNotifications: true },
+          false
+        )
+      ).toBe(false);
+    });
   });
 });

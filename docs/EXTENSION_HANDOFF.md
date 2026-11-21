@@ -85,7 +85,7 @@ ML_ENABLED=false uvicorn app:app --reload --port 8000
 - Run `npx tsx scripts/fuzz-ext-policy.ts` (273 odd URLs) after touching
   `extension/src/policy.ts`; it fails on a throw, on any private/internal block,
   on any guarded-site block, and on a lookalike that stops being blocked.
-- Current counts: 87 self-tests (54/8/25), 102 golden entries, 57 vitest tests,
+- Current counts: 88 self-tests (54/8/26), 103 golden entries, 61 vitest tests,
   12 backend tests, 140 guarded sites. Keep them green.
 - The label-boundary rule is load-bearing: `findLookalike` only treats an
   official domain as embedded when it starts and ends on a label of the host.

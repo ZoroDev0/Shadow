@@ -9,7 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The same 102 golden entries the web app and the Python mirror use, run through
+ * The same 103 golden entries the web app and the Python mirror use, run through
  * the on-device QuickJS bridge. Requires a phone or emulator:
  *   ./gradlew connectedDebugAndroidTest
  *
@@ -43,7 +43,7 @@ class EngineGoldenTest {
             }
         }
 
-        assertEquals("golden entries present", 102, checked)
+        assertEquals("golden entries present", 103, checked)
         if (failures.isNotEmpty()) fail(failures.joinToString("\n"))
     }
 }

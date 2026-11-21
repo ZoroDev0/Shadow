@@ -151,7 +151,7 @@ const en = {
   "share_open": "Opening WhatsApp — warning copied for you",
   "share_done": "Shared",
   "lab_t": "Test lab",
-  "lab_d": "Run 87 project-written cases on this device. This is not independent accuracy.",
+  "lab_d": "Run 88 project-written cases on this device. This is not independent accuracy.",
   "lab_run": "Run tests",
   "lab_total": "Cases",
   "lab_pass": "Passed",

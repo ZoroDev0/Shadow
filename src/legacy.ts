@@ -2,7 +2,8 @@ import { analyze as analyzeShared } from './detection/analyze';
 import { urlHost } from './detection/engine';
 import {
   clearRecent, getRecent, isListenerEnabled, isNativeAndroid, onNotificationScanned,
-  openAppSettings, openListenerSettings, requestPostNotifications, setScanning
+  openAppSettings, openListenerSettings, requestPostNotifications, setScanning,
+  shouldPromptPostNotifications
 } from './native/scamShield';
 import type { RecentScan } from './native/scamShield';
 
@@ -217,7 +218,7 @@ const I18N = {
   hist_notif:       { en: 'Notification · {app}', hi: 'नोटिफिकेशन · {app}' },
   sim_tag:          { en: 'Simulation', hi: 'सिमुलेशन' },
   lab_t:           { en: 'Test lab', hi: 'टेस्ट लैब' },
-  lab_d:           { en: 'Run 87 project-written cases on this device. This is not independent accuracy.', hi: 'इस डिवाइस पर 87 प्रोजेक्ट-लिखित मामलों की जाँच चलाएँ। यह स्वतंत्र सटीकता नहीं है।' },
+  lab_d:           { en: 'Run 88 project-written cases on this device. This is not independent accuracy.', hi: 'इस डिवाइस पर 88 प्रोजेक्ट-लिखित मामलों की जाँच चलाएँ। यह स्वतंत्र सटीकता नहीं है।' },
   lab_run:         { en: 'Run tests', hi: 'टेस्ट चलाएँ' },
   lab_total:       { en: 'Cases', hi: 'मामले' },
   lab_pass:        { en: 'Passed', hi: 'पास' },
@@ -1007,6 +1008,7 @@ const PROTECT_CARDS = [
    platform reports unsupported and the card stays the labelled simulation. */
 let nativeState = { supported: false, enabled: false, scanning: false, postNotifications: false, debug: false, sdk: 0 };
 let nativeScans: RecentScan[] = [];
+let postNotificationsPrompted = false;
 
 function nativeScanEntry(s: RecentScan) {
   const reason = { en: 'Found in a notification from ' + s.appLabel + '. The message body is not stored on this device.',
@@ -1031,7 +1033,8 @@ async function refreshNative() {
   if (!isNativeAndroid()) return;
   nativeState = await isListenerEnabled();
   nativeScans = await getRecent();
-  if (nativeState.enabled && nativeState.sdk >= 33 && !nativeState.postNotifications) {
+  if (shouldPromptPostNotifications(nativeState, postNotificationsPrompted)) {
+    postNotificationsPrompted = true;
     void requestPostNotifications().then(granted => {
       if (granted) void refreshNative();
     });
@@ -1286,13 +1289,8 @@ function wireEvents() {
       if (!nativeState.enabled) {
         /* Access is the system's grant, not ours: send the user to it. */
         c.checked = false;
-        void openListenerSettings().then(() => {
-          if (nativeState.sdk >= 33 && !nativeState.postNotifications) void requestPostNotifications();
-        });
+        void openListenerSettings();
         return;
-      }
-      if (c.checked && nativeState.sdk >= 33 && !nativeState.postNotifications) {
-        void requestPostNotifications();
       }
       void setScanning(c.checked).then(() => refreshNative());
       return;

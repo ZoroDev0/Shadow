@@ -5,7 +5,7 @@
    is absent there. This test reproduces that exact environment on the host:
    normalization is removed inside QuickJS, the text is pre-normalized with the
    host's exact NFKC (what Android's java.text.Normalizer does), and every one of
-   the 102 golden entries must return the same verdict and score as the web app. */
+   the 103 golden entries must return the same verdict and score as the web app. */
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { buildSync } from "esbuild";
@@ -45,7 +45,7 @@ describe("Android engine bundle under QuickJS", () => {
         }
       }
       expect(failures).toEqual([]);
-      expect(golden.length).toBe(102);
+      expect(golden.length).toBe(103);
     } finally {
       ctx.dispose();
       rt.dispose();

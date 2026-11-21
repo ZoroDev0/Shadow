@@ -73,7 +73,7 @@ same JavaScript the web app runs, so there is exactly one detection brain.
 QuickJS has no ICU, so `EngineBridge` normalises text with
 `java.text.Normalizer` (exact NFKC) before calling in, and the bundle's
 `normalize()` call becomes a no-op. `src/native/androidEngineGolden.test.ts`
-proves this path against all **102** golden entries inside real QuickJS with
+proves this path against all **103** golden entries inside real QuickJS with
 normalisation removed — same verdict and same score on every entry.
 
 ## Grant notification access
@@ -128,7 +128,7 @@ snippet.
 
 ```bash
 # Host: JVM logic + QuickJS golden parity for the Android bundle
-npm test                                     # 57 tests, includes the 101-entry QuickJS golden test
+npm test                                     # 61 tests, includes the 103-entry QuickJS golden test
 
 # Android: pure JVM unit tests (no device needed)
 cd android && ./gradlew testDebugUnitTest     # 12 tests: allowlist, filtering, masking, dedupe
@@ -139,7 +139,7 @@ cd android && ./gradlew connectedDebugAndroidTest
 
 `EngineGoldenTest` (instrumented) runs the same `backend/golden.json` — copied
 into the androidTest assets at build time, never duplicated in git — through the
-on-device QuickJS bridge and asserts verdict **and** score on all 102 entries.
+on-device QuickJS bridge and asserts verdict **and** score on all 103 entries.
 
 ## Limits (read before a demo)
 
@@ -148,9 +148,11 @@ on-device QuickJS bridge and asserts verdict **and** score on all 102 entries.
   phone yet.
 - Notification access is granted by the user in system settings; without it the
   app is silent.
-- Only the six listed apps are scanned. A bank's own app notifications and SMS
-  from senders not covered by those apps are not scanned (the SMS inbox is never
-  read — that is a deliberate choice, not an oversight).
+- Only the six listed messaging apps are scanned (Google Messages, Samsung Messages,
+  WhatsApp, WhatsApp Business, Telegram, Truecaller, plus com.android.shell in debug builds).
+  Payment and banking app notifications are deliberately not scanned because they carry
+  real transaction details and are not where scam texts arrive. The SMS inbox is never
+  read — that is a deliberate choice, not an oversight.
 - The message body is not stored, so a result opened later shows the verdict, the
   score and a masked snippet, not the original text.
 - iOS cannot do this: there is no public API to read other apps' notifications.
@@ -232,8 +234,10 @@ D ScamShieldListener: scanned pkg=com.sbi.lotusintouch verdict=safe score=5
 ```
 
 If nothing appears but the listener is bound, the notification may be from a
-package not in the scanned-app list (WhatsApp, Paytm, PhonePe, GPay, SBI
-YONO, BHIM).
+package not in the scanned-app allowlist (Google Messages, Samsung Messages,
+WhatsApp, WhatsApp Business, Telegram, Truecaller, plus com.android.shell in debug builds).
+Payment and banking app notifications are deliberately not scanned because they carry
+real transaction details and are not where scam texts arrive.
 
 ---
 
@@ -244,7 +248,7 @@ cd android
 ./gradlew connectedDebugAndroidTest
 ```
 
-This installs a test APK that evaluates all 102 golden entries inside real
+This installs a test APK that evaluates all 103 golden entries inside real
 QuickJS on the device and asserts verdict + score. Requires a device or
 emulator connected via `adb devices`.
 

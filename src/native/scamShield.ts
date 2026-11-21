@@ -101,6 +101,21 @@ export async function requestPostNotifications(): Promise<boolean> {
   }
 }
 
+/** Pure decision for whether to prompt POST_NOTIFICATIONS on app resume.
+ * Requests at most once per session, only when notification access is enabled
+ * on Android 13+ (SDK >= 33) and POST_NOTIFICATIONS is not yet granted.
+ * Web or unsupported environments do nothing. */
+export function shouldPromptPostNotifications(
+  state: { supported?: boolean; enabled?: boolean; sdk?: number; postNotifications?: boolean },
+  alreadyPromptedInSession: boolean
+): boolean {
+  if (!state.supported || !state.enabled) return false;
+  if ((state.sdk ?? 0) < 33) return false;
+  if (state.postNotifications) return false;
+  if (alreadyPromptedInSession) return false;
+  return true;
+}
+
 export async function setScanning(enabled: boolean): Promise<boolean> {
   if (!isNativeAndroid()) return false;
   try {

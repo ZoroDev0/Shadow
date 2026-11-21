@@ -10,7 +10,7 @@ from app import detect_local
 GOLDEN = Path(__file__).with_name("golden.json")
 
 
-GOLDEN_ENTRY_COUNT = 102  # 87 project-written self-tests + 15 extra parity cases
+GOLDEN_ENTRY_COUNT = 103  # 88 project-written self-tests + 15 extra parity cases
 
 
 def test_all_golden_verdicts_and_scores():

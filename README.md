@@ -28,17 +28,17 @@ Verified on 2026-11-22 by running these commands on this machine:
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Frontend + engine tests | `npm ci && npm test` | 57 tests pass, including 87 project-written detector cases |
+| Frontend + engine tests | `npm ci && npm test` | 61 tests pass, including 88 project-written detector cases |
 | Web build | `npm run build` | succeeds |
 | Extension build | `npm run build:ext` | succeeds; loads unpacked in headless Chromium |
-| Backend parity | `cd backend && python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt && pytest -q` | 12 tests pass over 102 golden entries |
+| Backend parity | `cd backend && python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt && pytest -q` | 12 tests pass over 103 golden entries |
 | Extension URL fuzz | `npx tsx scripts/fuzz-ext-policy.ts` | 273 URLs: 0 throws, 0 private/internal blocks, 0 guarded-site blocks |
-| Two-engine input fuzz | `npx tsx scripts/fuzz-engine.ts` | 340 adversarial inputs: 0 throws, identical TS/Python verdict and score, slowest 9.07 ms |
-| Android engine parity | `npx vitest run src/native` | all 102 golden entries match inside real QuickJS |
+| Two-engine input fuzz | `npx tsx scripts/fuzz-engine.ts` | 340 adversarial inputs: 0 throws, identical TS/Python verdict and score, slowest 9.07 ms (supports `PYTHON` env var) |
+| Android engine parity | `npx vitest run src/native` | all 103 golden entries match inside real QuickJS |
 | Android JVM tests | `cd android && ./gradlew testDebugUnitTest` | 12 tests pass (filtering, masking, de-dupe) |
 | Android debug APK | `cd android && ./gradlew assembleDebug` | builds, 7.6 MB universal debug APK |
 
-The 87 detector cases and 102 golden entries are **project-written cases, not independent accuracy**. The only held-out measurement is the one-shot Phase 7 run — **24/30 correct, five misses and one false positive** (`docs/eval_holdout_phase7.md`) — and it was written by the same agent that wrote the rules.
+The 88 detector cases and 103 golden entries are **project-written cases, not independent accuracy**. The only held-out measurement is the one-shot Phase 7 run — **24/30 correct, five misses and one false positive** (`docs/eval_holdout_phase7.md`) — and it was written by the same agent that wrote the rules.
 
 - Detection is a **rule engine**: no model and no dataset in this repository.
 - The extension ships as an **unpacked build** only — no store listing, no signing, no auto-update.
@@ -123,9 +123,11 @@ ML_ENABLED=false uvicorn app:app --host 0.0.0.0 --port 8000
 
 `android/` is a Capacitor 8 wrapper of the same web build plus a Kotlin
 `NotificationListenerService`. After the user grants notification access it
-reads incoming notifications from six messaging apps, runs the **same** engine
-(bundled by esbuild, executed in QuickJS — no second port) and posts a local
-alert that never contains the message body.
+reads incoming notifications from six messaging apps (Google Messages, Samsung Messages,
+WhatsApp, WhatsApp Business, Telegram, Truecaller, plus com.android.shell in debug builds),
+runs the **same** engine (bundled by esbuild, executed in QuickJS — no second port) and posts
+a local alert that never contains the message body. Payment and banking app notifications are
+deliberately not scanned because they carry real transaction details and are not where scam texts arrive.
 
 - No SMS permission is requested: `READ_SMS` and `RECEIVE_SMS` are absent from
 the manifest. Only notifications are read.
