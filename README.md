@@ -19,8 +19,7 @@ SHADOW / ScamShield is an end-to-end platform designed to protect users against 
 
 The platform provides:
 1. **ScamShield Web Application**: Single-page, on-device scam detector for SMS, WhatsApp messages and URLs with an explainable rule engine and bilingual (English/Hindi) UI.
-2. **Central Backend Detection Engine**: FastAPI service with Python parity mirror, rule engine validation, and optional ML evaluation pipelines.
-3. **Multimodal ML Research Pipeline**: Comprehensive research pipeline exploring multimodal intelligence (URL lexical, static HTML DOM, and visual embeddings).
+2. **Central Backend Detection Engine**: FastAPI service with a Python parity mirror of the rule engine, validated against the TypeScript implementation.
 
 ---
 
@@ -82,42 +81,23 @@ ML_ENABLED=false uvicorn app:app --host 0.0.0.0 --port 8000
 
 ---
 
-## 4. Multimodal ML Research & Pipeline
-
-The SHADOW research pipeline (`ml-research/`) explores **multimodal fusion** across complementary observation layers:
-1. **URL Intelligence (Lexical & Structural):** Shannon entropy, token depth, path/query structure, digit ratio, IP usage, and suspicious brand keywords.
-2. **HTML DOM Intelligence (Semantic Architecture):** Safe static parsing of forms, password inputs, hidden fields, cross-origin targets, and iframe embedding without executing untrusted JavaScript.
-3. **Visual Intelligence (Deep Vision Embeddings):** Webpage screenshot representation via frozen pretrained backbones (**MobileNetV3-Small** / **ResNet-18**).
-4. **Unified LightGBM Classifier:** Trained model located at `models/shadow_unified_classifier.txt` paired with `models/feature_schema.json`.
-
-Sequential reproducible Jupyter research notebooks are located in `ml-research/notebooks/`:
-- `Dataset Discovery.ipynb` (Phase 1): Discovery, safe acquisition, and integrity verification across 7 benchmark datasets.
-- `02_Dataset Audit & Preprocessing.ipynb` (Phase 2): Auditing, deduplication, registered domain extraction, and domain-grouped leakage-free splitting.
-- `03_Feature Engineering & Signal Extraction.ipynb` (Phase 3): Signal extraction across URL, DOM, and visual dimensions.
-- `04_Baseline Model Training & Multimodal Evaluation.ipynb` (Phase 4): LightGBM training, threshold tuning, and multimodal evaluation.
-
----
-
-## 5. Repository Directory Structure
+## 4. Repository Directory Structure
 
 ```
 .
 ├── backend/            # FastAPI central detection engine, parity tests & golden datasets
-├── docs/               # System documentation, runbooks, QA procedures & research reports
-│   └── research/       # Multimodal ML research specifications, catalogues & audit logs
+├── docs/               # System documentation, runbooks, QA procedures & evaluation reports
 ├── index.html          # Vite entrypoint
 ├── index_9.html        # Original standalone single-page source of truth
-├── ml-research/        # Research notebooks (01-04) and acquisition manifests
-├── models/             # Trained unified classifier binary & feature schemas
 ├── public/             # Static web assets
-├── scripts/            # Evaluation runners and ML automation scripts
+├── scripts/            # Evaluation runners
 ├── src/                # ScamShield React/TypeScript frontend (engines, state, i18n, screens)
 └── package.json        # Frontend dependencies and test scripts
 ```
 
 ---
 
-## 6. Safety & Untrusted Data Protocol
+## 5. Safety & Untrusted Data Protocol
 
 - **Static Parsing Only:** External HTML pages are parsed statically with `BeautifulSoup` without executing untrusted JavaScript.
 - **No Live Navigation:** Avoid live automated navigation to malicious URLs during testing.
@@ -125,7 +105,7 @@ Sequential reproducible Jupyter research notebooks are located in `ml-research/n
 
 ---
 
-## 7. License & Credits
+## 6. License & Credits
 
 - ScamShield application code is released under the MIT License; see `LICENSE`.
-- Multimodal ML research and model training in `ml-research/` and `models/` were developed by the research team.
+- This repository ships only the application, backend, tests and documentation. Third-party research notebooks, datasets, figures and trained model binaries are not distributed here, and no model file is required: the backend runs rules-only with `ML_ENABLED=false` (the default).

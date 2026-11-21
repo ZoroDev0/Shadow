@@ -32,8 +32,9 @@ backend/.env
 *.swo
 .ipynb_checkpoints/
 
-# Dataset files & Archives (Explicitly Excluded)
+# Dataset files, model binaries & archives (never commit)
 data/
+*.csv
 *.zip
 *.tar
 *.tar.gz
@@ -47,9 +48,15 @@ data/
 *.arff
 *.xlsx
 *.xls
-*.csv
+*.pdf
+*.pkl
+*.joblib
+*.lgb
+*.onnx
 
-# Exceptions for small metadata CSVs in docs
-!docs/research/*.csv
-!ml-research/reports/*.csv
-!scripts/*.csv
+# Research/model trees removed in Phase 7 — keep them out for good
+ml-research/
+models/
+backend/models/
+artifacts/
+docs/research/

@@ -254,7 +254,7 @@ Concrete improvement order by value/hour:
 
 ### What the teammate repository contained
 
-The adjacent backup/ZIP `ScamShield-backup/Shadow-main.zip` contained 75 entries:
+A ZIP supplied by a teammate contained 75 entries. The ZIP, the model and the research tree were purged from this repository and its history in Phase 7; this section is kept as a historical record of what was reviewed and deliberately not used:
 
 - 4 Jupyter notebooks: dataset discovery, dataset audit/preprocessing, feature engineering/signal extraction, baseline model training/multimodal evaluation.
 - 14+ research reports and CSV/JSON manifests.
@@ -296,7 +296,7 @@ From the teammate concept, this repo adapted only the 20 URL-only features liste
 ### What was not used / changes made
 
 - No 67-feature model or teammate data was copied or committed.
-- No model/dataset was added to `.gitignore`? `.gitignore` excludes `backend/models/`, `models/`, `data/`, `*.joblib`, `*.pkl`, `*.lgb`, `*.onnx`, `*.zip` and `*.pdf`, so future accidental adds are blocked.
+- `.gitignore` excludes `data/`, `models/`, `backend/models/`, `ml-research/`, `artifacts/`, `docs/research/`, `*.csv`, `*.zip`, `*.pdf`, `*.pkl`, `*.joblib`, `*.lgb` and `*.onnx`, so the removed artifacts cannot be re-added accidentally.
 - `backend/requirements.txt` adds `lightgbm`, `numpy` and `tldextract` for optional URL gate.
 - `backend/app.py` adds exact URL feature extraction and bounded ML merge.
 - Parity tests add missing-model, model-error, bounded contribution, hard-scam and official-domain guards.
@@ -368,7 +368,7 @@ This does **NOT** verify browser behavior. DevTools Network-tab verification is 
 
 - No obvious secret strings were found in source/docs.
 - No personal absolute paths were found.
-- Largest tracked files (Phase 6 measurement): `models/shadow_unified_classifier.txt` 548K, three `ml-research/notebooks/*` files ~300K each, `backend/golden.json` 234K, `index_9.html` 205K. A 2.3 MB `Shadow-main.zip` exists in commit `4496227` but is not reachable from `HEAD`.
+- Largest tracked files after the Phase 7 purge: `backend/golden.json` 234K and `index_9.html` 205K; no model binary, dataset, notebook, figure or archive remains in any commit or tag.
 - `.gitignore` excludes dependencies, build, virtualenv, cache, env, model/dataset and archive formats.
 - MIT licence exists only in current ScamShield repo.
 - Tag: `v1.0-hackathon`.

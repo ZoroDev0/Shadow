@@ -75,7 +75,7 @@ def test_official_domains_never_receive_ml_contribution(monkeypatch):
     assert backend.detect_with_ml(text)["score"] == detect_local(text)["score"]
 
 
-def test_all_48_safe_cases_never_move_above_safe(monkeypatch):
+def test_safe_cases_never_move_above_safe(monkeypatch):
     outputs = json.loads(GOLDEN.read_text(encoding="utf-8"))
     monkeypatch.setattr(backend, "ML_ENABLED", True)
     monkeypatch.setattr(backend, "_model_probability", lambda url: 1.0)
@@ -104,3 +104,19 @@ def test_normalisation_matches_shared_fixtures():
     fixtures = json.loads(fixtures_path.read_text(encoding="utf-8"))
     for fixture in fixtures:
         assert backend.normalize_text(fixture["input"]) == fixture["expected"], fixture["name"]
+
+
+def test_analyze_works_with_ml_disabled_and_no_model_present(monkeypatch):
+    """The shipped configuration: ML_ENABLED=false, SHADOW_MODEL_PATH empty, no model file."""
+    monkeypatch.setattr(backend, "ML_ENABLED", False)
+    monkeypatch.setattr(backend, "SHADOW_MODEL_PATH", "")
+    assert not Path("models").exists() or not list(Path("models").glob("*")), "no model tree expected"
+    client = TestClient(backend.app)
+    response = client.post(
+        "/analyze",
+        json={"text": "Your SBI account is blocked. KYC update now: http://sbi-kyc-update.xyz"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["verdict"] == "scam"
+    assert 0 <= body["score"] <= 100
