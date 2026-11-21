@@ -331,7 +331,7 @@ export function normalizeText(rawText) {
   let text = String(rawText || '').normalize('NFKC');
   text = text.replace(/[\u200B-\u200D\uFEFF]/g, '');
   text = text.replace(/[०-९]/g, function (d) { return String(d.charCodeAt(0) - 0x0966); });
-  text = text.replace(/(?:\b[A-Za-z]\b(?:[\s._\-*#@~!]+|[\u{1F300}-\u{1FAFF}])*){2,}[A-Za-z]\b/gu,
+  text = text.replace(/(?:\b[A-Za-z]\b(?:[\s._*#@~!-]+|[\u{1F300}-\u{1FAFF}])*){2,}[A-Za-z]\b/gu,
     function (match) { return match.replace(/[^A-Za-z]/gu, ''); });
   text = text.replace(/([A-Za-z])[\u{1F300}-\u{1FAFF}]+(?=[A-Za-z])/gu, '$1');
   return text.replace(/[ \t]+/g, ' ').trim();
