@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-11-21T16:09:57.015493",
+  "python_version": "3.11.9",
+  "operations_performed": [
+    "Standardized label mapping to is_phishing (1=phish, 0=legit)",
+    "Extracted registered_domain via tldextract (Public Suffix List aware)",
+    "Zero-leakage domain-grouped train/val/test splitting (70/15/15, seed=42)",
+    "Zenodo screenshot mapping verified via excel_row - 2 formula (99.58% direct match)",
+    "Static BeautifulSoup DOM parsing (form actions, script/iframe counts)",
+    "Separated 100% phishing live feeds (PhishTank, OpenPhish) from balanced benchmarks"
+  ],
+  "exported_artifacts": {
+    "phiusiil_domain_splits": "data\\processed\\phiusiil_domain_splits.parquet",
+    "zenodo_paired_multimodal": "data\\processed\\zenodo_paired_multimodal.parquet",
+    "phreshphish_clean": "data\\interim\\phreshphish_clean.parquet",
+    "phishtank_clean": "data\\interim\\phishtank_clean.parquet",
+    "openphish_clean": "data\\interim\\openphish_clean.parquet"
+  },
+  "notebook03_execution": {
+    "timestamp": "2026-11-21T16:53:55.756305",
+    "python_version": "3.11.9",
+    "pytorch_version": "2.11.0+cu128",
+    "cuda_device": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "url_features": {
+      "count": 20,
+      "evaluated_samples": 20000,
+      "throughput_urls_per_sec": 37332.8,
+      "output_file": "data\\processed\\url_features_extracted.parquet"
+    },
+    "html_features": {
+      "count": 13,
+      "evaluated_samples": 1000,
+      "throughput_pages_per_sec": 30.5,
+      "output_file": "data\\processed\\html_features_extracted.parquet"
+    },
+    "visual_embeddings": {
+      "resnet18_dimensions": 512,
+      "mobilenetv3_dimensions": 576,
+      "evaluated_samples": 1000,
+      "throughput_images_per_sec": 44.7,
+      "output_parquet": "data\\processed\\visual_embeddings_sample.parquet"
+    },
+    "behaviour_schema": {
+      "scenarios_simulated": 5,
+      "total_records": 2500,
+      "output_file": "data\\interim\\behaviour_features_synthetic.parquet"
+    }
+  }
+}

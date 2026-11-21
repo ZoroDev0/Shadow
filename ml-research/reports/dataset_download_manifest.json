@@ -1,0 +1,111 @@
+[
+  {
+    "dataset_id": "uci_phiusiil",
+    "dataset_name": "PhiUSIIL Phishing URL Dataset",
+    "source": "UCI Machine Learning Repository",
+    "category": "Tabular URL & Webpage Content Features",
+    "file_name": "phiusiil_phishing_url_dataset.zip",
+    "file_path": "data\\raw\\uci_phiusiil\\phiusiil_phishing_url_dataset.zip",
+    "file_size_bytes": 15376007,
+    "sha256": "0a639fd03aea6308c5b1c10c92aa23c2ce1505447a9137271865cd0badc9a59a",
+    "license": "CC BY 4.0",
+    "status": "Verified & Extracted",
+    "extracted_files": [
+      "data\\raw\\uci_phiusiil\\PhiUSIIL_Phishing_URL_Dataset.csv"
+    ],
+    "role": "Primary training candidate (lexical + structural features)"
+  },
+  {
+    "dataset_id": "uci_phishing_websites_327",
+    "dataset_name": "UCI Phishing Websites Dataset",
+    "source": "UCI Machine Learning Repository",
+    "category": "Tabular Engineered Features (11,055 instances, 30 features)",
+    "file_name": "phishing_websites.zip",
+    "file_path": "data\\raw\\uci_phishing_websites\\phishing_websites.zip",
+    "file_size_bytes": 1011184,
+    "sha256": "514f582cb44cba17251baf1d59f64cddff16efa2b644d091ce8d2a1e8d492940",
+    "license": "CC BY 4.0",
+    "status": "Verified & Extracted",
+    "extracted_files": [
+      "data\\raw\\uci_phishing_websites\\.old.arff",
+      "data\\raw\\uci_phishing_websites\\Training Dataset.arff",
+      "data\\raw\\uci_phishing_websites\\Phishing Websites Features.docx"
+    ],
+    "role": "Historical benchmark & baseline verification"
+  },
+  {
+    "dataset_id": "uci_website_phishing_379",
+    "dataset_name": "UCI Website Phishing Dataset",
+    "source": "UCI Machine Learning Repository",
+    "category": "Tabular Compact Features (1,353 instances, 9 features)",
+    "file_name": "website_phishing.zip",
+    "file_path": "data\\raw\\uci_website_phishing\\website_phishing.zip",
+    "file_size_bytes": 33767,
+    "sha256": "fa029c3b079b6bfb4f0833c0ec94a778a20522161b028273e81ac3b93ee8bfee",
+    "license": "CC BY 4.0",
+    "status": "Verified & Extracted",
+    "extracted_files": [
+      "data\\raw\\uci_website_phishing\\PhishingData.arff"
+    ],
+    "role": "Historical compact benchmark"
+  },
+  {
+    "dataset_id": "openphish_community_feed",
+    "dataset_name": "OpenPhish Community Feed",
+    "source": "OpenPhish",
+    "category": "Live Threat Intelligence (Active Phishing URLs)",
+    "file_name": "feed.txt",
+    "file_path": "data\\raw\\openphish\\feed.txt",
+    "file_size_bytes": 13534,
+    "sha256": "c190f2d420693d292b634d34d513aedab3fdcc3090cef273c5347f8a32ad157e",
+    "license": "OpenPhish Community License (Free for non-commercial / research)",
+    "status": "Verified",
+    "sample_count": 300,
+    "extracted_files": [],
+    "role": "Threat intelligence source & zero-day evaluation"
+  },
+  {
+    "dataset_id": "phishtank_online_valid",
+    "dataset_name": "PhishTank Online Validated Phishing Database",
+    "source": "PhishTank (Cisco / OpenDNS)",
+    "category": "Verified Phishing URLs with Timestamps & Target Brands",
+    "file_name": "online-valid.csv",
+    "file_path": "data\\raw\\phishtank\\online-valid.csv",
+    "file_size_bytes": 8334522,
+    "sha256": "65fb290a9a5f9b1ebf471b88cc0390da9d8ca293b2d447c1b3b32594e5007b10",
+    "license": "PhishTank Developer Terms (Free for research/education with User-Agent)",
+    "status": "Verified",
+    "sample_count": 43223,
+    "extracted_files": [],
+    "role": "Real-time verified threat intelligence & target ground truth"
+  },
+  {
+    "dataset_id": "zenodo_multimodal_21379702",
+    "dataset_name": "Phishing and Legitimate Websites Dataset (V2.0)",
+    "source": "Zenodo (DOI 10.5281/zenodo.21379702)",
+    "category": "Multimodal (60,000 URLs, 21,311 Screenshots, 18 Lexical Features)",
+    "file_name": "Phishing dataset.zip",
+    "file_path": "data\\raw\\zenodo_multimodal\\Phishing dataset.zip",
+    "file_size_bytes": 1775761857,
+    "sha256": "b7984b813b085395413025f00b78347595275012dfd012efbed4c474d41ff2dc",
+    "official_checksum": "md5:85937228498c1efffb2ee497389482a2",
+    "license": "CC BY 4.0",
+    "status": "Verified",
+    "extracted_files": [],
+    "role": "Multimodal research candidate (Screenshot + URL pairing)"
+  },
+  {
+    "dataset_id": "phreshphish_bounded_sample",
+    "dataset_name": "PhreshPhish Bounded HTML-URL Sample",
+    "source": "Hugging Face (phreshphish/phreshphish)",
+    "category": "Multimodal HTML + URL Pairs (Bounded Research Sample)",
+    "file_name": "test-000.parquet",
+    "file_path": "data\\raw\\phreshphish_sample\\test-000.parquet",
+    "file_size_bytes": 55340975,
+    "sha256": "9ae7908b64cc75669e4be4cbd0fec884ac2b3f4984211eacfbf013a2ada12851",
+    "license": "CC BY 4.0 (Anti-phishing research only)",
+    "status": "Verified Bounded Sample",
+    "extracted_files": [],
+    "role": "Multimodal HTML DOM structure & external resource investigation"
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "execution_timestamp": "2026-11-21T17:07:52.971453",
+  "python_version": "3.11.9",
+  "model_framework": "LightGBM 4.7.0",
+  "training_samples": 15397,
+  "validation_samples": 3725,
+  "test_samples": 2878,
+  "total_features": 67,
+  "training_time_seconds": 1.66,
+  "optimal_threshold": 0.27,
+  "test_metrics": {
+    "accuracy": 0.992,
+    "precision": 0.988,
+    "recall": 0.987,
+    "f1_score": 0.9875,
+    "roc_auc": 0.9961,
+    "pr_auc": 0.995,
+    "false_positive_rate": 0.0056,
+    "false_negative_rate": 0.013,
+    "inference_latency_ms": 0.003,
+    "throughput_samples_per_sec": 297203.2
+  },
+  "exported_artifacts": {
+    "model_file": "models\\shadow_unified_classifier.txt",
+    "schema_file": "models\\feature_schema.json"
+  }
+}
