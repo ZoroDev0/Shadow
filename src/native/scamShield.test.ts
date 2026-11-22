@@ -12,7 +12,7 @@ import {
   shouldPromptPostNotifications,
 } from "./scamShield";
 
-describe("native ScamShield wrapper on the web", () => {
+describe("native Shadow wrapper on the web", () => {
   it("reports unsupported instead of throwing", async () => {
     expect(isNativeAndroid()).toBe(false);
     const state = await isListenerEnabled();

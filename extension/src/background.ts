@@ -1,7 +1,7 @@
-/* ScamShield service worker (MV3).
+/* Shadow service worker (MV3).
  *
  * Responsibilities
- *  1. Right-click "Check with ScamShield" on selected text or on a link.
+ *  1. Right-click "Check with Shadow" on selected text or on a link.
  *  2. Analyse every main-frame navigation locally, before the page loads.
  *     SCAM  → the tab is sent to blocked.html (never the scam page).
  *     BE CAREFUL → badge only, navigation is allowed.
@@ -63,7 +63,7 @@ export async function handleNavigation(details: any): Promise<any> {
   return decision;
 }
 
-/** Build the result for a context-menu click and show it in a small window. */
+/** Build the result for a context-menu click and show it in the side panel. */
 export async function handleMenuClick(info: any, tab?: any): Promise<CheckedResult | null> {
   const c = api();
   const settings = await getSettings();
@@ -84,21 +84,48 @@ export async function handleMenuClick(info: any, tab?: any): Promise<CheckedResu
   await setLastResult({ ...result, url, kind: isLink ? "link" : "selection" });
   await setBadge(tab?.id, result.verdict, settings.lang);
 
-  const popupUrl = c.runtime.getURL("popup.html") + "?view=result";
+  const panelPath = "popup.html?view=result";
+  const popupUrl = c.runtime.getURL(panelPath);
+  await openResultPanel(c, panelPath, popupUrl, tab?.windowId);
+  return result;
+}
+
+/** Open the result page in the browser side panel (Chrome sidePanel / Firefox
+ *  sidebarAction), falling back to a popup window when side panels are not
+ *  supported by the browser. `panelPath` is relative to the extension root;
+ *  `popupUrl` is the absolute extension URL used by the window fallback. */
+async function openResultPanel(c: any, panelPath: string, popupUrl: string, windowId?: number): Promise<void> {
+  if (c?.sidePanel) {
+    try {
+      await c.sidePanel.setPanel({ path: panelPath });
+      await c.sidePanel.open({ windowId });
+      return;
+    } catch {
+      /* fall through to fallback */
+    }
+  }
+  if (c?.sidebarAction) {
+    try {
+      await c.sidebarAction.setPanel({ path: panelPath });
+      await c.sidebarAction.show({ windowId });
+      return;
+    } catch {
+      /* fall through to fallback */
+    }
+  }
   try {
     await c.windows.create({ url: popupUrl, type: "popup", width: 420, height: 680 });
   } catch {
     if (c.tabs?.create) await c.tabs.create({ url: popupUrl });
   }
-  return result;
 }
 
 export function createMenus(): void {
   const c = api();
   if (!c?.contextMenus) return;
   c.contextMenus.removeAll(() => {
-    c.contextMenus.create({ id: MENU_SELECTION, title: "Check with ScamShield", contexts: ["selection"] });
-    c.contextMenus.create({ id: MENU_LINK, title: "Check this link with ScamShield", contexts: ["link"] });
+  c.contextMenus.create({ id: MENU_SELECTION, title: "Check with Shadow", contexts: ["selection"] });
+  c.contextMenus.create({ id: MENU_LINK, title: "Check this link with Shadow", contexts: ["link"] });
   });
 }
 

@@ -1,18 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "ScamShield",
-  "short_name": "ScamShield",
+  "name": "Shadow",
+  "short_name": "Shadow",
   "version": "1.3.0",
   "description": "Checks links and pasted messages for scam signs on your device. Warns before a lookalike bank or government site opens.",
-  "minimum_chrome_version": "110",
-  "permissions": ["contextMenus", "storage", "webNavigation"],
+  "minimum_chrome_version": "114",
+  "permissions": ["contextMenus", "storage", "webNavigation", "sidePanel"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "shadow@shadow.app",
+      "strict_min_version": "109"
+    }
+  },
   "optional_host_permissions": ["https://*/*", "http://*/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
   "action": {
-    "default_title": "ScamShield — check a message or link",
+    "default_title": "Shadow — check a message or link",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",

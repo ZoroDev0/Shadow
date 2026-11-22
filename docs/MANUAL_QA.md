@@ -56,8 +56,8 @@ Run against the built `extension/dist` loaded unpacked in Playwright's Chromium
 ## Browser Extension — Human-only on a real Chrome/Edge/Brave profile
 
 - [ ] Load `extension/dist` via “Load unpacked” and confirm the toolbar icon appears without an error badge on `chrome://extensions`.
-- [ ] Right-click selected text → “Check with ScamShield” opens the result window with the matching verdict and a toolbar badge.
-- [ ] Right-click a link → “Check this link with ScamShield” shows the fake-vs-real diff for a lookalike domain.
+- [ ] Right-click selected text → “Check with Shadow” opens the result in the side panel with the matching verdict and a toolbar badge.
+- [ ] Right-click a link → “Check this link with Shadow” shows the fake-vs-real diff for a lookalike domain.
 - [ ] Toggle protection off in options, then open a known scam URL: it must load normally with no badge.
 - [ ] Add a domain to “Always allowed sites”, then open it: it must never be blocked.
 - [ ] Leave the API base URL empty and confirm in DevTools that no network request leaves the extension.

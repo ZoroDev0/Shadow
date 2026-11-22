@@ -4,7 +4,7 @@
 import { en as sharedEn, hi as sharedHi } from "../../src/i18n";
 
 const extEn = {
-  ext_name: "ScamShield",
+  ext_name: "Shadow",
   ext_tagline: "Check a message or link for scam signs — on this device.",
   ext_label: "Paste or type the message",
   ext_placeholder: "Paste the SMS, WhatsApp message or link you are unsure about…",
@@ -13,11 +13,11 @@ const extEn = {
   ext_options: "Settings",
   ext_why: "Why we think so",
   ext_score_n: "Risk level {n} of 3",
-  ext_check_selection: "Check with ScamShield",
-  ext_check_link: "Check this link with ScamShield",
+  ext_check_selection: "Check with Shadow",
+  ext_check_link: "Check this link with Shadow",
   ext_result_for: "Result for the selected link",
   ext_blocked_title: "This link looks like a scam",
-  ext_blocked_sub: "ScamShield stopped this page before it could open.",
+  ext_blocked_sub: "Shadow stopped this page before it could open.",
   ext_go_back: "Go back — keep me safe",
   ext_proceed: "Proceed anyway",
   ext_session_note: "“Proceed anyway” allows this domain for this browser session only.",
@@ -63,7 +63,7 @@ const extEn = {
 };
 
 const extHi = {
-  ext_name: "ScamShield",
+  ext_name: "Shadow",
   ext_tagline: "किसी संदेश या लिंक में ठगी के संकेत जाँचें — इसी डिवाइस पर।",
   ext_label: "संदेश पेस्ट करें या लिखें",
   ext_placeholder: "जिस SMS, WhatsApp संदेश या लिंक पर भरोसा न हो, उसे यहाँ पेस्ट करें…",
@@ -72,11 +72,11 @@ const extHi = {
   ext_options: "सेटिंग्स",
   ext_why: "हमें ऐसा क्यों लगा",
   ext_score_n: "जोखिम स्तर 3 में से {n}",
-  ext_check_selection: "ScamShield से जाँचें",
-  ext_check_link: "इस लिंक को ScamShield से जाँचें",
+  ext_check_selection: "Shadow से जाँचें",
+  ext_check_link: "इस लिंक को Shadow से जाँचें",
   ext_result_for: "चुने गए लिंक का नतीजा",
   ext_blocked_title: "यह लिंक ठगी जैसा लगता है",
-  ext_blocked_sub: "ScamShield ने इस पेज को खुलने से पहले रोक दिया।",
+  ext_blocked_sub: "Shadow ने इस पेज को खुलने से पहले रोक दिया।",
   ext_go_back: "वापस जाएँ — मैं सुरक्षित रहूँ",
   ext_proceed: "फिर भी खोलें",
   ext_session_note: "“फिर भी खोलें” इस डोमेन को सिर्फ इसी ब्राउज़र सत्र के लिए खोल देता है।",

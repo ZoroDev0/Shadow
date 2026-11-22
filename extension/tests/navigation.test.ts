@@ -134,7 +134,7 @@ describe("context menu results", () => {
       "scamshield-check-link",
       "scamshield-check-selection"
     ]);
-    expect(mock.menus.every((m) => m.title.includes("ScamShield"))).toBe(true);
+    expect(mock.menus.every((m) => m.title.includes("Shadow"))).toBe(true);
     expect(mock.menus.map((m) => m.contexts[0]).sort()).toEqual(["link", "selection"]);
   });
 });

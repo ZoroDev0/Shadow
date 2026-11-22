@@ -9,7 +9,7 @@ const manifest = JSON.parse(raw);
 describe("manifest.json", () => {
   it("is a valid Manifest V3 extension with a module service worker", () => {
     expect(manifest.manifest_version).toBe(3);
-    expect(manifest.name).toBe("ScamShield");
+    expect(manifest.name).toBe("Shadow");
     expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(manifest.background.service_worker).toBe("background.js");
     expect(manifest.background.type).toBe("module");
@@ -18,7 +18,7 @@ describe("manifest.json", () => {
   });
 
   it("requests only the three documented permissions", () => {
-    expect([...manifest.permissions].sort()).toEqual(["contextMenus", "storage", "webNavigation"]);
+    expect([...manifest.permissions].sort()).toEqual(["contextMenus", "sidePanel", "storage", "webNavigation"]);
     expect(manifest.permissions).not.toContain("tabs");
     expect(manifest.permissions).not.toContain("<all_urls>");
     expect(manifest.permissions).not.toContain("scripting");

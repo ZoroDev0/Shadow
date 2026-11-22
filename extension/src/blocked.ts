@@ -17,7 +17,7 @@ async function init(): Promise<void> {
   const host = String(url).replace(/^[a-z]+:\/\//i, "").split("/")[0] || url;
   $("host").textContent = host;
   renderResult($("result"), result, settings.lang);
-  document.title = `${host} — ScamShield`;
+  document.title = `${host} — Shadow`;
 
   $("btnBack").addEventListener("click", () => {
     if (history.length > 1) history.back();

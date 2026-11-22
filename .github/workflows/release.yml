@@ -1,0 +1,65 @@
+name: Release
+
+# Push a tag like v1.5.0 to build the extension zip and the Android APK
+# and attach both to a GitHub Release.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Build extension
+        run: npm run build:ext
+
+      - name: Build Android debug APK
+        run: |
+          npm run sync:android
+          cd android
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest assembleDebug
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p out
+          cp extension/shadow-extension.zip "out/Shadow-extension-${GITHUB_REF_NAME}.zip"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "out/Shadow-${GITHUB_REF_NAME}-debug.apk"
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+          generate_release_notes: true
+          body: |
+            **Android:** debug-signed APK, sideload only (enable "install unknown apps"). Not yet verified on a physical phone.
+            **Extension:** unzip, then `chrome://extensions` → Developer mode → Load unpacked. Not published to any store.
+
+      - name: Upload artifacts (manual runs)
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: actions/upload-artifact@v4
+        with:
+          name: shadow-release
+          path: out/*

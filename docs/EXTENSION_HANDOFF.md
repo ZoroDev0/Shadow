@@ -1,4 +1,4 @@
-# ScamShield browser extension — handoff
+# Shadow browser extension — handoff
 
 Status: **in the repo** (`extension/`), Manifest V3, unpacked build.
 Detection is imported from `src/detection` — there is no second engine.
@@ -95,7 +95,6 @@ ML_ENABLED=false uvicorn app:app --reload --port 8000
 
 - Not published to any store; no signing, no auto-update.
 - No content scripts: page content is never read.
-- No Firefox or Safari build (no `manifest.firefox.json`; the port is unwritten).
 - The web app's Protect-screen switches remain demo simulations; installing
   this extension is a separate manual step.
 - Three real sites are still flagged as lookalikes: `hdfc.bank.in`,

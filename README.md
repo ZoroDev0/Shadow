@@ -1,167 +1,161 @@
-# Shadow — Autonomous Phishing & Scam Detection Platform
+# Shadow
 
-> **A student-built cybersecurity research initiative and scam detection application defending users against web deception, malicious URLs, and smishing attacks.**
+**On-device scam and phishing detection for SMS, WhatsApp messages and links.** One rule engine, three front ends: a web app, a browser extension and an Android notification scanner. Bilingual (English / Hindi). Built by students as a cybersecurity research project.
 
----
+**Team:** Sasanka · Biswajeet · Riya · Kaustab
 
-## 👥 Core Team & Authors
-
-1. **Sasanka**
-2. **Biswajeet**
-3. **Riya**
-4. **Kaustab**
+[![Release](https://github.com/ZoroDev0/Shadow/actions/workflows/release.yml/badge.svg)](https://github.com/ZoroDev0/Shadow/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
 
-## 1. Project Overview
+## Contents
 
-Shadow is an end-to-end platform designed to protect users against modern web-based and message-based deception attacks, including credential harvesting, brand impersonation, zero-day phishing, and SMS/WhatsApp smishing scams.
+- [Components](#components)
+- [Download](#download)
+- [Quickstart](#quickstart)
+- [Browser extension](#browser-extension)
+- [Android app](#android-app)
+- [Backend service](#backend-service)
+- [Testing](#testing)
+- [Releasing](#releasing)
+- [Repository layout](#repository-layout)
+- [Status and honest limits](#status-and-honest-limits)
+- [Safety notes](#safety-notes)
+- [License](#license)
 
-The platform provides:
-1. **Shadow Web Application**: Single-page, on-device scam detector for SMS, WhatsApp messages and URLs with an explainable rule engine and bilingual (English/Hindi) UI.
-2. **Central Backend Detection Engine**: FastAPI service with a Python parity mirror of the rule engine, validated against the TypeScript implementation.
-3. **ScamShield Browser Extension (Chrome/Edge/Brave)**: Manifest V3 build of the same engine — checks pasted text, right-clicked text or links, and warns before a lookalike bank or government page opens. Available as an unpacked build; not published to any extension store.
+---
 
-## 1a. Status and honest limits
+## Components
 
-Verified on 2026-11-22 by running these commands on this machine:
-
-| Check | Command | Result |
+| Component | What it does | Where |
 | --- | --- | --- |
-| Frontend + engine tests | `npm ci && npm test` | 61 tests pass, including 88 project-written detector cases |
-| Web build | `npm run build` | succeeds |
-| Extension build | `npm run build:ext` | succeeds; loads unpacked in headless Chromium |
-| Backend parity | `cd backend && python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt && pytest -q` | 12 tests pass over 103 golden entries |
-| Extension URL fuzz | `npx tsx scripts/fuzz-ext-policy.ts` | 273 URLs: 0 throws, 0 private/internal blocks, 0 guarded-site blocks |
-| Two-engine input fuzz | `npx tsx scripts/fuzz-engine.ts` | 340 adversarial inputs: 0 throws, identical TS/Python verdict and score, slowest 9.07 ms (supports `PYTHON` env var) |
-| Android engine parity | `npx vitest run src/native` | all 103 golden entries match inside real QuickJS |
-| Android JVM tests | `cd android && ./gradlew testDebugUnitTest` | 12 tests pass (filtering, masking, de-dupe) |
-| Android debug APK | `cd android && ./gradlew assembleDebug` | builds, 7.6 MB universal debug APK |
+| Web app | Paste a message or URL, get an explainable verdict | `src/` |
+| Browser extension (MV3) | Checks text and links, warns before a lookalike bank or government site opens | `extension/` |
+| Android app | Scans notifications from messaging apps and raises a local alert | `android/` |
+| Backend | FastAPI parity mirror of the rule engine | `backend/` |
 
-The 88 detector cases and 103 golden entries are **project-written cases, not independent accuracy**. The only held-out measurement is the one-shot Phase 7 run — **24/30 correct, five misses and one false positive** (`docs/eval_holdout_phase7.md`) — and it was written by the same agent that wrote the rules.
+All front ends import the same engine from `src/detection`. It is a rule engine: no model and no dataset in this repository.
 
-- Detection is a **rule engine**: no model and no dataset in this repository.
-- The extension ships as an **unpacked build** only — no store listing, no signing, no auto-update.
-- The Protect screen on the web app is a **simulation**; only the extension performs real navigation checks.
-- Screenshot upload is a **file-selection and preview UI only** — no OCR.
-- The **Android app builds** (Capacitor + Kotlin notification listener) but has **not been run on a phone**: the notification listener, alerts and restricted-settings flow are NOT VERIFIED. The web app's Protect switches stay simulations. The Android app reads **notifications only** — never the SMS database. See `docs/ANDROID.md`.
-- The **PWA and the extension are not yet verified in a human browser session** (automated headless Chromium only).
-- The **independent human evaluation has not been run** (`docs/INDEPENDENT_EVAL.md`).
+## Download
 
----
+Prebuilt files are attached to each [GitHub Release](https://github.com/ZoroDev0/Shadow/releases):
 
-## 2. Shadow Web Application
+- `Shadow-extension-<version>.zip`: unzip and load unpacked (see [extension](#browser-extension)).
+- `Shadow-<version>-debug.apk`: debug-signed Android build for sideloading.
 
-The interactive client detector is rule-based and runs on-device, with optional backend API support:
-
-```text
-index_9.html (original source of truth)
-          |
-          v
-src/detection/rules.json --> engine.ts + links.ts
-                               |
-                               v
-                           analyze.ts
-                               |
-                               v
-src/screens + src/components + src/state + src/i18n
-                               |
-                               v
-                         React/Vite UI
-```
-
-### Quickstart
+## Quickstart
 
 ```bash
 npm ci
-npm run dev
-npm test
-npm run build
+npm run dev      # web app on localhost
+npm test         # engine, extension and Android parity tests
+npm run build    # production web build
 ```
 
-Set `VITE_API_BASE` to a backend origin to POST `{ "text": "..." }` to `${VITE_API_BASE}/analyze`.
-When unset or on API failure, Shadow uses its on-device local detector with an 8-second timeout.
+Set `VITE_API_BASE` to a backend origin to POST `{ "text": "..." }` to `${VITE_API_BASE}/analyze`. When unset, or if the call fails, the on-device detector is used (8-second timeout).
 
-### Browser extension (unpacked build)
+## Browser extension
 
-The extension imports `src/detection` directly — the engine is not copied. Build it and load `extension/dist`:
+Chrome, Edge, Brave (and Firefox 109+ temporarily). Not published to any store.
 
 ```bash
 npm run build:ext
 # chrome://extensions → Developer mode → Load unpacked → extension/dist
 ```
 
-See [`extension/README.md`](extension/README.md) for permissions, data flow and limits.
+Right-click text or a link and choose "Check with Shadow", or use the toolbar popup. Permissions, data flow and Firefox/Safari notes: [`extension/README.md`](extension/README.md).
 
----
+## Android app
 
-## 3. Backend Detection Service
+A Capacitor 8 wrapper of the web build plus a Kotlin `NotificationListenerService`. After you grant notification access it reads notifications from Google Messages, Samsung Messages, WhatsApp, WhatsApp Business, Telegram and Truecaller, runs the same engine inside QuickJS, and posts a local alert that never contains the message body.
 
-The FastAPI central backend service mirrors the detection rules and exposes evaluation endpoints:
+- No SMS permission: `READ_SMS` and `RECEIVE_SMS` are absent. Notifications only.
+- Everything stays on the device; the scan path makes no network call.
+- Payment and banking notifications are deliberately not scanned.
+- iOS is unsupported (no API to read other apps' notifications).
+
+```bash
+npm run sync:android
+cd android && ./gradlew installDebug
+```
+
+Full guide, adb commands and expected verdicts: [`docs/ANDROID.md`](docs/ANDROID.md).
+
+## Backend service
 
 ```bash
 cd backend
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ML_ENABLED=false uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
-### Endpoints
+- `GET /health`: status check.
+- `POST /analyze`: heuristic verdict for a message or URL.
 
-- `GET /health` — Service status check.
-- `POST /analyze` — Submit message/URL for heuristic detection.
-  ```bash
-  curl -X POST http://localhost:8000/analyze \
-    -H 'Content-Type: application/json' \
-    -d '{"text":"Your SBI account is blocked. KYC update now: http://sbi-kyc-update.xyz"}'
-  ```
-
----
-
-## 3a. Android App (real notification scanning)
-
-`android/` is a Capacitor 8 wrapper of the same web build plus a Kotlin
-`NotificationListenerService`. After the user grants notification access it
-reads incoming notifications from six messaging apps (Google Messages, Samsung Messages,
-WhatsApp, WhatsApp Business, Telegram, Truecaller, plus com.android.shell in debug builds),
-runs the **same** engine (bundled by esbuild, executed in QuickJS — no second port) and posts
-a local alert that never contains the message body. Payment and banking app notifications are
-deliberately not scanned because they carry real transaction details and are not where scam texts arrive.
-
-- No SMS permission is requested: `READ_SMS` and `RECEIVE_SMS` are absent from
-the manifest. Only notifications are read.
-- Everything stays on the device; there is no network call in the scan path.
-- Build and install: `npm run sync:android`, then `cd android && ./gradlew installDebug`.
-- Full guide, adb commands and expected verdicts: [`docs/ANDROID.md`](docs/ANDROID.md).
-- iOS is not supported: it has no API that lets an app read other apps' notifications.
-
-## 4. Repository Directory Structure
-
+```bash
+curl -X POST http://localhost:8000/analyze \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"Your SBI account is blocked. KYC update now: http://sbi-kyc-update.xyz"}'
 ```
+
+## Testing
+
+| Check | Command |
+| --- | --- |
+| Frontend, engine, extension | `npm test` (61 tests) |
+| Backend parity | `cd backend && pytest -q` (12 tests over 103 golden entries) |
+| Extension URL fuzz | `npx tsx scripts/fuzz-ext-policy.ts` |
+| Two-engine input fuzz | `npx tsx scripts/fuzz-engine.ts` |
+| Android engine parity | `npx vitest run src/native` |
+| Android JVM tests | `cd android && ./gradlew testDebugUnitTest` |
+
+Manual QA steps: [`docs/MANUAL_QA.md`](docs/MANUAL_QA.md).
+
+## Releasing
+
+A GitHub Actions workflow (`.github/workflows/release.yml`) builds and publishes a release when a version tag is pushed:
+
+```bash
+git tag v1.5.0
+git push origin v1.5.0
+```
+
+It runs the tests, builds the extension zip and the Android debug APK, and attaches both to a new GitHub Release. You can also run it manually from the Actions tab; that uploads the files as a workflow artifact instead.
+
+Before tagging, bump `version` in `extension/manifest.json` and `versionName` / `versionCode` in `android/app/build.gradle`.
+
+## Repository layout
+
+```text
 .
-├── backend/            # FastAPI central detection engine, parity tests & golden datasets
-├── docs/               # System documentation, runbooks, QA procedures & evaluation reports
-├── extension/          # ScamShield MV3 browser extension (source + build output)
-├── index.html          # Vite entrypoint
-├── index_9.html        # Frozen standalone reference page (not built; read by the parity test)
-├── public/             # Static web assets
-├── scripts/            # Evaluation runners
-├── src/                # Shadow React/TypeScript frontend (engines, state, i18n, screens)
-└── package.json        # Frontend dependencies and test scripts
+├── android/        Capacitor + Kotlin notification scanner
+├── backend/        FastAPI service, parity tests, golden datasets
+├── docs/           Runbooks, QA procedures, evaluation reports
+├── extension/      MV3 browser extension (source, tests)
+├── public/         Static web assets
+├── scripts/        Build scripts, fuzzers, evaluation runners
+├── src/            React/TypeScript app, detection engine, i18n
+├── index.html      Vite entrypoint
+└── index_9.html    Frozen reference page (read by the parity test)
 ```
 
----
+## Status and honest limits
 
-## 5. Safety & Untrusted Data Protocol
+Last verified 2026-11-22 on the author's machine: `npm test` (61 pass), `npm run build`, `npm run build:ext`, and the backend, fuzz and Android checks listed above.
 
-- **Static Parsing Only:** External HTML pages are parsed statically with `BeautifulSoup` without executing untrusted JavaScript.
-- **No Live Navigation:** Avoid live automated navigation to malicious URLs during testing.
-- **Simulation Notice:** Device protection switches in the demo UI are simulated, and screenshot upload is preview UI only. The browser extension's navigation warning is real once you load the unpacked build; installing it is a manual step and it is not distributed through a store.
+- The 88 detector cases and 103 golden entries are **project-written, not independent accuracy**. The only held-out measurement is the Phase 7 run: **24/30 correct, five misses, one false positive** ([`docs/eval_holdout_phase7.md`](docs/eval_holdout_phase7.md)), written by the same agent that wrote the rules.
+- The extension is an **unpacked build**: no store listing, no signing, no auto-update. Verified only in headless Chromium, not a human browser session.
+- The Android app **builds but has not been run on a phone**. The listener, alerts and restricted-settings flow are not verified. Release APKs are debug-signed.
+- The web app's Protect switches are a **simulation**. Screenshot upload is a preview UI only, with no OCR.
+- The independent human evaluation has not been run ([`docs/INDEPENDENT_EVAL.md`](docs/INDEPENDENT_EVAL.md)).
 
----
+## Safety notes
 
-## 6. License & Credits
+- External HTML is parsed statically with `BeautifulSoup`; untrusted JavaScript is never executed.
+- Avoid live automated navigation to malicious URLs during testing.
 
-- Shadow application code is released under the MIT License; see `LICENSE`.
-- This repository ships only the application, backend, tests and documentation. Third-party research notebooks, datasets, figures and trained model binaries are not distributed here, and no model file is required: the backend runs rules-only with `ML_ENABLED=false` (the default).
+## License
+
+MIT, see [`LICENSE`](LICENSE). No third-party notebooks, datasets or trained model binaries are distributed here; the backend runs rules-only (`ML_ENABLED=false`, the default).

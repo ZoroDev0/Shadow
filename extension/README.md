@@ -1,41 +1,86 @@
-# ScamShield browser extension (Manifest V3)
+# Shadow browser extension (Manifest V3)
 
 Checks a message or a link for scam signs **on your device**, using the same
 detection engine as the Shadow web app (`src/detection`). The engine is
 imported, never copied: `npm run build:ext` bundles it into the extension.
 
 Unpacked build only. It is **not** published to the Chrome Web Store, Edge
-Add-ons or the Firefox add-on site.
+Add-ons, the Firefox add-on site or the Apple App Store.
 
 ## Build
 
 ```bash
 npm ci
-npm run build:ext          # → extension/dist  (+ extension/scamshield-extension.zip)
+npm run build:ext          # → extension/dist  (+ extension/shadow-extension.zip)
 ```
 
 `extension/dist` and the zip are git-ignored. The build is deterministic: the
 same sources produce the same bytes, and no timestamp is written. The only
 build dependency is `esbuild`, pinned to an exact version in `package.json`.
 
-## Load unpacked
+## Load unpacked / install
 
-**Chrome** — `chrome://extensions` → enable *Developer mode* → *Load unpacked* →
-select `extension/dist`.
+The same `extension/dist` folder loads in Chrome, Firefox and Safari.
 
-**Edge** — `edge://extensions` → *Developer mode* → *Load unpacked* → `extension/dist`.
+### Chrome (and Edge, Brave)
 
-**Brave** — `brave://extensions` → *Developer mode* → *Load unpacked* → `extension/dist`.
+1. Open `chrome://extensions` (`edge://extensions` or `brave://extensions`).
+2. Enable **Developer mode** (top-right toggle).
+3. Click **Load unpacked** and select `extension/dist`.
+4. The Shadow shield appears in the toolbar. Right-click text or a link →
+   "Check with Shadow". Open the popup from the toolbar icon; the options
+   page is at *Details → Extension options*.
 
-Then open the toolbar popup (the shield icon). A right-click on selected text or
-on a link offers “Check with ScamShield”. The options page is reachable from the
-popup footer or the extensions page (*Details → Extension options*).
+Chrome marks unpacked extensions as "developer mode" and does not auto-update
+them; reload `extension/dist` after rebuilding.
+
+### Firefox
+
+Firefox 109+ supports Manifest V3. The manifest declares a fixed Gecko ID
+(`shadow@shadow.app`) so Firefox recognizes it as the same extension
+across loads.
+
+1. Open `about:debugging#/addons/this-firefox`.
+2. Click **Load Temporary Add-on…** and select `extension/dist/manifest.json`.
+3. The extension loads for this session. Right-click text or a link →
+   "Check with Shadow". Options page: *Add-ons → Shadow → Options* or
+   the popup footer.
+
+Temporary add-ons are dropped when Firefox restarts. Reload the add-on from
+`extension/dist` after rebuilding. To keep it across restarts, package the
+`extension/dist` folder into a `.xpi` and sign it via addons.mozilla.org
+(AMO), or load it as a permanent unsigned add-on in Firefox Nightly/Developer
+Edition with the appropriate dev setting enabled.
+
+### Safari
+
+Safari supports WebExtensions, but Apple requires extensions to be signed with
+an Apple Developer Program certificate to install in the release version of
+Safari.
+
+**Unsigned local install (Safari Technology Preview or Developer setting):**
+1. In Safari, open **Safari → Settings → Advanced** and enable "Show features
+   for web developers" (or use Safari Technology Preview).
+2. Open **Develop → Allow Unsigned Extensions** and check it.
+3. Open `safari://extensions` (or the Extensions pane in Settings → Extensions
+   in newer builds) and load `extension/dist/manifest.json`.
+4. Grant the extension access and pin it to the toolbar.
+
+**Signed install (release Safari):** submit the `extension/dist` bundle to
+Apple for signing/distribution through the Apple Developer Program. The same
+MV3 source builds for Safari; no separate manifest is required.
+
+> Safari support note: `webNavigation` (main-frame navigation guard) and the
+> service worker are used where Safari's WebExtensions implementation allows
+> them. Pop-up windows and context menus work. If a Safari build does not
+> intercept a navigation, the popup and right-click menu still check links and
+> text on demand.
 
 ## Permissions, and why
 
 | Permission | Why it is needed |
 | --- | --- |
-| `contextMenus` | Adds the “Check with ScamShield” right-click entries for selected text and links. |
+| `contextMenus` | Adds the “Check with Shadow” right-click entries for selected text and links. |
 | `storage` | Saves your language, on/off switch, allowlist and optional server address (`storage.local`), plus the session-only “Proceed anyway” list and last result (`storage.session`). |
 | `webNavigation` | Reads the address of a main-frame navigation so a lookalike domain can be stopped **before** the page loads. |
 | `optional_host_permissions` (`http://*/*`, `https://*/*`) | Requested at runtime, for your server's exact origin only, and only if you type an API base URL. |
@@ -125,11 +170,11 @@ known limitations in `docs/AUDIT_REPORT.md` §I8.
   brand, or a scam hosted on a legitimate service, will not be blocked.
 - Official domains are treated as safe from `src/detection/rules.json`. That
   list is finite and manually maintained.
-- Unpacked builds are unsigned. Chrome may show a developer-mode warning, and
-  the extension does not auto-update.
-- **Firefox and Safari are not supported.** The code targets the Chrome MV3
-  service-worker model; there is no `manifest.firefox.json` because that port
-  has not been written or tested.
+- Unpacked builds are unsigned. Chrome shows a developer-mode warning; Firefox
+  treats it as a temporary add-on until signed; Safari requires an Apple
+  Developer signature for the release browser (unsigned works via "Allow
+  Unsigned Extensions" in Safari Technology Preview / developer builds). The
+  extension does not auto-update.
 
 ## Files
 

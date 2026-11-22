@@ -66,11 +66,11 @@ for (const file of ["background.js", "popup.js", "options.js", "blocked.js"]) {
 }
 
 /* ── Shareable zip (git-ignored) ─────────────────────────────────────── */
-const zipPath = join(root, "extension", "scamshield-extension.zip");
+const zipPath = join(root, "extension", "shadow-extension.zip");
 rmSync(zipPath, { force: true });
 try {
   execFileSync("zip", ["-qr", zipPath, "."], { cwd: out, stdio: "ignore" });
-  console.log(`zip: extension/scamshield-extension.zip`);
+  console.log(`zip: extension/shadow-extension.zip`);
 } catch {
   console.log("zip: skipped (the `zip` command is not available on this machine)");
 }

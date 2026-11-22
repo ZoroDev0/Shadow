@@ -205,9 +205,9 @@ const I18N = {
   /* — Test lab — */
   /* — Android notification scanner (real on the phone, simulation on web) — */
   prot_native_d:   { en: 'Android only: reads notifications from the messaging apps you allow — never your SMS inbox.', hi: 'केवल Android पर: आपकी अनुमति वाले मैसेजिंग ऐप्स के नोटिफिकेशन पढ़ता है — SMS इनबॉक्स कभी नहीं।' },
-  prot_native_need: { en: 'Notification access is needed to see new messages from the apps you choose. ScamShield never reads your SMS inbox, contacts, clipboard or screen, and no message leaves the phone.', hi: 'आपके चुने ऐप्स के नए संदेश देखने के लिए नोटिफिकेशन एक्सेस चाहिए। ScamShield आपका SMS इनबॉक्स, संपर्क, क्लिपबोर्ड या स्क्रीन नहीं पढ़ता, और कोई संदेश फ़ोन से बाहर नहीं जाता।' },
+  prot_native_need: { en: 'Notification access is needed to see new messages from the apps you choose. Shadow never reads your SMS inbox, contacts, clipboard or screen, and no message leaves the phone.', hi: 'आपके चुने ऐप्स के नए संदेश देखने के लिए नोटिफिकेशन एक्सेस चाहिए। Shadow आपका SMS इनबॉक्स, संपर्क, क्लिपबोर्ड या स्क्रीन नहीं पढ़ता, और कोई संदेश फ़ोन से बाहर नहीं जाता।' },
   prot_native_btn:  { en: 'Open notification access settings', hi: 'नोटिफिकेशन एक्सेस सेटिंग खोलें' },
-  prot_native_tip:  { en: 'Some phone brands stop background services to save battery. If alerts stop, allow ScamShield to run in the background in battery settings.', hi: 'कुछ फ़ोन ब्रांड बैटरी बचाने के लिए बैकग्राउंड सेवाएँ रोक देते हैं। अलर्ट बंद हो जाएँ तो बैटरी सेटिंग में ScamShield को बैकग्राउंड में चलने दें।' },
+  prot_native_tip:  { en: 'Some phone brands stop background services to save battery. If alerts stop, allow Shadow to run in the background in battery settings.', hi: 'कुछ फ़ोन ब्रांड बैटरी बचाने के लिए बैकग्राउंड सेवाएँ रोक देते हैं। अलर्ट बंद हो जाएँ तो बैटरी सेटिंग में Shadow को बैकग्राउंड में चलने दें।' },
   prot_native_ok:   { en: 'Notification access is on', hi: 'नोटिफिकेशन एक्सेस चालू है' },
   prot_native_off:  { en: 'Notification access is off', hi: 'नोटिफिकेशन एक्सेस बंद है' },
   prot_native_silent: { en: 'Notification permission is missing — alerts will stay silent.', hi: 'नोटिफिकेशन अनुमति नहीं है — अलर्ट मूक रहेंगे।' },
